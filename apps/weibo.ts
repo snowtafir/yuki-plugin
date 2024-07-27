@@ -193,65 +193,69 @@ export default class YukiWeibo extends Plugin {
 
   /** 订阅的全部微博推送列表 */
   async allSubDynamicPushList() {
-    let subData = this.weiboPushData || { group: {}, private: {} };
+    if (!this.e.isMaster) {
+      this.e.reply("未取得bot主人身份，无权限查看Bot的全部微博推送列表");
+    } else {
+      let subData = this.weiboPushData || { group: {}, private: {} };
 
-    const messages = [];
+      const messages = [];
 
-    const typeMap = {
-      DYNAMIC_TYPE_AV: "视频",
-      DYNAMIC_TYPE_WORD: "图文",
-      DYNAMIC_TYPE_DRAW: "图文",
-      DYNAMIC_TYPE_ARTICLE: "文章",
-      DYNAMIC_TYPE_FORWARD: "转发",
-    };
+      const typeMap = {
+        DYNAMIC_TYPE_AV: "视频",
+        DYNAMIC_TYPE_WORD: "图文",
+        DYNAMIC_TYPE_DRAW: "图文",
+        DYNAMIC_TYPE_ARTICLE: "文章",
+        DYNAMIC_TYPE_FORWARD: "转发",
+      };
 
-    // 处理群组订阅
-    if (subData.group && Object.keys(subData.group).length > 0) {
-      messages.push("------群组微博订阅------");
-      Object.keys(subData.group).forEach((groupId) => {
-        messages.push(`群组ID：${groupId}：`);
-        subData.group[groupId].forEach((item: { type: any[]; uid: any; name: any; }) => {
-          const types = new Set();
+      // 处理群组订阅
+      if (subData.group && Object.keys(subData.group).length > 0) {
+        messages.push("------群组微博订阅------");
+        Object.keys(subData.group).forEach((groupId) => {
+          messages.push(`群组ID：${groupId}：`);
+          subData.group[groupId].forEach((item: { type: any[]; uid: any; name: any; }) => {
+            const types = new Set();
 
-          if (item.type && item.type.length) {
-            item.type.forEach((typeItem: string | number) => {
-              if (typeMap[typeItem]) {
-                types.add(typeMap[typeItem]);
-              }
-            });
-          }
+            if (item.type && item.type.length) {
+              item.type.forEach((typeItem: string | number) => {
+                if (typeMap[typeItem]) {
+                  types.add(typeMap[typeItem]);
+                }
+              });
+            }
 
-          messages.push(
-            `${item.name}：${item.uid}  ${types.size ? `[${Array.from(types).join("、")}]` : " [全部动态]"}`
-          );
+            messages.push(
+              `${item.name}：${item.uid}  ${types.size ? `[${Array.from(types).join("、")}]` : " [全部动态]"}`
+            );
+          });
         });
-      });
-    }
+      }
 
-    // 处理私聊订阅
-    if (subData.private && Object.keys(subData.private).length > 0) {
-      messages.push("------私聊微博订阅------");
-      Object.keys(subData.private).forEach((userId) => {
-        messages.push(`用户ID：${userId}：`);
-        subData.private[userId].forEach((item: { type: any[]; uid: any; name: any; }) => {
-          const types = new Set();
+      // 处理私聊订阅
+      if (subData.private && Object.keys(subData.private).length > 0) {
+        messages.push("------私聊微博订阅------");
+        Object.keys(subData.private).forEach((userId) => {
+          messages.push(`用户ID：${userId}：`);
+          subData.private[userId].forEach((item: { type: any[]; uid: any; name: any; }) => {
+            const types = new Set();
 
-          if (item.type && item.type.length) {
-            item.type.forEach((typeItem: string | number) => {
-              if (typeMap[typeItem]) {
-                types.add(typeMap[typeItem]);
-              }
-            });
-          }
+            if (item.type && item.type.length) {
+              item.type.forEach((typeItem: string | number) => {
+                if (typeMap[typeItem]) {
+                  types.add(typeMap[typeItem]);
+                }
+              });
+            }
 
-          messages.push(
-            `${item.name}：${item.uid}  ${types.size ? `[${Array.from(types).join("、")}]` : " [全部动态]"}`
-          );
+            messages.push(
+              `${item.name}：${item.uid}  ${types.size ? `[${Array.from(types).join("、")}]` : " [全部动态]"}`
+            );
+          });
         });
-      });
-    }
+      }
 
-    this.e.reply(`推送列表如下：\n${messages.join("\n")}`);
+      this.e.reply(`推送列表如下：\n${messages.join("\n")}`);
+    }
   }
 
   /** 单独群聊或私聊的订阅的b站推送列表 */
@@ -340,7 +344,7 @@ export default class YukiWeibo extends Plugin {
     const res = await new WeiboGetWebData(this.e).searchBloggerInfo(keyword);
 
     if (res.statusText !== 'OK') {
-      this.reply("诶嘿，出了点网络问题，等会再试试吧~");
+      this.e.reply("诶嘿，出了点网络问题，等会再试试吧~");
       return;
     }
 
@@ -355,7 +359,7 @@ export default class YukiWeibo extends Plugin {
     const followers_count_str = data?.users[0]?.followers_count_str;
 
     if (ok !== 0 && (!info || !infos)) {
-      this.reply("惹~没有搜索到该用户捏，\n请换个关键词试试吧~ \nPS：该方法只能搜索到大V");
+      this.e.reply("惹~没有搜索到该用户捏，\n请换个关键词试试吧~ \nPS：该方法只能搜索到大V");
       return;
     }
 

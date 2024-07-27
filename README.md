@@ -12,6 +12,8 @@
 
 #### 1. 克隆仓库
 按照网络情况或个人喜好，选择克隆仓库到本地。
+
+```yunzai-v4：```
 >gitee仓库：
 >```
 >git clone https://gitee.com/snowtafir/yuki-plugin.git ./plugins/yuki-plugin
@@ -27,6 +29,17 @@
 > ```
 > git clone https://mirror.ghproxy.com/https://github.com/snowtafir/yuki-plugin.git ./plugins/yuki-plugin
 > ```
+
+```yunzai-v3：```
+>gitee仓库：
+>```
+>git clone --branch main3 https://gitee.com/snowtafir/yuki-plugin.git ./plugins/yuki-plugin
+>```
+
+>github仓库：
+>```
+>git clone --branch main3 https://github.com/snowtafir/yuki-plugin.git ./plugins/yuki-plugin
+>```
 
 #### 2. 安装依赖
 

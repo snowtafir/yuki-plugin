@@ -259,12 +259,12 @@ export class WeiboTask {
     if (chatType === "group") {
       await (Bot[bot_id] ?? Bot)?.pickGroup(String(chatId)).sendMsg(message)  // 发送群聊
         .catch((error) => {
-          (logger ?? Bot.logger)?.error(`群/子频道[${chatId}]推送失败：${JSON.stringify(error)}`);
+          (logger ?? Bot.logger)?.error(`群组[${chatId}]推送失败：${JSON.stringify(error)}`);
         });
     } else if (chatType === "private") {
       await (Bot[bot_id] ?? Bot)?.pickUser(String(chatId)).sendMsg(message)
         .catch((error) => {
-          (logger ?? Bot.logger)?.error(`好友[${chatId}]推送失败：${JSON.stringify(error)}`);
+          (logger ?? Bot.logger)?.error(`用户[${chatId}]推送失败：${JSON.stringify(error)}`);
         }); // 发送私聊
     }
   }

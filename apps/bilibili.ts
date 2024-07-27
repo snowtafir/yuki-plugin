@@ -404,7 +404,7 @@ export default class YukiBili extends Plugin {
       await getNewTempCk();
       let newTempCk = await readTempCk();
       if ((newTempCk !== null) && (newTempCk !== undefined) && (newTempCk.length !== 0) && (newTempCk !== '')) {
-        this.e.reply(`~yuki-plugin:\n临时b站ck刷新成功~❤~\n接下来如果获取动态失败，请收动重启bot(手动或发送指令 #重启)刷新状态~\n如果重启续仍不可用，请考虑 #优纪添加b站登录 吧~`);
+        this.e.reply(`~yuki-plugin:\n临时b站ck刷新成功~❤~\n接下来如果获取动态失败，请重启bot(手动或发送指令 #重启)刷新状态~\n如果重启续仍不可用，请考虑 #优纪添加b站登录 吧~`);
       } else {
         this.e.reply(`~yuki-plugin:\n临时b站ck刷新失败X﹏X\n请重启bot(手动或发送指令 #重启)后重试`);
       }
@@ -416,66 +416,70 @@ export default class YukiBili extends Plugin {
 
   /** 订阅的全部b站推送列表 */
   async allSubDynamicPushList() {
-    let subData = this.biliPushData || { group: {}, private: {} };
+    if (!this.e.isMaster) {
+      this.e.reply("未取得bot主人身份，无权限查看Bot的全部B站订阅列表");
+    } else {
+      let subData = this.biliPushData || { group: {}, private: {} };
 
-    const messages = [];
+      const messages = [];
 
-    const typeMap = {
-      DYNAMIC_TYPE_AV: "视频",
-      DYNAMIC_TYPE_WORD: "图文",
-      DYNAMIC_TYPE_DRAW: "图文",
-      DYNAMIC_TYPE_ARTICLE: "文章",
-      DYNAMIC_TYPE_FORWARD: "转发",
-      DYNAMIC_TYPE_LIVE_RCMD: "直播",
-    };
+      const typeMap = {
+        DYNAMIC_TYPE_AV: "视频",
+        DYNAMIC_TYPE_WORD: "图文",
+        DYNAMIC_TYPE_DRAW: "图文",
+        DYNAMIC_TYPE_ARTICLE: "文章",
+        DYNAMIC_TYPE_FORWARD: "转发",
+        DYNAMIC_TYPE_LIVE_RCMD: "直播",
+      };
 
-    // 处理群组订阅
-    if (subData.group && Object.keys(subData.group).length > 0) {
-      messages.push("------群组B站订阅------");
-      Object.keys(subData.group).forEach((groupId) => {
-        messages.push(`群组ID：${groupId}：`);
-        subData.group[groupId].forEach((item: { type: any[]; uid: any; name: any; }) => {
-          const types = new Set();
+      // 处理群组订阅
+      if (subData.group && Object.keys(subData.group).length > 0) {
+        messages.push("------群组B站订阅------");
+        Object.keys(subData.group).forEach((groupId) => {
+          messages.push(`群组ID：${groupId}：`);
+          subData.group[groupId].forEach((item: { type: any[]; uid: any; name: any; }) => {
+            const types = new Set();
 
-          if (item.type && item.type.length) {
-            item.type.forEach((typeItem: string | number) => {
-              if (typeMap[typeItem]) {
-                types.add(typeMap[typeItem]);
-              }
-            });
-          }
+            if (item.type && item.type.length) {
+              item.type.forEach((typeItem: string | number) => {
+                if (typeMap[typeItem]) {
+                  types.add(typeMap[typeItem]);
+                }
+              });
+            }
 
-          messages.push(
-            `${item.name}：${item.uid}  ${types.size ? `[${Array.from(types).join("、")}]` : " [全部动态]"}`
-          );
+            messages.push(
+              `${item.name}：${item.uid}  ${types.size ? `[${Array.from(types).join("、")}]` : " [全部动态]"}`
+            );
+          });
         });
-      });
-    }
+      }
 
-    // 处理私聊订阅
-    if (subData.private && Object.keys(subData.private).length > 0) {
-      messages.push("------私聊B站订阅------");
-      Object.keys(subData.private).forEach((userId) => {
-        messages.push(`用户ID：${userId}：`);
-        subData.private[userId].forEach((item: { type: any[]; uid: any; name: any; }) => {
-          const types = new Set();
+      // 处理私聊订阅
+      if (subData.private && Object.keys(subData.private).length > 0) {
+        messages.push("------私聊B站订阅------");
+        Object.keys(subData.private).forEach((userId) => {
+          messages.push(`用户ID：${userId}：`);
+          subData.private[userId].forEach((item: { type: any[]; uid: any; name: any; }) => {
+            const types = new Set();
 
-          if (item.type && item.type.length) {
-            item.type.forEach((typeItem: string | number) => {
-              if (typeMap[typeItem]) {
-                types.add(typeMap[typeItem]);
-              }
-            });
-          }
+            if (item.type && item.type.length) {
+              item.type.forEach((typeItem: string | number) => {
+                if (typeMap[typeItem]) {
+                  types.add(typeMap[typeItem]);
+                }
+              });
+            }
 
-          messages.push(
-            `${item.name}：${item.uid}  ${types.size ? `[${Array.from(types).join("、")}]` : " [全部动态]"}`
-          );
+            messages.push(
+              `${item.name}：${item.uid}  ${types.size ? `[${Array.from(types).join("、")}]` : " [全部动态]"}`
+            );
+          });
         });
-      });
-    }
+      }
 
-    this.e.reply(`推送列表如下：\n${messages.join("\n")}`);
+      this.e.reply(`推送列表如下：\n${messages.join("\n")}`);
+    }
   }
 
   /** 单独群聊或私聊的订阅的b站推送列表 */
@@ -527,17 +531,17 @@ export default class YukiBili extends Plugin {
     const res = await new BiliGetWebData(this.e).getBilibiUserInfoByUid(uid);
 
     if (res.statusText !== 'OK') {
-      this.reply("诶嘿，出了点网络问题，等会再试试吧~");
+      this.e.reply("诶嘿，出了点网络问题，等会再试试吧~");
       return;
     }
 
     const { code, data } = res.data || {};
 
     if (code === -799) {
-      this.reply("遭遇风控：请求过于频繁，请稍后再试。");
+      this.e.reply("遭遇风控：请求过于频繁，请稍后再试。");
       return;
     } else if (code === -404) {
-      this.reply("输入的uid无效。");
+      this.e.reply("输入的uid无效。");
       return;
     }
     const message = [
@@ -556,7 +560,7 @@ export default class YukiBili extends Plugin {
         `\n观看人数：${data?.live_room?.watched_show?.num}人`
       );
     }
-    this.reply(message);
+    this.e.reply(message);
   }
 
   /** 根据名称搜索up的uid*/
@@ -566,14 +570,14 @@ export default class YukiBili extends Plugin {
     const res = await new BiliGetWebData(this.e).searchBiliUserInfoByKeyword(keyword);
 
     if (res.statusText !== 'OK') {
-      this.reply("诶嘿，出了点网络问题，等会再试试吧~");
+      this.e.reply("诶嘿，出了点网络问题，等会再试试吧~");
       return;
     }
 
     const { code, data } = await res.data || {};
 
     if (code !== 0 || !data.result) {
-      this.reply("哦豁~没有搜索到该用户捏，请换个关键词试试吧~");
+      this.e.reply("哦豁~没有搜索到该用户捏，请换个关键词试试吧~");
       return;
     }
 
