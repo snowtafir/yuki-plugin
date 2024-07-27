@@ -1,0 +1,44 @@
+@font-face {
+  font-family: "iconfont";
+  src: url("./../../fonts/iconfont.16acc2.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #000;
+  padding: 10px 20px;
+  border-top-width: 1px;
+  border-top-color: #ff69b4;
+  border-top-style: dashed;
+}
+
+.qr-code {
+  width: 148px;
+  height: 148px;
+  border-radius: 8px;
+  border: 2px dashed #ff69b4;
+  margin-left: 20px;
+  margin-top: 20px;
+  align-items: center;
+}
+
+.footer-text-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-size: 20px;
+  font-family: "iconfont";
+}
+
+.bili-logo-0 {
+  margin-bottom: 6px;
+}
+
+.weibo-logo-0 {
+  margin-left: 15px;
+  margin-bottom: 10px;
+}

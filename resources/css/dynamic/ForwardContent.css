@@ -1,0 +1,11 @@
+.orig-container {
+  background-color: #f5f5f5 !important;
+  border-radius: 10px !important;
+  position: relative;
+}
+
+/**微博content图标*/
+.url-icon img {
+  left: 10px;
+  position: absolute;
+}

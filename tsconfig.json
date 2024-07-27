@@ -1,0 +1,54 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "noImplicitAny": false,
+    "esModuleInterop": true,
+    "moduleResolution": "bundler",
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "ignoreDeprecations": "5.0",
+    "jsx": "react",
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "composite": false,
+    "allowJs": true,
+    "typeRoots": ["node_modules/@types"],
+
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+
+    /* Linting */
+    //"strict": true, //严格模式
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "outDir": "./dist",
+    "rootDir": "./",
+  },
+  "ts-node": {
+    "esm": true,
+    "transpileOnly": true,
+    "experimentalSpecifierResolution": "node"
+  },
+  "include": [
+    "apps/*.ts",
+    "components/dynamic/*",
+    "components/help/*",
+    "components/loginQrcode/*",
+    "components/version/*",
+    "components/**/*",
+    "models/**/*.ts",
+    "utils/*",
+    "index.ts"
+  ],
+  "exclude": ["node_modules", "yunzai"]
+}

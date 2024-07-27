@@ -1,0 +1,116 @@
+/* 隐藏滚动条 */
+body {
+  overflow: -moz-scrollbars-none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE 10+ */
+  scrollbar-width: none;
+  /* Firefox 64+ */
+}
+
+body::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Safari, Edge */
+}
+
+::-webkit-scrollbar {
+  width: 0px;
+  height: 5px;
+}
+
+@font-face {
+  font-family: "iconfont";
+  src: url("./../../fonts/iconfont.16acc2.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+body {
+  font-size: 16px;
+  font-family: "iconfont";
+  transform: scale(1.5);
+  transform-origin: 0 0;
+  color: white;
+  width: 788px;
+}
+
+.container {
+  width: 788px;
+  background-image: url(./../../img/background/Girl.png);
+  background-size: 100%;
+  padding: 15px 0 10px 0;
+}
+
+.version-card {
+  background: transparent;
+  margin: 5px 10px 8px 10px;
+  position: relative;
+  box-shadow: 0 0 0.5px 0 #ffd1f8, 2px 2px 4px 0 rgb(238 160 236 / 80%);
+  border: 0.5px solid #ff69b4;
+  overflow: hidden;
+  color: #fff;
+  font-size: 16px;
+  border-radius: 4px;
+  backdrop-filter: blur(4px);
+  border-radius: 10px;
+}
+
+.version-card .title {
+  border-bottom: 0.5px solid #ff69b4;
+  color: #4e8eff;
+  font-family: Number, YS;
+  padding: 10px 20px;
+  text-align: left;
+  font-size: 16px;
+  padding: 8px 20px 8px;
+  font-weight: bold;
+  background: transparent;
+}
+
+.version-card .content {
+  padding: 10px 15px;
+  font-size: 12px;
+  font-weight: normal;
+  font-family: "iconfont";
+  background: transparent;
+  color: rgba(0, 0, 0);
+}
+
+.version-card ul {
+  font-size: 14px;
+  padding-left: 20px;
+}
+
+.version-card ul li {
+  margin: 3px 0;
+}
+
+.version-card .cmd {
+  color: #c59460;
+  display: inline-block;
+  border-radius: 3px;
+  padding: 0 3px;
+  margin: 1px 2px;
+}
+
+.version-card .strong {
+  color: #67a9e4;
+  display: inline-block;
+  border-radius: 3px;
+  padding: 0 3px;
+  margin: 1px 2px;
+}
+
+.logo {
+  text-align: center;
+  font-size: 14px;
+  color: rgb(15, 15, 15);
+  font-family: 'iconfont';
+}
