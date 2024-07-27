@@ -42,7 +42,7 @@ export class WeiboTask {
       for (let chatId in weiboPushData[chatType]) {
         const subUpsOfChat: { uid: string; bot_id: string[]; name: string; type: string[] }[] = weiboPushData[chatType][chatId] || [];
         for (let subInfoOfup of subUpsOfChat) {
-          const resp: any = await new WeiboGetWebData().getWeiboDynamicList(subInfoOfup.uid); // 获取指定 uid 的动态列表
+          const resp: any = await new WeiboGetWebData().getBloggerDynamicList(subInfoOfup.uid); // 获取指定 uid 的动态列表
           if (resp) {
             const dynamicData = resp || [];
             dynamicList[subInfoOfup.uid] = dynamicData;
