@@ -1,3 +1,11 @@
+- group: 指令前缀
+  list:
+    - icon: diagram
+      title: "#优纪 #yuki"
+      desc: "示例：#优纪B站订阅列表 #yuki订阅B站推送UID"
+    - icon: diagram
+      title: "/优纪 /yuki"
+      desc: "示例：/优纪B站订阅列表 /yuki订阅B站推送UID"
 - group: B站功能
   list:
     - icon: diagram
