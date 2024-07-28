@@ -53,6 +53,10 @@
   visibility: hidden;
 }
 
+.bili-rich-text-module {
+  color: #008ac5;
+}
+
 /* 定义B站互动抽奖标签的样式 */
 .bili-rich-text-module.lottery {
   display: inline-block;

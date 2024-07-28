@@ -152,7 +152,7 @@ export class BiliQuery {
             if (jumpUrl && !jumpUrl.startsWith('http://') && !jumpUrl.startsWith('https://')) {
               jumpUrl = `https://${jumpUrl}`;
             }
-            return `<a href="${jumpUrl}">${node?.text}</a>`;
+            return `<span class="bili-rich-text-module topic" href="${jumpUrl}">${node?.text}</span>`;
 
           case 'RICH_TEXT_NODE_TYPE_TEXT':
             // 正文将 \n 替换为 <br> 以实现换行
