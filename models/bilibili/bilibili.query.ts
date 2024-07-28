@@ -37,10 +37,10 @@ export class BiliQuery {
       case "DYNAMIC_TYPE_WORD":
         majorType = data?.modules?.module_dynamic?.major?.type;
         if (majorType === "MAJOR_TYPE_OPUS") {
-          desc = data?.modules?.module_dynamic?.major?.opus?.summary;
-          pics = data?.modules?.module_dynamic?.major?.opus?.pics;
+          desc = data?.modules?.module_dynamic?.major?.opus || {};
+          pics = desc?.pics;
           pics = pics.map((item: any) => { return item?.url; }) || [];
-          formatData.data.content = this.parseRichTextNodes(desc?.rich_text_nodes);
+          formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || ""
         } else {
           desc = data?.modules?.module_dynamic?.desc || {};
           pics = data?.modules?.module_dynamic?.major?.draw?.items;
@@ -57,12 +57,12 @@ export class BiliQuery {
       case "DYNAMIC_TYPE_DRAW":
         majorType = data?.modules?.module_dynamic?.major?.type;
         if (majorType === "MAJOR_TYPE_OPUS") {
-          desc = data?.modules?.module_dynamic?.major?.opus?.summary;
-          pics = data?.modules?.module_dynamic?.major?.opus?.pics;
+          desc = data?.modules?.module_dynamic?.major?.opus || {};
+          pics = desc?.pics;
           pics = pics.map((item: any) => {
             return item.url;
           });
-          formatData.data.content = this.parseRichTextNodes(desc?.rich_text_nodes);
+          formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || ""
         } else {
           desc = data?.modules?.module_dynamic?.desc;
           pics = data?.modules?.module_dynamic?.major?.draw?.items;
@@ -80,11 +80,11 @@ export class BiliQuery {
       case "DYNAMIC_TYPE_ARTICLE":
         majorType = data?.modules?.module_dynamic?.major?.type;
         if (majorType === "MAJOR_TYPE_OPUS") {
-          desc = data?.modules?.module_dynamic?.major?.opus?.summary || {};
-          pics = data?.modules?.module_dynamic?.major?.opus?.pics;
+          desc = data?.modules?.module_dynamic?.major?.opus || {};
+          pics = desc?.pics;
           pics = pics.map((item: any) => { return item.url; }) || [];
           formatData.data.title = desc?.title;
-          formatData.data.content = this.parseRichTextNodes(desc?.rich_text_nodes) || "";
+          formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || "";
         } else {
           desc = data?.modules?.module_dynamic?.major?.article || {};
           if (desc.covers && desc.covers.length) {

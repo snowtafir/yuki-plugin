@@ -61,7 +61,7 @@
   position: relative;
   background-repeat: no-repeat;
   background-position: left center;
-  background-size: 16px 16px;
+  background-size: 10px 20px;
   /* 根据你的SVG图标大小调整 */
   background-image: url('./../../img/icon/dynamic/bili-rich-text-module-lottery.svg');
   /* 引入SVG图标 */
@@ -75,7 +75,7 @@
   position: relative;
   background-repeat: no-repeat;
   background-position: left center;
-  background-size: 16px 16px;
+  background-size: 20px 20px;
   /* 根据你的SVG图标大小调整 */
   background-image: url('./../../img/icon/dynamic/bili-rich-text-module-goods-taobao.svg');
   /* 引入SVG图标 */
