@@ -167,7 +167,7 @@ export class BiliTask {
         modelName: 'bilibili',
         SOptions: {
           type: 'jpeg',
-          quality: 95,
+          quality: 98,
         },
         saveHtmlfile: false,
       };

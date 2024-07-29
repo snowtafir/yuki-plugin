@@ -202,16 +202,16 @@ export class BiliQuery {
    * @param setData - 设置数据
    * @returns 生成的动态消息文字内容
    */
-  static async formatTextDynamicData(upName: string, formatData: any, isForward: boolean, setData: any): Promise<any> {
+  static async formatTextDynamicData(upName: string, data: any, isForward: boolean, setData: any): Promise<any> {
     const BiliDrawDynamicLinkUrl = "https://m.bilibili.com/dynamic/";
-    let desc: any, msg: any, pics: any, author: any;
+    let desc: any, msg: any, pics: any, author: any, majorType: any, content: any, dynamicTitle: any;
     let title = `B站【${upName}】动态推送：\n`;
 
-    switch (formatData.type) {
+    switch (data.type) {
       case "DYNAMIC_TYPE_AV":
         // 处理视频动态
-        desc = formatData?.modules?.module_dynamic?.major?.archive;
-        author = formatData?.modules?.module_author;
+        desc = data?.modules?.module_dynamic?.major?.archive;
+        author = data?.modules?.module_author;
         if (!desc && !author) return;
 
         title = `B站【${upName}】视频动态推送：\n`;
@@ -222,23 +222,35 @@ export class BiliQuery {
           `${desc.desc}\n`,
           `链接：${this.formatUrl(desc.jump_url)}\n`,
           `时间：${author ? moment(author.pub_ts * 1000).format("YYYY年MM月DD日 HH:mm:ss") : ""}\n`,
-          Segment.image(desc.cover),
+          Segment.image(desc?.cover),
         ];
 
         return msg;
 
       case "DYNAMIC_TYPE_WORD":
         // 处理文字动态
-        desc = formatData?.modules?.module_dynamic?.desc;
-        author = formatData?.modules?.module_author;
+        author = data?.modules?.module_author;
+        majorType = data?.modules?.module_dynamic?.major?.type;
+        if (majorType === "MAJOR_TYPE_OPUS") {
+          desc = data?.modules?.module_dynamic?.major?.opus || {};
+          pics = desc?.pics;
+          pics = pics.map((item: any) => { return item?.url; }) || [];
+          content = this.parseRichTextNodes(desc?.summary?.text) || "";
+        } else {
+          desc = data?.modules?.module_dynamic?.desc || {};
+          pics = data?.modules?.module_dynamic?.major?.draw?.items;
+          pics = [];
+          content = this.parseRichTextNodes(desc?.text);
+        }
+
         if (!desc && !author) return;
 
         title = `B站【${upName}】动态推送：\n`;
         msg = [
           title,
           `-----------------------------\n`,
-          `内容：${this.dynamicContentLimit(desc.text, setData)}\n`,
-          `链接：${BiliDrawDynamicLinkUrl}${formatData.id_str}\n`,
+          `内容：${this.dynamicContentLimit(content, setData)}\n`,
+          `链接：${BiliDrawDynamicLinkUrl}${data.id_str}\n`,
           `时间：${author ? moment(author.pub_ts * 1000).format("YYYY年MM月DD日 HH:mm:ss") : ""}`,
         ];
 
@@ -246,9 +258,22 @@ export class BiliQuery {
 
       case "DYNAMIC_TYPE_DRAW":
         // 处理图文动态
-        desc = formatData?.modules?.module_dynamic?.desc;
-        pics = formatData?.modules?.module_dynamic?.major?.draw?.items;
-        author = formatData?.modules?.module_author;
+        author = data?.modules?.module_author;
+        majorType = data?.modules?.module_dynamic?.major?.type;
+        if (majorType === "MAJOR_TYPE_OPUS") {
+          desc = data?.modules?.module_dynamic?.major?.opus || {};
+          pics = desc?.pics;
+          pics = pics.map((item: any) => {
+            return item.url;
+          });
+          content = this.parseRichTextNodes(desc?.summary?.text) || "";
+        } else {
+          desc = data?.modules?.module_dynamic?.desc;
+          pics = data?.modules?.module_dynamic?.major?.draw?.items;
+          pics = pics.map((item: any) => { return item?.src; });
+          content = this.parseRichTextNodes(desc?.text);
+        }
+
         if (!desc && !pics && !author) return;
 
         const dynamicPicCountLimit = setData.pushPicCountLimit || 3;
@@ -257,16 +282,16 @@ export class BiliQuery {
           pics.length = dynamicPicCountLimit;
         }
 
-        pics = pics.map((item) => {
-          return Segment.image(item.src);
+        pics = pics.map((item: any) => {
+          return Segment.image(item);
         });
 
         title = `B站【${upName}】图文动态推送：\n`;
         msg = [
           title,
           `-----------------------------\n`,
-          `${this.dynamicContentLimit(desc.text, setData)}\n`,
-          `链接：${BiliDrawDynamicLinkUrl}${formatData.id_str}\n`,
+          `${this.dynamicContentLimit(content, setData)}\n`,
+          `链接：${BiliDrawDynamicLinkUrl}${data.id_str}\n`,
           `时间：${author ? moment(author.pub_ts * 1000).format("YYYY年MM月DD日 HH:mm:ss") : ""}\n`,
           ...pics,
         ];
@@ -275,22 +300,35 @@ export class BiliQuery {
 
       case "DYNAMIC_TYPE_ARTICLE":
         // 处理文章动态
-        desc = formatData?.modules?.module_dynamic?.major?.article;
-        author = formatData?.modules?.module_author;
+        author = data?.modules?.module_author;
+        majorType = data?.modules?.module_dynamic?.major?.type;
+        if (majorType === "MAJOR_TYPE_OPUS") {
+          desc = data?.modules?.module_dynamic?.major?.opus || {};
+          pics = desc?.pics;
+          pics = pics.map((item: any) => { return item.url; }) || [];
+          dynamicTitle = desc?.title;
+          content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || "";
+        } else {
+          desc = data?.modules?.module_dynamic?.major?.article || {};
+          if (desc.covers && desc.covers.length) {
+            pics = [desc?.covers];
+          }
+          dynamicTitle = desc?.title;
+          pics = pics;
+          content = "";
+        }
+
         if (!desc && !author) return;
 
-        pics = [];
-        if (desc.covers && desc.covers.length) {
-          pics = desc.covers.map((item: any) => {
-            return Segment.image(item);
-          });
-        }
+        pics = pics.map((item: any) => {
+          return Segment.image(item);
+        });
 
         title = `B站【${upName}】文章动态推送：\n`;
         msg = [
           title,
           `-----------------------------\n`,
-          `标题：${desc.title}\n`,
+          `标题：${dynamicTitle}\n`,
           `链接：${this.formatUrl(desc.jump_url)}\n`,
           `时间：${author ? moment(author.pub_ts * 1000).format("YYYY年MM月DD日 HH:mm:ss") : ""}\n`,
           ...pics,
@@ -300,13 +338,16 @@ export class BiliQuery {
 
       case "DYNAMIC_TYPE_FORWARD":
         // 处理转发动态
-        desc = formatData?.modules?.module_dynamic?.desc;
-        author = formatData?.modules?.module_author;
+        author = data?.modules?.module_author;
+        desc = data?.modules?.module_dynamic?.desc || {};
+
+        content = this.parseRichTextNodes(desc?.text);
+
         if (!desc && !author) return;
-        if (!formatData.orig) return;
+        if (!data.orig) return;
 
         isForward = true;
-        let orig = await this.formatTextDynamicData(upName, formatData.orig, isForward, setData);
+        let orig = await this.formatTextDynamicData(upName, data.orig, isForward, setData);
         if (orig && orig.length) {
           orig = orig.slice(2);
         } else {
@@ -317,8 +358,8 @@ export class BiliQuery {
         msg = [
           title,
           `-----------------------------\n`,
-          `${this.dynamicContentLimit(desc.text, setData)}\n`,
-          `链接：${BiliDrawDynamicLinkUrl}${formatData.id_str}\n`,
+          `${this.dynamicContentLimit(content, setData)}\n`,
+          `链接：${BiliDrawDynamicLinkUrl}${data.id_str}\n`,
           `时间：${author ? moment(author.pub_ts * 1000).format("YYYY年MM月DD日 HH:mm:ss") : ""}\n`,
           "\n---以下为转发内容---\n",
           ...orig,
@@ -328,7 +369,7 @@ export class BiliQuery {
 
       case "DYNAMIC_TYPE_LIVE_RCMD":
         // 处理直播动态
-        desc = formatData?.modules?.module_dynamic?.major?.live_rcmd?.content;
+        desc = data?.modules?.module_dynamic?.major?.live_rcmd?.content;
         if (!desc) return;
         desc = JSON.parse(desc);
         desc = desc?.live_play_info;
@@ -346,7 +387,7 @@ export class BiliQuery {
 
       default:
         // 处理未定义的动态类型
-        (Bot.logger ?? logger)?.mark(`未处理的B站推送【${upName}】：${formatData.type}`);
+        (Bot.logger ?? logger)?.mark(`未处理的B站推送【${upName}】：${data.type}`);
         return "continue";
     }
   }
