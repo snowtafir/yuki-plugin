@@ -76,7 +76,7 @@ export class WeiboQuery {
 
 
     /* 构造动态渲染数据 *************************** */
-    let pics: string[] = [];
+    let pics: any = [];
     let formatData: { data: { [key: string]: any } } = { data: {} };
 
     /**头像 */
@@ -97,11 +97,11 @@ export class WeiboQuery {
         formatData.data.url = detail_url;
         formatData.data.pubTs = moment(created_time).format("YYYY年MM月DD日 HH:mm:ss");
         formatData.data.category = "视频动态";
-        formatData.data.pics = info?.page_info?.page_pic?.url ? [info.page_info.page_pic.url] : [];
+        formatData.data.pics = info?.page_info?.page_pic?.url ? [{ url: info.page_info.page_pic.url }] : [];
         break;
       case "DYNAMIC_TYPE_DRAW":
         let raw_pics_list: any[] = retweeted ? info?.retweeted_status?.pics || [] : info?.pics || [];
-        pics = raw_pics_list.map(img => img?.large?.url) || [];
+        pics = raw_pics_list.map((img: any) => { return { url: img?.large?.url, width: Number(img?.large?.geo?.width), height: Number(img?.large?.geo?.height) } }) || [];
         formatData.data.title = "";
         formatData.data.content = this.parseRichTextNodes(info?.text);
         formatData.data.url = detail_url;
@@ -111,7 +111,7 @@ export class WeiboQuery {
         break;
       case "DYNAMIC_TYPE_ARTICLE":
         let raw_pics_list_article = retweeted ? info?.retweeted_status?.pics || [] : info?.pics || [];
-        pics = raw_pics_list_article.map((img: any) => img?.large?.url) || [];
+        pics = raw_pics_list_article.map((img: any) => { return { url: img?.large?.url, width: Number(img?.large?.geo?.width), height: Number(img?.large?.geo?.height) } }) || [];
         formatData.data.title = "";
         formatData.data.content = this.parseRichTextNodes(info?.text);
         formatData.data.url = detail_url;

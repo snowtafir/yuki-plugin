@@ -145,13 +145,13 @@ export class YukiPuppeteerRender extends Puppeteer {
         } else {
           logger.error(`[puppeteer]`, '截图失败');
         }
-        // 关闭页面
-        await page.close().catch(err => logger.error(err));
       }
       if (ret.length === 0 || !ret[0]) {
         logger.error(`[图片生成][${name}] 图片生成为空`);
         return false;
       }
+      // 关闭页面
+      await page.close().catch(err => logger.error(err));
       return { img: ret }; // 返回图像数组
     } catch (err) {
       logger.error('[puppeteer] newPage', err)

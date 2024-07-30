@@ -31,7 +31,7 @@ export class BiliQuery {
         formatData.data.pubTime = author.pub_time;
         formatData.data.pubTs = moment(author.pub_ts * 1000).format("YYYY年MM月DD日 HH:mm:ss");
         formatData.data.category = "视频动态";
-        formatData.data.pics = [desc?.cover];
+        formatData.data.pics = [{ url: desc?.cover }];
         break;
 
       case "DYNAMIC_TYPE_WORD":
@@ -39,7 +39,7 @@ export class BiliQuery {
         if (majorType === "MAJOR_TYPE_OPUS") {
           desc = data?.modules?.module_dynamic?.major?.opus || {};
           pics = desc?.pics;
-          pics = pics.map((item: any) => { return item?.url; }) || [];
+          pics = pics.map((item: any) => { return { url: item?.url, width: item?.width, height: item?.height } }) || [];
           formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || ""
         } else {
           desc = data?.modules?.module_dynamic?.desc || {};
@@ -59,14 +59,12 @@ export class BiliQuery {
         if (majorType === "MAJOR_TYPE_OPUS") {
           desc = data?.modules?.module_dynamic?.major?.opus || {};
           pics = desc?.pics;
-          pics = pics.map((item: any) => {
-            return item.url;
-          });
+          pics = pics.map((item: any) => { return { url: item?.url, width: item?.width, height: item?.height } });
           formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || ""
         } else {
           desc = data?.modules?.module_dynamic?.desc;
           pics = data?.modules?.module_dynamic?.major?.draw?.items;
-          pics = pics.map((item: any) => { return item?.src; });
+          pics = pics.map((item: any) => { return { url: item?.src } });
           formatData.data.content = this.parseRichTextNodes(desc?.text);
         }
         formatData.data.title = "";
@@ -82,13 +80,13 @@ export class BiliQuery {
         if (majorType === "MAJOR_TYPE_OPUS") {
           desc = data?.modules?.module_dynamic?.major?.opus || {};
           pics = desc?.pics;
-          pics = pics.map((item: any) => { return item.url; }) || [];
+          pics = pics.map((item: any) => { return { url: item?.url, width: item?.width, height: item?.height } }) || [];
           formatData.data.title = desc?.title;
           formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || "";
         } else {
           desc = data?.modules?.module_dynamic?.major?.article || {};
           if (desc.covers && desc.covers.length) {
-            pics = desc?.covers;
+            pics = [{ url: desc?.covers }];
           }
           formatData.data.title = desc?.title;
           formatData.data.pics = pics;
@@ -123,7 +121,7 @@ export class BiliQuery {
         formatData.data.pubTime = "";
         formatData.data.pubTs = "";
         formatData.data.url = `https:${desc.link}`;
-        formatData.data.pics = [desc?.cover];
+        formatData.data.pics = [{ url: desc?.cover }];
         formatData.data.category = "直播动态";
         break;
     }
