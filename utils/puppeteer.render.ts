@@ -60,7 +60,7 @@ export class YukiPuppeteerRender extends Puppeteer {
         await page.setExtraHTTPHeaders(Options.header);
       }
 
-      await page.goto(`file://${htmlPath}`, { timeout: Options?.timeout ?? 120000 });
+      await page.goto(`file://${htmlPath}`, { timeout: Options?.timeout ?? 120000, waitUntil: 'networkidle2' });
 
       const body = await page.$(Options?.tab ?? 'body')
       if (!body) return false
@@ -98,8 +98,6 @@ export class YukiPuppeteerRender extends Puppeteer {
 
       logger.info('[puppeteer] success')
 
-      await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * (6500 - 3000 + 1) + 3000))); // 随机延时3-6.5秒
-
       let numSun = 0;
       let start = Date.now();
       const ret = new Array<Buffer>();
@@ -110,7 +108,7 @@ export class YukiPuppeteerRender extends Puppeteer {
           await page.evaluate(pageHeight => {
             window.scrollBy(0, pageHeight); // 在页面上下文中执行滚动操作
           }, pageHeight);
-          await new Promise((resolve) => setTimeout(resolve, 300)); // 等待一段时间，确保页面加载完成
+          await new Promise((resolve) => setTimeout(resolve, 500)); // 等待一段时间，确保页面加载完成
         }
 
 
