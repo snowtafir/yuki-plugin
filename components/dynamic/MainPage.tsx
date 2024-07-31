@@ -21,7 +21,7 @@ export type MainProps = {
     content?: string,
     urlImgData?: string,
     created?: any,
-    pics?: string[]
+    pics?: Array<any>
     category?: string,
     orig?: {
       data?: {

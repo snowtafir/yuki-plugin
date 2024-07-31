@@ -145,8 +145,8 @@ const Content: React.FC<ContentProps> = ({ data }) => {
             <div className="content-text-title" style={{ marginBottom: '10px' }}>
               {data.title && <h1>{data.title}</h1>}
             </div>
-            {picItems}
             <div className="content-text" dangerouslySetInnerHTML={{ __html: data.content || '' }} />
+            {picItems}
           </div>
         </>
       )

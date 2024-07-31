@@ -82,6 +82,7 @@ export class BiliQuery {
           pics = desc?.pics;
           pics = pics.map((item: any) => { return { url: item?.url, width: item?.width, height: item?.height } }) || [];
           formatData.data.title = desc?.title;
+          formatData.data.pics = pics;
           formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || "";
         } else {
           desc = data?.modules?.module_dynamic?.major?.article || {};
