@@ -43,7 +43,7 @@ export default [
         targets: [
           { src: 'resources/', dest: path.join(__dirname, 'dist') },
           { src: './package.json', dest: path.join(__dirname, 'dist') },
-          //{ src: './tsconfig.json', dest: path.join(__dirname, 'dist') },
+          { src: './.puppeteerrc.cjs', dest: path.join(__dirname, 'dist') },
           { src: './README.md', dest: path.join(__dirname, 'dist') },
           { src: 'LICENSE', dest: path.join(__dirname, 'dist') },
           { src: './CHANGELOG.md', dest: path.join(__dirname, 'dist') },
