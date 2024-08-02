@@ -135,8 +135,8 @@ https://m.weibo.cn/u/7643376782 # 7643376782 为崩坏星穹铁道博主uid
 ||||
 | **其他指令** |  |  |
 | 查看版本信息 | 查看版本信息 | `#优纪版本` |
-| 更新yuki插件 | 更新yuki插件 | `#优纪插件更新` |
-| 强制更新yuki插件 | 强制更新yuki插件 | `#优纪插件强制更新` |
+| 更新yuki插件 | 系统指令更新yuki插件，v4需安装yz-system | `#更新yuki-plugin` |
+| 强制更新yuki插件 | 强制更新yuki插件，v4需安装yz-system| `#强制更新yuki-plugin` |
 
 </details>
 

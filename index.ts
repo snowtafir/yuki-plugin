@@ -1,14 +1,13 @@
 import chalk from 'chalk';
 import Config from './utils/config';
 import { _paths } from './utils/paths';
-import YukiBili  from './apps/bilibili';
-import YukiHelp  from './apps/help.ts';
-import YukiUpdate  from './apps/update';
+import YukiBili from './apps/bilibili';
+import YukiHelp from './apps/help.ts';
 import YukiVersion from './apps/version';
-import YukiWeibo  from './apps/weibo';
+import YukiWeibo from './apps/weibo';
 
 
-let apps = { YukiBili, YukiHelp, YukiUpdate, YukiVersion, YukiWeibo }
+let apps = { YukiBili, YukiHelp, YukiVersion, YukiWeibo }
 let rules = {}
 let count = 0;
 for (let key in apps) {
