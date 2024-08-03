@@ -32,11 +32,11 @@ export default class YukiBili extends Plugin {
         permission: "master",
       },
       {
-        reg: "^(#|\/)(yuki|优纪)?(订阅|添加|add|ADD)(b站|B站|bili|bilibili|哔哩|哔哩哔哩)推送\s*(视频\s*|图文\s*|文章\s*|转发\s*|直播\s*)*.*$",
+        reg: "^(#|\/)(yuki|优纪)?(订阅|添加|add|ADD)(b站|B站|bili|bilibili|哔哩|哔哩哔哩)推送\\s*(视频\\s*|图文\\s*|文章\\s*|转发\\s*|直播\\s*)*.*$",
         fnc: this.addDynamicSub.name,
       },
       {
-        reg: "^(#|\/)(yuki|优纪)?(取消|删除|del|DEL)(b站|B站|bili|bilibili|哔哩|哔哩哔哩)推送\s*(视频\s*|图文\s*|文章\s*|转发\s*|直播\s*)*.*$",
+        reg: "^(#|\/)(yuki|优纪)?(取消|删除|del|DEL)(b站|B站|bili|bilibili|哔哩|哔哩哔哩)推送\\s*(视频\\s*|图文\\s*|文章\\s*|转发\\s*|直播\\s*)*.*$",
         fnc: this.delDynamicSub.name,
       },
       {
