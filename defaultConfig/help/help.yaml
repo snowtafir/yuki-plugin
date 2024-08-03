@@ -21,7 +21,7 @@
       title: "#B站订阅列表"
       desc: "查看 本群/私聊 添加的B站订阅列表"
     - icon: kamera
-      title: "#推送B站订阅"
+      title: "#执行B站任务"
       desc: "手动触发定时推送任务"
     - icon: flower_2
       title: "#B站up主UID"
@@ -65,7 +65,7 @@
       title: "#微博订阅列表"
       desc: "查看 本群/私聊 添加的微博订阅列表"
     - icon: kamera
-      title: "#推送微博订阅"
+      title: "#执行微博任务"
       desc: "手动触发定时推送任务"
     - icon: flower_2
       title: "#微博博主UID"

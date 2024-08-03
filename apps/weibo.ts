@@ -12,16 +12,16 @@ export default class YukiWeibo extends Plugin {
     super();
     this.rule = [
       {
-        reg: "^(#|\/)(yuki|优纪)?推送(微博|weibo|WEIBO)(动态|订阅|博主)$",
+        reg: "^(#|\/)(yuki|优纪)?执行(微博|weibo|WEIBO)任务$",
         fnc: this.newPushTask.name,
         permission: "master",
       },
       {
-        reg: "^(#|\/)(yuki|优纪)?(订阅|添加|add|ADD)(微博|weibo|WEIBO)推送\\s*(视频\\s*|图文\\s*|文章\\s*|转发\\s*)*.*$",
+        reg: "^(#|\/)(yuki|优纪)?(订阅|添加|add|ADD)(微博|weibo|WEIBO)推送\s*(视频\s*|图文\s*|文章\s*|转发\s*)*.*$",
         fnc: this.addDynamicSub.name,
       },
       {
-        reg: "^(#|\/)(yuki|优纪)?(取消|删除|del|DEL)(微博|weibo|WEIBO)推送\\s*(视频\\s*|图文\\s*|文章\\s*|转发\\s*)*.*$",
+        reg: "^(#|\/)(yuki|优纪)?(取消|删除|del|DEL)(微博|weibo|WEIBO)推送\s*(视频\s*|图文\s*|文章\s*|转发\s*)*.*$",
         fnc: this.delDynamicSub.name,
       },
       {
