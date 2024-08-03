@@ -1,26 +1,18 @@
-import { basename,join } from 'path';
+import { basename, dirname, join } from 'path';
+import { fileURLToPath } from 'url';
 
 const _path = process.cwd()
-export const pluginName = basename(join(import.meta.url, './../../'))
-export const _paths = yukiPaths()
+const thisFilePath = dirname(fileURLToPath(import.meta.url));
+const pluginPath = join(thisFilePath, '..');
 
-function yukiPaths() {
-  // BotData目录
-  const botData = join(_path, 'data')
-  // Bot资源目录
-  const botResources = join(_path, 'resources')
-  // yuki-plugin根目录
-  const pluginPath = join(_path, 'plugins', pluginName)
-  // yuki-plugin资源目录
-  const pluginResources = join(pluginPath, 'resources')
+export const pluginName = basename(pluginPath);
 
-  return {
-    root: _path, // Bot根目录
-    botData,
-    botResources,
-    pluginPath,
-    pluginResources,
-    pluginName, // 插件所在文件夹名称
-  }
+export const _paths = {
+  root: _path, // Bot根目录
+  botData: join(_path, 'data'),// BotData目录
+  botTempPath: join(_path, 'temp'), // Bot缓存目录
+  pluginPath, // yuki-plugin根目录
+  pluginResources: join(pluginPath, 'resources'), // yuki-plugin资源目录
+  pluginName, // 插件所在文件夹名称
 }
 
