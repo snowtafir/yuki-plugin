@@ -53,7 +53,8 @@
   visibility: hidden;
 }
 
-.bili-rich-text-module {
+.bili-rich-text-module,
+.surl-text {
   color: #008ac5;
 }
 
