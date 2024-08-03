@@ -583,7 +583,7 @@ export default class YukiBili extends Plugin {
 
     const messages = [];
 
-    data.data.result.map((item: { uname: any; mid: any; fans: any; }, index: number) => {
+    data.result.map((item: { uname: any; mid: any; fans: any; }, index: number) => {
       if (index < 5) {
         messages.push(`${item.uname}\nUID：${item.mid}\n粉丝数：${item.fans}${index < 4 ? "\n" : ""}`);
       }
