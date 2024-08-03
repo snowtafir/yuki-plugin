@@ -306,7 +306,7 @@ export default class YukiWeibo extends Plugin {
     const res = await new WeiboGetWebData(this.e).getBloggerInfo(uid);
 
     if (res.statusText !== 'OK') {
-      this.reply("诶嘿，出了点网络问题，等会再试试吧~");
+      this.e.reply("诶嘿，出了点网络问题，等会再试试吧~");
       return;
     }
 
@@ -334,7 +334,7 @@ export default class YukiWeibo extends Plugin {
       `\n粉丝人数：${userInfo.followers_count_str || ''}`,
     ];
 
-    this.reply(message);
+    this.e.reply(message);
   }
 
   /** 根据昵称搜索博主信息*/
@@ -349,16 +349,15 @@ export default class YukiWeibo extends Plugin {
     }
 
     const { ok, data } = res.data || {};
-
-    const info = data?.user[0];
-    const infos = data?.users[0];
-    const uid = data?.user[0]?.uid;
-    const id = data?.users[0]?.id;
-    const nick = data?.user[0]?.nick;
-    const screen_name = data?.users[0]?.screen_name;
-    const followers_count_str = data?.users[0]?.followers_count_str;
-
-    if (ok !== 0 && (!info || !infos)) {
+    const { user, users } = data;
+    let info = user[0];
+    let infos = users[0];
+    let uid = info?.uid;
+    let id = infos?.id;
+    let nick = info?.nick;
+    let screen_name = infos?.screen_name;
+    let followers_count_str = infos?.followers_count_str;
+    if (ok !== 1 && !info && !infos) {
       this.e.reply("惹~没有搜索到该用户捏，\n请换个关键词试试吧~ \nPS：该方法只能搜索到大V");
       return;
     }

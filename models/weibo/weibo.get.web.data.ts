@@ -34,7 +34,7 @@ export class WeiboGetWebData {
     const resp = await axios.get(url, {
       params,
       timeout: 10000,
-      headers: { 'accept': '*/*', 'Content-Type': 'application/json', 'referer': 'https://weibo.com' },
+      headers: { 'accept': '*/*', 'Content-Type': 'application/json', 'referer': 'https://s.weibo.com' },
     })
     return resp;
   }
