@@ -1,0 +1,91 @@
+name: 构建和部署
+
+on:
+  push:
+    branches:
+      - dev
+      
+permissions:
+    contents: write
+      
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 🚀 检出代码
+      uses: actions/checkout@v4
+
+    - name: 🏗️ 安装 Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18
+
+    - name: 📦 安装 yarn
+      run: npm install -g yarn
+
+    - name: 📦 列出node版本
+      run: |
+        pwd
+        node -v
+
+    - name: 📦 列出npm版本
+      run: npm -v
+
+    - name: 📦 列出yarn版本
+      run: yarn -v
+
+    - name: 🔧 安装依赖
+      run: yarn install
+
+    - name: 🛠️ 构建项目
+      run: yarn build
+
+    - name: 📂 创建临时目录
+      run: mkdir ./../temp_dist/
+
+    - name: 📄 列出当前目录文件
+      run: ls -l
+
+    - name: 🚚 移动构建文件到临时目录
+      run: mv ./dist/* ../temp_dist/
+
+    - name: 🛠️ 配置Git用户信息
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+    - name: 🔄 获取最新代码
+      run: git fetch
+
+    - name: 🔀 切换到main分支
+      run: git checkout main
+
+    - name: 🔄 拉取main分支最新代码
+      run: git pull origin main
+
+    - name: 📄 列出main分支文件
+      run: ls -l
+
+    - name: 🧹 清理当前目录（保留.git)
+      run: find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
+
+    - name: 🚚 从临时目录移动文件到当前目录
+      run: mv ./../temp_dist/* ./
+
+    - name: 🗑️ 删除临时目录
+      run: rm -rf ./../temp_dist
+
+    - name: 📄 列出当前目录文件
+      run: ls -l
+
+    - name: 📥 添加所有更改到Git
+      run: git add .
+
+    - name: 💬 提交更改
+      run: git commit -m "${{ github.event.head_commit.message }}"
+
+    - name: 🚀 推送到main分支
+      run: git push origin main
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
