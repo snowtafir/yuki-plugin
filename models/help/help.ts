@@ -1,15 +1,15 @@
-import { EventType } from 'yunzai';
+//import { EventType } from 'yunzai';
 import Config from '../../utils/config';
 
 export default class Help {
-  e?: EventType;
+  e?: any;
   model: string;
-  constructor(e?: EventType) {
+  constructor(e?: any) {
     this.model = "help";
     this.e = e
   }
 
-  static async get(e?: EventType) {
+  static async get(e?: any) {
     let helpData = new Help(e);
     return await helpData.getData();
   }

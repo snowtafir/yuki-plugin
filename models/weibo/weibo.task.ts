@@ -1,5 +1,4 @@
 import QRCode from 'qrcode';
-import { Bot, Redis, Segment, EventType } from 'yunzai';
 import { MainProps } from "../../components/dynamic/MainPage";
 import Config from '../../utils/config';
 import Image from '../../utils/image';
@@ -7,12 +6,14 @@ import { ScreenshotOptions } from '../../utils/puppeteer.render';
 import { WeiboGetWebData } from './weibo.get.web.data';
 import { WeiboQuery } from './weibo.query';
 
+declare const Bot: any, redis: any, segment: any;
+
 declare const logger: any;
 
 export class WeiboTask {
   taskName: string;
   key: string;
-  e?: EventType;
+  e?: any;
   constructor(e?) {
     this.taskName = "weiboTask";
     this.key = "Yz:yuki:weibo:upPush:";
@@ -111,7 +112,7 @@ export class WeiboTask {
    */
   async sendDynamic(chatId: string | number, bot_id: string | number, upName: string, pushDynamicData: any, weiboConfigData: any, chatType: string) {
     const id_str: string = WeiboQuery.getDynamicId(pushDynamicData); // 获取动态 ID
-    let sended: string | null = await Redis.get(`${this.key}${chatId}:${id_str}`);
+    let sended: string | null = await redis.get(`${this.key}${chatId}:${id_str}`);
     if (sended) return; // 如果已经发送过，则直接返回
 
     if (!!weiboConfigData.pushMsgMode) {
@@ -146,20 +147,20 @@ export class WeiboTask {
       let imgs: Buffer[] | null = await this.renderDynamicCard(uid, renderData, ScreenshotOptionsData);
       if (!imgs) return;
 
-      Redis.set(`${this.key}${chatId}:${id_str}`, "1", { EX: 3600 * 10 }); // 设置已发送标记
+      redis.set(`${this.key}${chatId}:${id_str}`, "1", { EX: 3600 * 10 }); // 设置已发送标记
 
       (logger ?? Bot.logger)?.mark("优纪插件：B站动态执行推送");
 
       for (let i = 0; i < imgs.length; i++) {
         const image: Buffer = imgs[i];
-        await this.sendMessage(chatId, bot_id, chatType, Segment.image(image));
+        await this.sendMessage(chatId, bot_id, chatType, segment.image(image));
         await this.randomDelay(2000, 6500); // 随机延时2-6.5秒
       }
       await this.randomDelay(1000, 2000);
     } else {
       const dynamicMsg: string[] | "continue" | false = await WeiboQuery.formatTextDynamicData(upName, pushDynamicData, false, weiboConfigData); //构建文字动态消息
 
-      Redis.set(`${this.key}${chatId}:${id_str}`, "1", { EX: 3600 * 10 }); // 设置已发送标记
+      redis.set(`${this.key}${chatId}:${id_str}`, "1", { EX: 3600 * 10 }); // 设置已发送标记
 
       if (dynamicMsg == "continue" || dynamicMsg == false) {
         return "return"; // 如果动态消息构建失败或内部资源获取失败，则直接返回

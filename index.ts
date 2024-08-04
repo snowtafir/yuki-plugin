@@ -1,6 +1,15 @@
 import chalk from 'chalk';
 import Config from './utils/config';
 import { _paths } from './utils/paths';
+
+if (!global.segment) {
+  try {
+    global.segment = (await import("oicq")).segment;
+  } catch (err) {
+    global.segment = (await import("icqq")).segment;
+  }
+}
+
 import YukiBili from './apps/bilibili';
 import YukiHelp from './apps/help.ts';
 import YukiVersion from './apps/version';

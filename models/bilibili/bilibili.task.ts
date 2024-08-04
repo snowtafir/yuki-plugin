@@ -1,5 +1,5 @@
 import QRCode from 'qrcode';
-import { Bot, Redis, Segment, EventType } from 'yunzai';
+//import { Bot, Redis, Segment, EventType } from 'yunzai';
 import { MainProps } from "../../components/dynamic/MainPage";
 import Config from '../../utils/config';
 import Image from '../../utils/image';
@@ -8,13 +8,15 @@ import { BiliGetWebData } from './bilibili.get.web.data';
 import { postGateway, readSyncCookie } from './bilibili.models';
 import { BiliQuery } from './bilibili.query';
 
+declare const Bot: any, redis: any, segment: any;
+
 declare const logger: any;
 
 export class BiliTask {
   taskName: string;
   key: string;
-  e?: EventType;
-  constructor(e?: EventType) {
+  e?: any;
+  constructor(e?: any) {
     this.taskName = "biliTask";
     this.key = "Yz:yuki:bili:upPush:";
   }
@@ -44,7 +46,7 @@ export class BiliTask {
     let biliConfigData = await Config.getUserConfig("bilibili", "config");
     let biliPushData = await Config.getUserConfig("bilibili", "push");
     let interval: number = biliConfigData.interval || 7200;
-    let lastLiveStatus = JSON.parse(await Redis.get("yuki:bililive:lastlivestatus")) || {};
+    let lastLiveStatus = JSON.parse(await redis.get("yuki:bililive:lastlivestatus")) || {};
     const uidMap = new Map(); // 存放 uid 与推送信息的映射
     const dynamicList = {}; // 存放获取的所有动态，键为 uid，值为动态数组
 
@@ -144,7 +146,7 @@ export class BiliTask {
   async sendDynamic(chatId: string | number, bot_id: string | number, upName: string, pushDynamicData: any, biliConfigData: any, chatType: string) {
     const id_str = pushDynamicData.id_str;
 
-    let sended: string | null = await Redis.get(`${this.key}${chatId}:${id_str}`);
+    let sended: string | null = await redis.get(`${this.key}${chatId}:${id_str}`);
     if (sended) return; // 如果已经发送过，则直接返回
 
     if (!!biliConfigData.pushMsgMode) {
@@ -179,13 +181,13 @@ export class BiliTask {
       let imgs: Buffer[] | null = await this.renderDynamicCard(uid, renderData, ScreenshotOptionsData);
       if (!imgs) return;
 
-      Redis.set(`${this.key}${chatId}:${id_str}`, "1", { EX: 3600 * 10 }); // 设置已发送标记
+      redis.set(`${this.key}${chatId}:${id_str}`, "1", { EX: 3600 * 10 }); // 设置已发送标记
 
       (logger ?? Bot.logger)?.mark("优纪插件：B站动态执行推送");
 
       for (let i = 0; i < imgs.length; i++) {
         const image: Buffer = imgs[i];
-        await this.sendMessage(chatId, bot_id, chatType, Segment.image(image));
+        await this.sendMessage(chatId, bot_id, chatType, segment.image(image));
         await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * (6500 - 2000 + 1) + 2000))); // 随机延时2-6.5秒
       }
 
@@ -194,7 +196,7 @@ export class BiliTask {
     } else {
       const dynamicMsg = await BiliQuery.formatTextDynamicData(upName, pushDynamicData, false, biliConfigData); // 构建图文动态消息
 
-      Redis.set(`${this.key}${chatId}:${id_str}`, "1", { EX: 3600 * 10 }); // 设置已发送标记
+      redis.set(`${this.key}${chatId}:${id_str}`, "1", { EX: 3600 * 10 }); // 设置已发送标记
 
       if (dynamicMsg == "continue") {
         return "return"; // 如果动态消息构建失败，则直接返回

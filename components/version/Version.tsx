@@ -1,9 +1,9 @@
 import React from 'react';
-import { BOT_NAME, ConfigController } from 'yunzai';
 import Config from '../../utils/config';
 import { createRequire } from 'module';
 
-const botVersion = ConfigController.package?.version
+const BOT_NAME = 'yunzai'
+const botVersion = "3.1+"
 
 const require = createRequire(import.meta.url);
 

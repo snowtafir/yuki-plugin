@@ -1,18 +1,25 @@
-import { Plugin, Segment } from 'yunzai';
 import Image from '../utils/image';
 import { HelpPageProps } from '../components/help/Help';
 import Help from '../models/help/help';
 import { ScreenshotOptions } from '../utils/puppeteer.render';
+import plugin from "../../../lib/plugins/plugin.js";
 
-export default class YukiHelp extends Plugin {
+declare const segment: any;
+
+export default class YukiHelp extends plugin {
   constructor() {
-    super();
-    this.rule = [
-      {
-        reg: "^(#|\/)(yuki|优纪)帮助$",
-        fnc: this.yukiHelp.name,
-      },
-    ]
+    super({
+      name: "yuki-help",
+      des: "优纪帮助",
+      event: "message",
+      priority: 550,
+      rule: [
+        {
+          reg: "^(#|\/)(yuki|优纪)帮助$",
+          fnc: "yukiHelp",
+        },
+      ]
+    });
   };
 
   /**
@@ -46,7 +53,7 @@ export default class YukiHelp extends Plugin {
       return;
     }
     let msg = [];
-    msg.push(Segment.image(imgRes.img[0]));
+    msg.push(segment.image(imgRes.img[0]));
     await this.e.reply(msg);
   };
 }

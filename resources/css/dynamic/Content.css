@@ -32,7 +32,7 @@
 }
 
 .pic-item {
-/*   flex: 1 0 calc(33.3333% - 10px); */
+  /*   flex: 1 0 calc(33.3333% - 10px); */
   margin: 2px;
   background-size: contain;
   background-repeat: no-repeat;

@@ -32,7 +32,7 @@
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
     "outDir": "./dist",
-    "rootDir": "./",
+    "rootDir": "./"
   },
   "ts-node": {
     "esm": true,
@@ -48,7 +48,7 @@
     "components/**/*",
     "models/**/*.ts",
     "utils/*",
-    "index.ts"
+    "index.ts",
   ],
-  "exclude": ["node_modules", "yunzai"]
+  "exclude": ["node_modules", "yunzai", "../../../lib/plugins/plugin.js"]
 }

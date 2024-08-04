@@ -1,13 +1,13 @@
 import axios from "axios";
-import { Bot, EventType } from 'yunzai';
 import { WeiboApi } from './weibo.api';
 import { WeiboQuery } from "./weibo.query";
 
-declare const logger: any;
+declare const logger: any, Bot: any;
+
 
 export class WeiboGetWebData {
-  e?: EventType;
-  constructor(e?: EventType) {
+  e?: any;
+  constructor(e?: any) {
   }
 
   /**通过uid获取博主信息 */

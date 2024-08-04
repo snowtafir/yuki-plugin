@@ -1,5 +1,6 @@
 import moment from "moment";
-import { Bot, Segment } from "yunzai";
+
+declare const Bot: any, segment: any;
 
 declare const logger: any;
 
@@ -221,7 +222,7 @@ export class BiliQuery {
           `${desc.desc}\n`,
           `链接：${this.formatUrl(desc.jump_url)}\n`,
           `时间：${author ? moment(author.pub_ts * 1000).format("YYYY年MM月DD日 HH:mm:ss") : ""}\n`,
-          Segment.image(desc?.cover),
+          segment.image(desc?.cover),
         ];
 
         return msg;
@@ -282,7 +283,7 @@ export class BiliQuery {
         }
 
         pics = pics.map((item: any) => {
-          return Segment.image(item);
+          return segment.image(item);
         });
 
         title = `B站【${upName}】图文动态推送：\n`;
@@ -320,7 +321,7 @@ export class BiliQuery {
         if (!desc && !author) return;
 
         pics = pics.map((item: any) => {
-          return Segment.image(item);
+          return segment.image(item);
         });
 
         title = `B站【${upName}】文章动态推送：\n`;
@@ -379,7 +380,7 @@ export class BiliQuery {
           `-----------------------------\n`,
           `标题：${desc.title}\n`,
           `链接：https:${desc.link}\n`,
-          Segment.image(desc.cover),
+          segment.image(desc.cover),
         ];
 
         return msg;

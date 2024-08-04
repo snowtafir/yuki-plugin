@@ -1,6 +1,5 @@
 import JSON from 'json5';
 import lodash from 'lodash';
-import { Bot, Plugin, Redis } from 'yunzai';
 import { BiliQuery } from '../models/bilibili/bilibili.query';
 import { BiliTask } from '../models/bilibili/bilibili.task';
 import Config from '../utils/config';
@@ -19,71 +18,78 @@ import {
   saveLoginCookie,
   readTempCk
 } from '../models/bilibili/bilibili.models.ts';
+import plugin from "../../../lib/plugins/plugin.js";
 
 declare const logger: any;
+declare const Bot: any, redis: any;
 
-export default class YukiBili extends Plugin {
+export default class YukiBili extends plugin {
   constructor() {
-    super();
-    this.rule = [
-      {
-        reg: "^(#|\/)(yuki|优纪)?执行(b站|B站|bili|bilibili|哔哩|哔哩哔哩)任务$",
-        fnc: this.newPushTask.name,
-        permission: "master",
-      },
-      {
-        reg: "^(#|\/)(yuki|优纪)?(订阅|添加|add|ADD)(b站|B站|bili|bilibili|哔哩|哔哩哔哩)推送\\s*(视频\\s*|图文\\s*|文章\\s*|转发\\s*|直播\\s*)*.*$",
-        fnc: this.addDynamicSub.name,
-      },
-      {
-        reg: "^(#|\/)(yuki|优纪)?(取消|删除|del|DEL)(b站|B站|bili|bilibili|哔哩|哔哩哔哩)推送\\s*(视频\\s*|图文\\s*|文章\\s*|转发\\s*|直播\\s*)*.*$",
-        fnc: this.delDynamicSub.name,
-      },
-      {
-        reg: "^(#|\/)(yuki|优纪)?(扫码|添加|ADD|add)(b站|B站|bili|bilibili|哔哩|哔哩哔哩)登录$",
-        fnc: this.scanBiliLogin.name,
-      },
-      {
-        reg: "^(#|\/)(yuki|优纪)?(取消|删除|del|DEL)(b站|B站|bili|bilibili|哔哩|哔哩哔哩)登录$",
-        fnc: this.delBiliLogin.name,
-      },
-      {
-        reg: "^(#|\/)(yuki|优纪)?我的(b站|B站|bili|bilibili|哔哩|哔哩哔哩)登录$",
-        fnc: this.myBiliLoginInfo.name,
-      },
-      {
-        reg: "^(#|\/)(yuki|优纪)?(绑定|添加|ADD|add)(b站|B站|bili|bilibili|哔哩|哔哩哔哩)本地(ck|CK|cookie|COOKIE)(:|：)?.*$",
-        fnc: this.addLocalBiliCookie.name,
-      },
-      {
-        reg: "^(#|\/)(yuki|优纪)?(取消|删除|del|DEL)(b站|B站|bili|bilibili|哔哩|哔哩哔哩)本地(ck|CK|cookie|COOKIE)$",
-        fnc: this.delLocalBiliCookie.name,
-      },
-      {
-        reg: "^(#|\/)(yuki|优纪)?我的(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(ck|CK|cookie|COOKIE)$",
-        fnc: this.myUsingBiliCookie.name,
-      },
-      {
-        reg: "^(#|\/)(yuki|优纪)?刷新(b站|B站|bili|bilibili|哔哩|哔哩哔哩)临时(ck|CK|cookie|COOKIE)$",
-        fnc: this.reflashTempCk.name,
-      },
-      {
-        reg: "^(#|\/)(yuki|优纪)?(b站|B站|bili|bilibili|哔哩|哔哩哔哩)全部(推送|动态|订阅)列表$",
-        fnc: this.allSubDynamicPushList.name,
-      },
-      {
-        reg: "^(#|\/)(yuki|优纪)?(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(推送|动态|订阅)列表$",
-        fnc: this.singelSubDynamicPushList.name,
-      },
-      {
-        reg: "^(#|\/)(yuki|优纪)?(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(up|UP)主.*$",
-        fnc: this.getBilibiUserInfoByUid.name,
-      },
-      {
-        reg: "^(#|\/)(yuki|优纪)?搜索(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(up|UP)主.*$",
-        fnc: this.searchBiliUserInfoByKeyword.name,
-      },
-    ]
+    super({
+      name: "yuki-plugin-bilibili",
+      dsc: "b站相关指令",
+      event: "message",
+      priority: 550,
+      rule: [
+        {
+          reg: "^(#|\/)(yuki|优纪)?执行(b站|B站|bili|bilibili|哔哩|哔哩哔哩)任务$",
+          fnc: "newPushTask",
+          permission: "master",
+        },
+        {
+          reg: "^(#|\/)(yuki|优纪)?(订阅|添加|add|ADD)(b站|B站|bili|bilibili|哔哩|哔哩哔哩)推送\\s*(视频\\s*|图文\\s*|文章\\s*|转发\\s*|直播\\s*)*.*$",
+          fnc: "addDynamicSub",
+        },
+        {
+          reg: "^(#|\/)(yuki|优纪)?(取消|删除|del|DEL)(b站|B站|bili|bilibili|哔哩|哔哩哔哩)推送\\s*(视频\\s*|图文\\s*|文章\\s*|转发\\s*|直播\\s*)*.*$",
+          fnc: "delDynamicSub",
+        },
+        {
+          reg: "^(#|\/)(yuki|优纪)?(扫码|添加|ADD|add)(b站|B站|bili|bilibili|哔哩|哔哩哔哩)登录$",
+          fnc: "scanBiliLogin",
+        },
+        {
+          reg: "^(#|\/)(yuki|优纪)?(取消|删除|del|DEL)(b站|B站|bili|bilibili|哔哩|哔哩哔哩)登录$",
+          fnc: "delBiliLogin",
+        },
+        {
+          reg: "^(#|\/)(yuki|优纪)?我的(b站|B站|bili|bilibili|哔哩|哔哩哔哩)登录$",
+          fnc: "myBiliLoginInfo",
+        },
+        {
+          reg: "^(#|\/)(yuki|优纪)?(绑定|添加|ADD|add)(b站|B站|bili|bilibili|哔哩|哔哩哔哩)本地(ck|CK|cookie|COOKIE)(:|：)?.*$",
+          fnc: "addLocalBiliCookie",
+        },
+        {
+          reg: "^(#|\/)(yuki|优纪)?(取消|删除|del|DEL)(b站|B站|bili|bilibili|哔哩|哔哩哔哩)本地(ck|CK|cookie|COOKIE)$",
+          fnc: "delLocalBiliCookie",
+        },
+        {
+          reg: "^(#|\/)(yuki|优纪)?我的(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(ck|CK|cookie|COOKIE)$",
+          fnc: "myUsingBiliCookie",
+        },
+        {
+          reg: "^(#|\/)(yuki|优纪)?刷新(b站|B站|bili|bilibili|哔哩|哔哩哔哩)临时(ck|CK|cookie|COOKIE)$",
+          fnc: "reflashTempCk",
+        },
+        {
+          reg: "^(#|\/)(yuki|优纪)?(b站|B站|bili|bilibili|哔哩|哔哩哔哩)全部(推送|动态|订阅)列表$",
+          fnc: "allSubDynamicPushList",
+        },
+        {
+          reg: "^(#|\/)(yuki|优纪)?(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(推送|动态|订阅)列表$",
+          fnc: "singelSubDynamicPushList",
+        },
+        {
+          reg: "^(#|\/)(yuki|优纪)?(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(up|UP)主.*$",
+          fnc: "getBilibiUserInfoByUid",
+        },
+        {
+          reg: "^(#|\/)(yuki|优纪)?搜索(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(up|UP)主.*$",
+          fnc: "searchBiliUserInfoByKeyword",
+        },
+      ]
+    });
     this.biliConfigData = Config.getConfigData("config", "bilibili", "config");
     this.biliPushData = Config.getConfigData("config", "bilibili", "push");
 
@@ -276,7 +282,7 @@ export default class YukiBili extends Plugin {
   async delBiliLogin() {
     if (this.e.isMaster) {
       await exitBiliLogin(this.e);
-      await Redis.set("Yz:yuki:bili:loginCookie", "", { EX: 3600 * 24 * 180 });
+      await redis.set("Yz:yuki:bili:loginCookie", "", { EX: 3600 * 24 * 180 });
       this.e.reply(`登陆的B站ck并已删除~`);
     } else {
       this.e.reply("未取得bot主人身份，无权限删除B站登录ck");

@@ -16,3 +16,4 @@ export const _paths = {
   pluginResources: join(pluginPath, 'resources'), // yuki-plugin资源目录
   pluginName, // 插件所在文件夹名称
 }
+

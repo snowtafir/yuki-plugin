@@ -6,7 +6,6 @@ import { promisify } from 'node:util';
 import path from 'path';
 import QRCode from 'qrcode';
 import YAML from "yaml";
-import { Bot, Redis, Segment, EventType } from 'yunzai';
 import { LoginProps } from "../../components/loginQrcode/Page";
 import Image from '../../utils/image';
 import { _paths } from '../../utils/paths';
@@ -14,7 +13,7 @@ import { ScreenshotOptions } from './../../utils/puppeteer.render';
 import { BiliApi } from './bilibili.api';
 import { gen_buvid_fp } from './bilibili.buid.fp';
 
-declare const logger: any;
+declare const logger: any, Bot: any, redis: any, segment: any;
 
 /**
 * *******************************************************************
@@ -22,7 +21,7 @@ declare const logger: any;
 * *******************************************************************
 */
 /**申请登陆二维码(web端) */
-export async function applyLoginQRCode(e: EventType) {
+export async function applyLoginQRCode(e: any) {
   const url = 'https://passport.bilibili.com/x/passport-login/web/qrcode/generate?source=main-fe-header';
   const response = await fetch(url, {
     method: "GET",
@@ -48,7 +47,7 @@ export async function applyLoginQRCode(e: EventType) {
       qrcodeImg = img;
     }
     let msg = [];
-    msg.push(Segment.image(qrcodeImg[0]));
+    msg.push(segment.image(qrcodeImg[0]));
     e.reply('请在3分钟内扫码以完成B站登陆绑定');
     e.reply(msg);
 
@@ -60,7 +59,7 @@ export async function applyLoginQRCode(e: EventType) {
 }
 
 /**处理扫码结果 */
-export async function pollLoginQRCode(e: EventType, qrcodeKey: string) {
+export async function pollLoginQRCode(e: any, qrcodeKey: string) {
   const url = `https://passport.bilibili.com/x/passport-login/web/qrcode/poll?qrcode_key=${qrcodeKey}&source=main-fe-header`;
   const response = await fetch(url, {
     method: "GET",
@@ -101,7 +100,7 @@ export async function pollLoginQRCode(e: EventType, qrcodeKey: string) {
 }
 
 /**查看app扫码登陆获取的ck的有效状态*/
-export async function checkBiliLogin(e: EventType) {
+export async function checkBiliLogin(e: any) {
   const LoginCookie = await readLoginCookie();
   const res = await fetch("https://api.bilibili.com/x/web-interface/nav", {
     method: "GET",
@@ -127,7 +126,7 @@ export async function checkBiliLogin(e: EventType) {
 }
 
 /**退出B站账号登录，将会删除redis缓存的LoginCK，并在服务器注销该登录 Token (SESSDATA)*/
-export async function exitBiliLogin(e: EventType) {
+export async function exitBiliLogin(e: any) {
   const url = 'https://passport.bilibili.com/login/exit/v2';
   const exitCk = await readLoginCookie();
   const [SESSDATA, biliCSRF, DedeUserID] = await Promise.all([
@@ -163,7 +162,7 @@ export async function exitBiliLogin(e: EventType) {
       switch (code) {
         case 0:
           e.reply("当前缓存的B站登录CK已在服务器注销~");
-          await Redis.set("Yz:yuki:bili:loginCookie", "", { EX: 3600 * 24 * 180 });
+          await redis.set("Yz:yuki:bili:loginCookie", "", { EX: 3600 * 24 * 180 });
           e.reply(`登陆的B站ck并已删除~`);
           break;
         case 2202:
@@ -188,10 +187,10 @@ export async function exitBiliLogin(e: EventType) {
 */
 
 /**保存扫码登录的loginCK*/
-export async function saveLoginCookie(e: EventType, biliLoginCk: string) {
+export async function saveLoginCookie(e: any, biliLoginCk: string) {
   if (biliLoginCk && biliLoginCk.length > 0) {
     const LoginCkKey = "Yz:yuki:bili:loginCookie";
-    Redis.set(LoginCkKey, biliLoginCk, { EX: 3600 * 24 * 360 });
+    redis.set(LoginCkKey, biliLoginCk, { EX: 3600 * 24 * 360 });
   } else {
     e.reply("扫码超时");
   }
@@ -200,7 +199,7 @@ export async function saveLoginCookie(e: EventType, biliLoginCk: string) {
 /** 读取扫码登陆后缓存的cookie */
 async function readLoginCookie() {
   const CK_KEY = "Yz:yuki:bili:loginCookie";
-  const tempCk = await Redis.get(CK_KEY);
+  const tempCk = await redis.get(CK_KEY);
 
   return tempCk ? tempCk : '';
 }
@@ -242,14 +241,14 @@ export async function saveLocalBiliCk(data: any) {
 /** 读取缓存的tempCK */
 export async function readTempCk() {
   const CK_KEY = "Yz:yuki:bili:tempCookie";
-  const tempCk = await Redis.get(CK_KEY);
+  const tempCk = await redis.get(CK_KEY);
   return tempCk ?? '';
 }
 
 /**保存tempCK*/
 export async function saveTempCk(newTempCk: any) {
   const CK_KEY = "Yz:yuki:bili:tempCookie";
-  await Redis.set(CK_KEY, newTempCk, { EX: 3600 * 24 * 180 });
+  await redis.set(CK_KEY, newTempCk, { EX: 3600 * 24 * 180 });
 }
 
 /** 综合获取ck，返回优先级：localCK > loginCK > tempCK */

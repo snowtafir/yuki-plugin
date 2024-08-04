@@ -1,18 +1,25 @@
-import { Plugin, Segment } from 'yunzai';
 import Image from '../utils/image';
 import { VersionProps } from '../components/version/Version';
 import VersionData from '../models/version/version';
 import { ScreenshotOptions } from '../utils/puppeteer.render';
+import plugin from "../../../lib/plugins/plugin.js";
 
-export default class YukiVersion extends Plugin {
+declare const segment: any;
+
+export default class YukiVersion extends plugin {
   constructor() {
-    super();
-    this.rule = [
-      {
-        reg: "^(#|\/)(yuki|优纪)版本$",
-        fnc: this.yukiVersion.name,
-      },
-    ]
+    super({
+      name: "yuki-version",
+      dsc: "优纪版本",
+      event: "message",
+      priority: 550,
+      rule:[
+        {
+          reg: "^(#|\/)(yuki|优纪)版本$",
+          fnc: "yukiVersion",
+        },
+      ]
+    });
   };
 
   /**
@@ -43,7 +50,7 @@ export default class YukiVersion extends Plugin {
       return;
     }
     let msg = [];
-    msg.push(Segment.image(imgRes.img[0]));
+    msg.push(segment.image(imgRes.img[0]));
     await this.e.reply(msg);
   };
 }

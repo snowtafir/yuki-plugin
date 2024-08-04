@@ -1,8 +1,9 @@
 import moment from "moment";
 import fetch from "node-fetch";
 import { WeiboApi } from "./weibo.api";
-import { Segment, Bot } from "yunzai";
 import { JSDOM } from 'jsdom';
+
+declare const Bot: any, segment: any;
 
 declare const logger: any;
 
@@ -226,7 +227,7 @@ export class WeiboQuery {
 
         let cover_img_url = info?.page_info?.page_pic?.url
 
-        let cover_img = Segment.image(cover_img_url, false, 15000, { referer: "https://weibo.com", });
+        let cover_img = segment.image(cover_img_url, false, 15000, { referer: "https://weibo.com", });
 
         title = `微博【${upName}】视频动态推送：\n`;
         msg = [
@@ -256,7 +257,7 @@ export class WeiboQuery {
         pics = []
 
         for (let pic_url of pic_urls) {
-          const temp = Segment.image(pic_url, false, 15000, { referer: "https://weibo.com", });
+          const temp = segment.image(pic_url, false, 15000, { referer: "https://weibo.com", });
           pics.push(temp);
         }
 
@@ -287,7 +288,7 @@ export class WeiboQuery {
         pics = []
 
         for (const pic_url of pic_urls) {
-          const temp = Segment.image(pic_url, false, 15000, { referer: "https://weibo.com", });
+          const temp = segment.image(pic_url, false, 15000, { referer: "https://weibo.com", });
           pics.push(temp);
         }
 
