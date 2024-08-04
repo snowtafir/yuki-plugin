@@ -1,0 +1,93 @@
+/* 隐藏滚动条 */
+body {
+  overflow: -moz-scrollbars-none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE 10+ */
+  scrollbar-width: none;
+  /* Firefox 64+ */
+}
+
+body::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Safari, Edge */
+}
+
+::-webkit-scrollbar {
+  width: 0px;
+  height: 5px;
+}
+
+@font-face {
+  font-family: "iconfont";
+  src: url("./../../fonts/iconfont.16acc2.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+
+body {
+  font-family: "iconfont", Arial, sans-serif;
+  background-color: #f9f9f9;
+  margin: 0;
+  padding: 0;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 828px !important;
+  width: 100%;
+}
+
+
+.outside-border {
+  /*限制页面内收缩*/
+  width: 100%;
+  min-width: 798px;
+  overflow: hidden;
+  margin: auto;
+}
+
+.container {
+  max-width: 788px;
+  width: 100%;
+  padding: 20px;
+  background-color: #fff;
+  box-shadow: 0px 1px 9px 12px rgb(246 140 224 / 20%);
+  border-radius: 8px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  margin-left: 20px;
+  margin-right: 20px;
+  border: 1px solid #ff69b4;
+  overflow: hidden;
+}
+
+.unfold {
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  line-height: 40px;
+  height: 100%;
+  outline: none;
+  overflow-y: auto;
+  -o-tab-size: 4;
+  tab-size: 4;
+  -moz-tab-size: 4;
+  text-align: left;
+  word-wrap: break-word;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+.dynamic-article-page-main {
+  /*限制页面布局改变*/
+  width: 100%;
+  max-width: 789px;
+  min-width: 742px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  /**禁止选中文本*/
+  user-select: none;
+}
