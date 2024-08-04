@@ -92,7 +92,7 @@ export default class YukiWeibo extends Plugin {
         upData.type = WeiboQuery.typeHandle(upData, this.e.msg, "add");
         this.weiboPushData = subData;
         await Config.saveConfig("config", "weibo", "push", subData);
-        this.e.reply(`修改b站推送动态类型成功~\n${upData.name}：${uid}`);
+        this.e.reply(`修改微博推送动态类型成功~\n${upData.name}：${uid}`);
         return;
       }
 

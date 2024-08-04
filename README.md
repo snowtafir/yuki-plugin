@@ -14,6 +14,21 @@
 按照网络情况或个人喜好，选择克隆仓库到本地。
 
 ```yunzai-v4：```
+
+1. V4 npm包 方式 安装：
+>```
+> yarn add yz-yuki-plugin -W
+>```
+接着修改 `yunzaijs/yunzai.config.js`：
+```js
+import yuki from 'yz-yuki-plugin' //新增该行
+export default defineConfig({
+  applications: [system(), yuki()], //该行添加 yuki() 
+  middlewares: [runtime(), starRail()]
+})
+```
+
+2. 旧的方式安装：
 >gitee仓库：
 >```
 >git clone https://gitee.com/snowtafir/yuki-plugin.git ./plugins/yuki-plugin
@@ -42,7 +57,12 @@
 >```
 
 #### 2. 安装依赖
+* yunzai-v4:
+```
+yarn install
+```
 
+* yunzai-v3:
 ```
 pnpm install --filter=yuki-plugin
 ```
