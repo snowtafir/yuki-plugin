@@ -48,7 +48,7 @@ jobs:
       run: ls -l
 
     - name: 🚚 移动构建文件到临时目录
-      run: mv ./dist/* ../temp_dist/
+      run: cp -a ./dist/. ../temp_dist/
 
     - name: 🛠️ 配置Git用户信息
       run: |
@@ -71,7 +71,7 @@ jobs:
       run: find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
 
     - name: 🚚 从临时目录移动文件到当前目录
-      run: mv ./../temp_dist/* ./
+      run: cp -a ./../temp_dist/. ./
 
     - name: 🗑️ 删除临时目录
       run: rm -rf ./../temp_dist
