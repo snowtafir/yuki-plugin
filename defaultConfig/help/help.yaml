@@ -1,0 +1,86 @@
+- group: 指令前缀
+  list:
+    - icon: diagram
+      title: "#优纪 #yuki"
+      desc: "示例：#优纪B站订阅列表 #yuki订阅B站推送UID"
+    - icon: diagram
+      title: "/优纪 /yuki"
+      desc: "示例：/优纪B站订阅列表 /yuki订阅B站推送UID"
+- group: B站功能
+  list:
+    - icon: diagram
+      title: "#订阅B站推送UID"
+      desc: "#订阅B站推送(视频|文章|图文|直播|转发)UID"
+    - icon: tourbillon_device
+      title: "#取消B站推送UID"
+      desc: "#取消B站推送(视频|文章|图文|直播|转发)UID"
+    - icon: restaurant_smoothie
+      title: "#B站全部订阅列表"
+      desc: "查看本Bot所有的B站订阅列表"
+    - icon: archaic_stone
+      title: "#B站订阅列表"
+      desc: "查看 本群/私聊 添加的B站订阅列表"
+    - icon: kamera
+      title: "#执行B站任务"
+      desc: "手动触发定时推送任务"
+    - icon: flower_2
+      title: "#B站up主UID"
+      desc: "通过uid查看up信息"
+    - icon: shell
+      title: "#搜索B站up主原神"
+      desc: "用昵称在b站搜索up信息"
+    - icon: 雷神瞳共鸣石
+      title: "#扫码B站登录"
+      desc: "app扫码获取登录ck"
+    - icon: everamber
+      title: "#取消B站登陆"
+      desc: "删除扫码获取的B站CK"
+    - icon: condessence_crystal
+      title: "#我的B站登录"
+      desc: "查看app扫码登录的信息和状态"
+    - icon: romaritime_flower
+      title: "#绑定B站本地ck: ***"
+      desc: "配置本地获取的B站CK"
+    - icon: unfading_silky_grace
+      title: "#删除B站本地ck"
+      desc: "删除手动获取的B站ck"
+    - icon: delightful_encounter
+      title: "#我的B站ck"
+      desc: "查看当前启用的B站ck,仅限私聊"
+    - icon: wondrous_lovely_flower
+      title: "#刷新B站临时ck"
+      desc: "刷新自动获取的临时B站cookie"
+- group: 微博功能
+  list:
+    - icon: diagram
+      title: "#订阅微博推送UID"
+      desc: "#订阅微博推送(视频|文章|图文|转发)UID"
+    - icon: tourbillon_device
+      title: "#取消微博推送UID"
+      desc: "#取消微博推送(视频|文章|图文|转发)UID"
+    - icon: restaurant_smoothie
+      title: "#微博全部订阅列表"
+      desc: "查看本Bot所有的B站订阅列表"
+    - icon: archaic_stone
+      title: "#微博订阅列表"
+      desc: "查看 本群/私聊 添加的微博订阅列表"
+    - icon: kamera
+      title: "#执行微博任务"
+      desc: "手动触发定时推送任务"
+    - icon: flower_2
+      title: "#微博博主UID"
+      desc: "通过uid查看博主信息"
+    - icon: shell
+      title: "#搜索微博博主原神"
+      desc: "根据关键词在微博搜索大V博主的信息"
+- group: 其他指令
+  list:
+    - icon: 风车
+      title: "#优纪版本"
+      desc: 查看版本信息
+    - icon: 钓鱼
+      title: "#更新yuki-plugin"
+      desc: "系统指令更新yuki插件,v4需安装yz-system"
+    - icon: pluie_lotus
+      title: "#强制更新yuki-plugin"
+      desc: "强制更新yuki插件,v4需安装yz-system"

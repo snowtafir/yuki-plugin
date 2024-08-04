@@ -1,0 +1,182 @@
+/* 隐藏滚动条 */
+body {
+  overflow: -moz-scrollbars-none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE 10+ */
+  scrollbar-width: none;
+  /* Firefox 64+ */
+}
+
+body::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Safari, Edge */
+}
+
+::-webkit-scrollbar {
+  width: 0px;
+  height: 5px;
+}
+
+@font-face {
+  font-family: "iconfont";
+  src: url("./../../fonts/iconfont.16acc2.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+body {
+  font-family: "iconfont";
+  font-size: 16px;
+  color: #1e1f20;
+  transform: scale(1.5);
+  transform-origin: 0 0;
+  width: 788px;
+}
+
+
+.container {
+  width: 788px;
+  padding: 15px 15px 15px 15px;
+  background-image: url(./../../img/background/Girl.png);
+  background-size: 100%;
+}
+
+.head_box {
+  font-family: "iconfont";
+  border-radius: 10px;
+  padding: 10px 20px;
+  position: relative;
+  color: #ff69b4;
+  box-shadow: 0 0 1px 0 #ccc, 2px 2px 4px 0 rgb(238 160 236 / 80%);
+  border: 0.5px solid #ff69b4;
+  backdrop-filter: blur(10px);
+}
+
+.head_box .id_text {
+  font-size: 24px;
+}
+
+.head_box .day_text {
+  font-size: 20px;
+}
+
+.head_box .genshin_logo {
+  position: absolute;
+  top: -6px;
+  right: 15px;
+  width: 97px;
+}
+
+.base_info {
+  position: relative;
+  padding-left: 10px;
+}
+
+.data_box {
+  border-radius: 15px;
+  margin-top: 20px;
+  margin-bottom: 15px;
+  padding: 20px 0px 5px 0px;
+  background: transparent;
+  background-color: rgba(255 241 255 / 35%);
+  box-shadow: 0 0 1px 0 #ccc, 2px 2px 4px 0 rgb(238 160 236 / 80%);
+  border: 0.5px solid #ff69b4;
+  position: relative;
+}
+
+.tab_lable {
+  position: absolute;
+  top: -10px;
+  left: -8px;
+  background-color: rgb(187 187 187 / 0%);
+  backdrop-filter: blur(15px);
+  box-shadow: 0 0 1px 0 #ccc, 2px 2px 4px 0 rgba(225 166 231 / 80%);
+  color: #ff004c;
+  font-size: 14px;
+  padding: 3px 10px;
+  border-radius: 15px 0px 15px 15px;
+  z-index: 20;
+  border: 0.5px solid #ff69b4;
+}
+
+.data_line {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 14px;
+}
+
+.data_line_item {
+  width: 100px;
+  text-align: center;
+  /*margin: 0 20px;*/
+}
+
+.num {
+  font-size: 24px;
+}
+
+.data_box .lable {
+  font-size: 14px;
+  color: #7f858a;
+  line-height: 1;
+  margin-top: 3px;
+}
+
+.list {
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.list .item {
+  width: 235px;
+  display: flex;
+  align-items: center;
+  color: #151215;
+  background: transparent;
+  box-shadow: 0 0 1px 0 #ccc, 2px 2px 4px 0 rgb(255 213 254 / 80%);
+  padding: 8px 6px 8px 6px;
+  border-radius: 8px;
+  margin: 0 0px 10px 10px;
+  backdrop-filter: blur(4px);
+  border: 1px solid #ffb1fa;
+}
+
+.list .item .icon {
+  width: 24px;
+  height: 24px;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.list .item .title {
+  font-size: 16px;
+  margin-left: 6px;
+  line-height: 20px;
+}
+
+/* .list .item .title .text{
+  white-space: nowrap;
+} */
+.list .item .title .dec {
+  font-size: 12px;
+  color: #102644;
+  margin-top: 2px;
+}
+
+.logo {
+  text-align: center;
+  font-size: 14px;
+  color: rgb(0, 0, 0);
+  font-family: "iconfont";
+}
