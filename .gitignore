@@ -1,5 +1,11 @@
 node_modules
-./config/
-lib
-public
+/config
+/data
+/logs
+/plugins
+/index.js
+/types
+/public
+/temp
 yarn.lock
+/lib
