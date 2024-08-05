@@ -93,7 +93,7 @@ class BiliTask {
                 if (!author?.pub_ts)
                     continue;
                 if (Number(now - author.pub_ts) > interval) {
-                    logger.info(`超过间隔时间，跳过该up [ ${author?.name} : ${author?.mid} ] ${author?.pub_time} 的动态`);
+                    logger.info(`超过间隔，跳过  [ ${author?.name} : ${author?.mid} ] ${author?.pub_time} 的动态`);
                     continue;
                 }
                 if (dynamicItem.type === "DYNAMIC_TYPE_FORWARD" && !biliConfigData.pushTransmit)

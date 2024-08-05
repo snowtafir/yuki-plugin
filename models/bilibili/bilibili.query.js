@@ -1,7 +1,11 @@
 import moment from 'moment';
+import { readSyncCookie } from './bilibili.models.js';
+import { BiliApi } from './bilibili.api.js';
+import axios from 'axios';
+import lodash from 'lodash';
 
 class BiliQuery {
-    static formatDynamicData(data) {
+    static async formatDynamicData(data) {
         const BiliDrawDynamicLinkUrl = "https://m.bilibili.com/dynamic/";
         let desc, pics = [], majorType;
         let formatData = { data: {} };
@@ -70,8 +74,19 @@ class BiliQuery {
                     pics = desc?.pics;
                     pics = pics.map((item) => { return { url: item?.url, width: item?.width, height: item?.height }; }) || [];
                     formatData.data.title = desc?.title;
-                    formatData.data.pics = pics;
-                    formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || "";
+                    if ((desc?.summary?.text)?.length >= 480) {
+                        const readInfo = await this.getFullArticleContent(this.formatUrl(desc?.jump_url));
+                        formatData.data.content = this.praseFullArticleContent(readInfo?.content);
+                        formatData.data.pics = [];
+                        if ((formatData.data.content) === null) {
+                            formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || "";
+                            formatData.data.pics = pics;
+                        }
+                    }
+                    else {
+                        formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || "";
+                        formatData.data.pics = pics;
+                    }
                 }
                 else {
                     desc = data?.modules?.module_dynamic?.major?.article || {};
@@ -157,6 +172,35 @@ class BiliQuery {
             return nodes;
         }
     };
+    static async getFullArticleContent(postUrl) {
+        const Cookie = await readSyncCookie();
+        try {
+            const response = await axios.get(postUrl, {
+                headers: lodash.merge(BiliApi.BILIBILI_ARTICLE_HEADERS, { "Cookie": `${Cookie}`, "Host": "www.bilibili.com" }),
+                responseType: 'text'
+            });
+            const text = response.data;
+            const match = text.match(/"readInfo":([\s\S]+?),"readViewInfo":/);
+            if (match) {
+                const full_json_text = match[1];
+                const readInfo = JSON.parse(full_json_text);
+                return readInfo;
+            }
+        }
+        catch (err) {
+            logger?.error(`优纪插件：获取B站完整文章内容失败 [ ${postUrl} ] : ${err}`);
+            return null;
+        }
+    }
+    static praseFullArticleContent(content) {
+        content = content.replace(/\n/g, '<br>');
+        const imgTagRegex = /<img[^>]*data-src="([^"]*)"[^>]*>/g;
+        content = content.replace(imgTagRegex, (match, p1) => {
+            const newSrc = this.formatUrl(p1);
+            return match.replace('data-src', 'src').replace(p1, newSrc);
+        });
+        return content;
+    }
     static formatUrl(url) {
         return 0 == url.indexOf('//') ? `https:${url}` : url;
     }

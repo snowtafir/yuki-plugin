@@ -52,7 +52,7 @@ class WeiboTask {
                 if (!raw_post?.mblog?.created_at)
                     continue;
                 if (Number(now - (WeiboQuery.getDynamicCreatetDate(raw_post) / 1000)) > interval) {
-                    logger.info(`超过间隔时间，跳过该博主 [ ${user?.screen_name} : ${user?.id} ] ${raw_post?.mblog?.created_at} 的动态`);
+                    logger.info(`超过间隔，跳过   [ ${user?.screen_name} : ${user?.id} ] ${raw_post?.mblog?.created_at} 的动态`);
                     continue;
                 }
                 if (dynamicItem.type === "DYNAMIC_TYPE_FORWARD" && !weiboConfigData.pushTransmit)

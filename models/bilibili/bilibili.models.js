@@ -126,7 +126,8 @@ async function exitBiliLogin(e) {
                 "Content-Type": 'application/x-www-form-urlencoded',
             },
         });
-        if (resp.headers["Content-Type"].includes('text/html')) {
+        const contentType = resp.headers["Content-Type"];
+        if (typeof contentType === 'string' && contentType.includes('text/html')) {
             e.reply("当前缓存的B站登录CK早已失效！");
             return;
         }

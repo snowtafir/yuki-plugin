@@ -44,6 +44,25 @@ class BiliApi {
         'Sec-Fetch-User': '?1',
         'TE': 'trailers',
     };
+    static BILIBILI_ARTICLE_HEADERS = {
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8',
+        'Accept-Language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Content-type': 'text/html; charset=utf-8',
+        Cookie: '',
+        'pragma': "no-cache",
+        "Cache-control": "no-cache",
+        'DNT': '1',
+        'Sec-GPC': '1',
+        'sec-ch-ua-mobile': '?0',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'same-site',
+        'Sec-Fetch-User': '?1',
+        'TE': 'trailers',
+        "Upgrade-Insecure-Requests": '1',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:127.0) Gecko/20100101 Firefox/127.0'
+    };
 }
 
 export { BiliApi };
