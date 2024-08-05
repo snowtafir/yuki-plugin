@@ -5,6 +5,10 @@
   font-style: normal;
 }
 
+.content-text-title {
+  margin-top: 10px;
+}
+
 .content {
   font-size: 20px;
   color: #333;

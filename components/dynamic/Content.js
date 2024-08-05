@@ -10,6 +10,8 @@ const Content = ({ data }) => {
         }
         return null;
     })));
+    const boxGrid_4 = React.createElement("link", { key: "0", rel: "stylesheet", href: require('./../../resources/css/dynamic/Content.box.grid.4.css') });
+    const boxGrid_9 = React.createElement("link", { key: "0", rel: "stylesheet", href: require('./../../resources/css/dynamic/Content.box.grid.9.css') });
     function getBoxGridStyle(pics) {
         if (!Array.isArray(pics) || pics.length === 0) {
             return null;
@@ -62,8 +64,6 @@ const Content = ({ data }) => {
         return null;
     }
     const boxGrid = data.boxGrid && (data.pics && getBoxGridStyle(data.pics));
-    const boxGrid_4 = React.createElement("link", { key: "0", rel: "stylesheet", href: require('./../../resources/css/dynamic/Content.box.grid.4.css') });
-    const boxGrid_9 = React.createElement("link", { key: "0", rel: "stylesheet", href: require('./../../resources/css/dynamic/Content.box.grid.9.css') });
     const contentCss = React.createElement("link", { rel: "stylesheet", href: require('./../../resources/css/dynamic/Content.css') });
     switch (data.type) {
         case 'DYNAMIC_TYPE_LIVE_RCMD':
