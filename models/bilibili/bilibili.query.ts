@@ -1,4 +1,8 @@
 import moment from "moment";
+import { readSyncCookie } from "./bilibili.models";
+import { BiliApi } from "./bilibili.api";
+import axios from "axios";
+import lodash from "lodash";
 
 declare const Bot: any, segment: any;
 
@@ -10,7 +14,7 @@ export class BiliQuery {
    * @param data - 动态数据对象
    * @returns 序列化后的动态数据对象
    */
-  static formatDynamicData(data: any) {
+  static async formatDynamicData(data: any) {
     const BiliDrawDynamicLinkUrl = "https://m.bilibili.com/dynamic/";
     let desc: any, pics = [], majorType: any;
     let formatData: { data: { [key: string]: any } } = { data: {} };
@@ -83,8 +87,18 @@ export class BiliQuery {
           pics = desc?.pics;
           pics = pics.map((item: any) => { return { url: item?.url, width: item?.width, height: item?.height } }) || [];
           formatData.data.title = desc?.title;
-          formatData.data.pics = pics;
-          formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || "";
+          if ((desc?.summary?.text)?.length >= 480) {
+            const readInfo = await this.getFullArticleContent(this.formatUrl(desc?.jump_url));
+            formatData.data.content = this.praseFullArticleContent(readInfo?.content);
+            formatData.data.pics = [];
+            if ((formatData.data.content) === null) {
+              formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || "";
+              formatData.data.pics = pics;
+            }
+          } else {
+            formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || "";
+            formatData.data.pics = pics;
+          }
         } else {
           desc = data?.modules?.module_dynamic?.major?.article || {};
           if (desc.covers && desc.covers.length) {
@@ -188,6 +202,44 @@ export class BiliQuery {
       return nodes;
     }
   };
+
+  /**获取完整B站文章内容 
+ * @param postId - 文章ID
+ * @returns {Json}完整的B站文章内容json数据
+*/
+  static async getFullArticleContent(postUrl: string) {
+    const Cookie = await readSyncCookie();
+    try {
+      const response = await axios.get(postUrl, {
+        headers: lodash.merge(BiliApi.BILIBILI_ARTICLE_HEADERS, { "Cookie": `${Cookie}`, "Host": "www.bilibili.com" }),
+        responseType: 'text'
+      });
+      const text = response.data;
+      const match = text.match(/"readInfo":([\s\S]+?),"readViewInfo":/);
+      if (match) {
+        const full_json_text = match[1];
+        const readInfo = JSON.parse(full_json_text);
+        return readInfo;
+      }
+    } catch (err) {
+      logger?.error(`优纪插件：获取B站完整文章内容失败 [ ${postUrl} ] : ${err}`);
+      return null;
+    }
+  }
+  /**解析完整文章内容 */
+  static praseFullArticleContent(content: string) {
+    content = content.replace(/\n/g, '<br>');
+    // 使用正则表达式匹配 <img> 标签的 data-src 属性
+    const imgTagRegex = /<img[^>]*data-src="([^"]*)"[^>]*>/g;
+
+    // 替换 data-src 为 src，并将 // 开头的链接改为 https:// 开头
+    content = content.replace(imgTagRegex, (match, p1) => {
+      const newSrc = this.formatUrl(p1);
+      return match.replace('data-src', 'src').replace(p1, newSrc);
+    });
+
+    return content;
+  }
 
   // 处理斜杠开头的链接
   static formatUrl(url: string): string {

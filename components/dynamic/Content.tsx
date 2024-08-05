@@ -28,7 +28,8 @@ const Content: React.FC<ContentProps> = ({ data }) => {
       })}
     </div>
   );
-
+  const boxGrid_4 = <link key="0" rel="stylesheet" href={require('./../../resources/css/dynamic/Content.box.grid.4.css')} />
+  const boxGrid_9 = <link key="0" rel="stylesheet" href={require('./../../resources/css/dynamic/Content.box.grid.9.css')} />
   /**动态宫格样式 */
   function getBoxGridStyle(pics: Array<any>) {
     if (!Array.isArray(pics) || pics.length === 0) {
@@ -85,8 +86,6 @@ const Content: React.FC<ContentProps> = ({ data }) => {
     return null;
   }
   const boxGrid = data.boxGrid && (data.pics && getBoxGridStyle(data.pics));
-  const boxGrid_4 = <link key="0" rel="stylesheet" href={require('./../../resources/css/dynamic/Content.box.grid.4.css')} />
-  const boxGrid_9 = <link key="0" rel="stylesheet" href={require('./../../resources/css/dynamic/Content.box.grid.9.css')} />
   const contentCss = <link rel="stylesheet" href={require('./../../resources/css/dynamic/Content.css')} />
   switch (data.type) {
     case 'DYNAMIC_TYPE_LIVE_RCMD':
