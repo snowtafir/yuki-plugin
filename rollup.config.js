@@ -5,7 +5,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import replace from '@rollup/plugin-replace';
 import copy from 'rollup-plugin-copy';
 import json from '@rollup/plugin-json';
-//import { terser } from 'rollup-plugin-terser';
+//import terser from '@rollup/plugin-terser';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
