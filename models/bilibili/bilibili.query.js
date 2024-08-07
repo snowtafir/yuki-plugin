@@ -110,7 +110,7 @@ class BiliQuery {
                 formatData.data.pubTs = moment(author.pub_ts * 1000).format("YYYY年MM月DD日 HH:mm:ss");
                 formatData.data.url = `${BiliDrawDynamicLinkUrl}${data.id_str}`;
                 formatData.data.pics = [data?.cover];
-                formatData.data.orig = this.formatDynamicData(data.orig);
+                formatData.data.orig = await this.formatDynamicData(data.orig);
                 formatData.data.category = "转发动态";
                 break;
             case "DYNAMIC_TYPE_LIVE_RCMD":

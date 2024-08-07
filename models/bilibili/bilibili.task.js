@@ -78,7 +78,7 @@ class BiliTask {
                     const bot_id = subInfoOfup.bot_id || [];
                     const { name, type } = subInfoOfup;
                     uidMap.set(subInfoOfup.uid, { chatIds, bot_id, upName: name, type, chatType });
-                    await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * (4000 - 1000 + 1) + 1000)));
+                    await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * (8000 - 2000 + 1) + 2000)));
                 }
             }
         }
