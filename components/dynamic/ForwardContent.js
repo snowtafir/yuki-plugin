@@ -1,7 +1,7 @@
 import React from 'react';
 import Account from './Account.js';
 import Content from './Content.js';
-import { createRequire } from 'module';
+import { createRequire } from 'react-puppeteer';
 
 const require = createRequire(import.meta.url);
 const ForwardContent = ({ data }) => (React.createElement(React.Fragment, null,

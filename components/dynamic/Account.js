@@ -1,6 +1,6 @@
 import React from 'react';
 import LogoText from './LogoText.js';
-import { createRequire } from 'module';
+import { createRequire } from 'react-puppeteer';
 
 const require = createRequire(import.meta.url);
 const bilibililogo = require('./../../resources/img/icon/dynamic/bilibili.svg');

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ConfigController, BOT_NAME } from 'yunzai';
 import Config from '../../utils/config.js';
-import { createRequire } from 'module';
+import { createRequire } from 'react-puppeteer';
 
 const botVersion = ConfigController.package?.version;
 const require = createRequire(import.meta.url);
