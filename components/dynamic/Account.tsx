@@ -2,9 +2,8 @@
 // up账户组件
 import React from 'react';
 import LogoText from './LogoText.tsx';
-import { createRequire } from 'module';
+import { createRequire } from 'react-puppeteer';
 const require = createRequire(import.meta.url)
-
 
 const bilibililogo: string = require('./../../resources/img/icon/dynamic/bilibili.svg')
 const weibilogo: string = require('./../../resources/img/icon/dynamic/weibo.svg')

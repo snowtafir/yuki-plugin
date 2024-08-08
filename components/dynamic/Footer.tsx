@@ -1,7 +1,7 @@
 // Footer.tsx
 import React from 'react';
 import Config from '../../utils/config';
-import { createRequire } from 'module';
+import { createRequire } from 'react-puppeteer';
 
 const BOT_NAME = 'yunzai'
 const botVersion = "3.1+"
