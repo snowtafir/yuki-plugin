@@ -1,7 +1,6 @@
 // QrcodeLoginPage.tsx
 import React from 'react';
-import { createRequire } from 'module';
-
+import { createRequire } from 'react-puppeteer';
 const require = createRequire(import.meta.url);
 
 export type LoginProps = {
