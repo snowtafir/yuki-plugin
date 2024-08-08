@@ -3,7 +3,7 @@ import Account from './Account.js';
 import Content from './Content.js';
 import ForwardContent from './ForwardContent.js';
 import Footer from './Footer.js';
-import { createRequire } from 'module';
+import { createRequire } from 'react-puppeteer';
 
 const require = createRequire(import.meta.url);
 function App({ data }) {
