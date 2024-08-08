@@ -4,7 +4,7 @@ import Account from './Account.tsx';
 import Content from './Content.tsx';
 import ForwardContent from './ForwardContent';
 import Footer from './Footer';
-import { createRequire } from 'module';
+import { createRequire } from 'react-puppeteer';
 
 const require = createRequire(import.meta.url)
 
