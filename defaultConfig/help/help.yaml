@@ -80,7 +80,7 @@
       desc: 查看版本信息
     - icon: 钓鱼
       title: "#更新yuki-plugin"
-      desc: "系统指令更新yuki插件,v4需安装yz-system"
+      desc: "系统指令更新yuki插件,yz-next需安装yz-system"
     - icon: pluie_lotus
       title: "#强制更新yuki-plugin"
-      desc: "强制更新yuki插件,v4需安装yz-system"
+      desc: "强制更新yuki插件,yz-next需安装yz-system"

@@ -2,7 +2,7 @@
 
 # YUKI-PLUGIN
 
-- 一个适用于 [Yunzai-V4 系列机器人框架](https://github.com/yunzai-org/yunzaijs/) 的B站动态和微博动态订阅推送的插件
+- 一个适用于 `Yunzai 系列机器人框架` 的B站动态和微博动态订阅推送的插件
 
 - 支持 群聊/私聊 订阅B站动态和微博动态，支持定时推送，支持手动触发推送，支持简单查询B站/微博用户信息。
 
@@ -10,12 +10,12 @@
 
 ## 🌰安装插件
 
-#### 1. 克隆仓库
-按照网络情况或个人喜好，选择克隆仓库到本地。
+#### 1. 安装方式选择
+按照网络情况或个人喜好，选择安装方式。
 
-```yunzai-v4：```
+##### ```Yunzai-Next：```
 
-1. V4 npm包 方式 安装：
+1. yunzai-next npm包 方式 安装插件：
 >```
 > yarn add yz-yuki-plugin -W
 >```
@@ -45,7 +45,7 @@ export default defineConfig({
 > git clone https://mirror.ghproxy.com/https://github.com/snowtafir/yuki-plugin.git ./plugins/yuki-plugin
 > ```
 
-```yunzai-v3：```
+##### ```Yunzai-V3：```
 >gitee仓库：
 >```
 >git clone --branch main3 https://gitee.com/snowtafir/yuki-plugin.git ./plugins/yuki-plugin
@@ -57,12 +57,12 @@ export default defineConfig({
 >```
 
 #### 2. 安装依赖
-* yunzai-v4:
+* Yunzai-Next:
 ```
 yarn install
 ```
 
-* yunzai-v3:
+* Yunzai-V3:
 ```
 pnpm install --filter=yuki-plugin
 ```
@@ -155,8 +155,8 @@ https://m.weibo.cn/u/7643376782 # 7643376782 为崩坏星穹铁道博主uid
 ||||
 | **其他指令** |  |  |
 | 查看版本信息 | 查看版本信息 | `#优纪版本` |
-| 更新yuki插件 | 系统指令更新yuki插件，v4需安装yz-system | `#更新yuki-plugin` |
-| 强制更新yuki插件 | 强制更新yuki插件，v4需安装yz-system| `#强制更新yuki-plugin` |
+| 更新yuki插件 | 系统指令更新yuki插件，yunzai-next需安装yz-system | `#更新yuki-plugin` |
+| 强制更新yuki插件 | 强制更新yuki插件，yunzai-next需安装yz-system| `#强制更新yuki-plugin` |
 
 </details>
 
@@ -185,9 +185,9 @@ https://m.weibo.cn/u/7643376782 # 7643376782 为崩坏星穹铁道博主uid
 
 |                              Nickname                               | Contribution            |
 | :-----------------------------------------------------------------: | ----------------------- |
-|Yunzai-V4||
-| [yunzai-org文档](https://yunzai-org.github.io/docs/)               | Yunzai Next 文档      |
-| [Yunzai-V4 仓库](https://github.com/yunzai-org/yunzaijs/)           |  Yunzai Next       |
+|Yunzai-Next||
+| [Yunzai-org文档](https://yunzai-org.github.io/docs/)               | Yunzai Next 文档      |
+| [Yunzai-Next 仓库](https://github.com/yunzai-org/yunzaijs/)           |  Yunzai Next       |
 |Yunzai-V3||
 | [功能/插件库](https://gitee.com/yhArcadia/Yunzai-Bot-plugins-index) | Yunzai-Bot 相关内容索引 |
 |       [TRSS-Yunzai](https://gitee.com/TimeRainStarSky/Yunzai)       | 时雨🌌星空的 TRSS-Yunzai |
