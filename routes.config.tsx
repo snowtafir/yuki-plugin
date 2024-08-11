@@ -22,9 +22,9 @@ const props = {
     category: "文章动态",
     created: `2024-06-29 12:00:00`,
     pics: [
-      'http://i0.hdslb.com/bfs/archive/e74c63cfec570974157be8d1f5e3582b355ad991.jpg',
-      'http://i0.hdslb.com/bfs/archive/e74c63cfec570974157be8d1f5e3582b355ad991.jpg',
-      'http://i0.hdslb.com/bfs/archive/e74c63cfec570974157be8d1f5e3582b355ad991.jpg',
+      { url: 'http://i0.hdslb.com/bfs/archive/e74c63cfec570974157be8d1f5e3582b355ad991.jpg' },
+      { url: 'http://i0.hdslb.com/bfs/archive/e74c63cfec570974157be8d1f5e3582b355ad991.jpg' },
+      { url: 'http://i0.hdslb.com/bfs/archive/e74c63cfec570974157be8d1f5e3582b355ad991.jpg' },
     ],
     /*         orig: {
               appName: "bilibili",
@@ -37,20 +37,11 @@ const props = {
               urlImgData: await (QRCode.toDataURL("https://m.bilibili.com/opus/949167878184108051")),
               category: "文章动态",
               created: `2024-06-29 12:00:00`,
-              pics: ['http://i0.hdslb.com/bfs/archive/e74c63cfec570974157be8d1f5e3582b355ad991.jpg',
-                'http://i0.hdslb.com/bfs/archive/e74c63cfec570974157be8d1f5e3582b355ad991.jpg',
-                'http://i0.hdslb.com/bfs/archive/e74c63cfec570974157be8d1f5e3582b355ad991.jpg',
-                'http://i0.hdslb.com/bfs/archive/e74c63cfec570974157be8d1f5e3582b355ad991.jpg',
-                'http://i0.hdslb.com/bfs/archive/e74c63cfec570974157be8d1f5e3582b355ad991.jpg',
-                'http://i0.hdslb.com/bfs/archive/e74c63cfec570974157be8d1f5e3582b355ad991.jpg',
-                'http://i0.hdslb.com/bfs/archive/e74c63cfec570974157be8d1f5e3582b355ad991.jpg',
-                'http://i0.hdslb.com/bfs/archive/e74c63cfec570974157be8d1f5e3582b355ad991.jpg',
-                'http://i0.hdslb.com/bfs/archive/e74c63cfec570974157be8d1f5e3582b355ad991.jpg',
-                'http://i0.hdslb.com/bfs/archive/e74c63cfec570974157be8d1f5e3582b355ad991.jpg',
-                'http://i0.hdslb.com/bfs/archive/e74c63cfec570974157be8d1f5e3582b355ad991.jpg',
-                'http://i0.hdslb.com/bfs/archive/e74c63cfec570974157be8d1f5e3582b355ad991.jpg',
-                'http://i0.hdslb.com/bfs/archive/e74c63cfec570974157be8d1f5e3582b355ad991.jpg',
-                'http://i0.hdslb.com/bfs/archive/e74c63cfec570974157be8d1f5e3582b355ad991.jpg',
+              pics: [
+              {url:'http://i0.hdslb.com/bfs/archive/e74c63cfec570974157be8d1f5e3582b355ad991.jpg'},
+              {url:'http://i0.hdslb.com/bfs/archive/e74c63cfec570974157be8d1f5e3582b355ad991.jpg'},
+              {url:'http://i0.hdslb.com/bfs/archive/e74c63cfec570974157be8d1f5e3582b355ad991.jpg'},
+              {url:'http://i0.hdslb.com/bfs/archive/e74c63cfec570974157be8d1f5e3582b355ad991.jpg'},
               ]
             } */
   }
