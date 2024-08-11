@@ -8,7 +8,7 @@
   "type": "module",
   "scripts": {
     "build": "rollup --config ./rollup.config.js",
-    "image": "node --no-warnings=ExperimentalWarning --loader ts-node/esm ./server.ts"
+    "image": "npx nodemon"
   },
   "repository": {
     "type": "git",
@@ -51,6 +51,7 @@
     "chokidar": "^3.6.0",
     "jsdom": "^24.1.1",
     "md5": "^2.3.0",
+    "nodemon":"3.1.4",
     "node-fetch": "^3.3.2",
     "puppeteer": "^23.0.2",
     "qrcode": "^1.5.4",
