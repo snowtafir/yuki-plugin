@@ -31,12 +31,12 @@ export default defineConfig({
 2. 旧的方式安装：
 >gitee仓库：
 >```
->git clone https://gitee.com/snowtafir/yuki-plugin.git ./plugins/yuki-plugin
+>git clone --branch main https://gitee.com/snowtafir/yuki-plugin.git ./plugins/yuki-plugin
 >```
 
 >github仓库：
 >```
->git clone https://github.com/snowtafir/yuki-plugin.git ./plugins/yuki-plugin
+>git clone --branch main https://github.com/snowtafir/yuki-plugin.git ./plugins/yuki-plugin
 >```
 > [!NOTE]
 > 如果你的网络环境较差，无法连接到 Github，可以使用 [GitHub Proxy](https://mirror.ghproxy.com/) 提供的文件代理加速下载服务
