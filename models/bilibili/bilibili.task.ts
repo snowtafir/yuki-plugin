@@ -111,17 +111,22 @@ export class BiliTask {
       const tempDynamicList = dynamicList[key] || [];
       const willPushDynamicList = [];
 
+      const printedList = new Set(); // 已打印的动态列表
       for (let dynamicItem of tempDynamicList) {
         let author = dynamicItem?.modules?.module_author || {};
-        logger.info(`正在检测B站动态 [ ${author?.name} : ${author?.mid} ]`);
+        if (!printedList.has(author?.mid)) {
+          logger.info(`正在检测B站动态 [ ${author?.name} : ${author?.mid} ]`);
+          printedList.add(author?.mid);
+        }
         if (!author?.pub_ts) continue; // 如果动态没有发布时间，跳过当前循环
         if (Number(now - author.pub_ts) > interval) {
-          logger.info(`超过间隔，跳过  [ ${author?.name} : ${author?.mid} ] ${author?.pub_time} 的动态`);
+          logger.debug(`超过间隔，跳过  [ ${author?.name} : ${author?.mid} ] ${author?.pub_time} 的动态`);
           continue;
         } // 如果超过推送时间间隔，跳过当前循环
         if (dynamicItem.type === "DYNAMIC_TYPE_FORWARD" && !biliConfigData.pushTransmit) continue; // 如果关闭了转发动态的推送，跳过当前循环
         willPushDynamicList.push(dynamicItem);
       }
+      printedList.clear();
 
       const pushMapInfo = value || {}; // 获取当前 uid 对应的推送信息
 
