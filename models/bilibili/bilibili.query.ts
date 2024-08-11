@@ -287,12 +287,12 @@ export class BiliQuery {
           desc = data?.modules?.module_dynamic?.major?.opus || {};
           pics = desc?.pics;
           pics = pics.map((item: any) => { return item?.url; }) || [];
-          content = this.parseRichTextNodes(desc?.summary?.text) || "";
+          content = desc?.summary?.text || "";
         } else {
           desc = data?.modules?.module_dynamic?.desc || {};
           pics = data?.modules?.module_dynamic?.major?.draw?.items;
           pics = [];
-          content = this.parseRichTextNodes(desc?.text);
+          content = desc?.text;
         }
 
         if (!desc && !author) return;
@@ -318,12 +318,12 @@ export class BiliQuery {
           pics = pics.map((item: any) => {
             return item.url;
           });
-          content = this.parseRichTextNodes(desc?.summary?.text) || "";
+          content = desc?.summary?.text || "";
         } else {
           desc = data?.modules?.module_dynamic?.desc;
           pics = data?.modules?.module_dynamic?.major?.draw?.items;
           pics = pics.map((item: any) => { return item?.src; });
-          content = this.parseRichTextNodes(desc?.text);
+          content = desc?.text;
         }
 
         if (!desc && !pics && !author) return;
@@ -359,7 +359,7 @@ export class BiliQuery {
           pics = desc?.pics;
           pics = pics.map((item: any) => { return item.url; }) || [];
           dynamicTitle = desc?.title;
-          content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || "";
+          content = desc?.summary?.text || "";
         } else {
           desc = data?.modules?.module_dynamic?.major?.article || {};
           if (desc.covers && desc.covers.length) {
@@ -393,7 +393,7 @@ export class BiliQuery {
         author = data?.modules?.module_author;
         desc = data?.modules?.module_dynamic?.desc || {};
 
-        content = this.parseRichTextNodes(desc?.text);
+        content = desc?.text;
 
         if (!desc && !author) return;
         if (!data.orig) return;
