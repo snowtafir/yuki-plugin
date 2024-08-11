@@ -87,19 +87,24 @@ class BiliTask {
         for (let [key, value] of uidMap) {
             const tempDynamicList = dynamicList[key] || [];
             const willPushDynamicList = [];
+            const printedList = new Set();
             for (let dynamicItem of tempDynamicList) {
                 let author = dynamicItem?.modules?.module_author || {};
-                logger.info(`正在检测B站动态 [ ${author?.name} : ${author?.mid} ]`);
+                if (!printedList.has(author?.mid)) {
+                    logger.info(`正在检测B站动态 [ ${author?.name} : ${author?.mid} ]`);
+                    printedList.add(author?.mid);
+                }
                 if (!author?.pub_ts)
                     continue;
                 if (Number(now - author.pub_ts) > interval) {
-                    logger.info(`超过间隔，跳过  [ ${author?.name} : ${author?.mid} ] ${author?.pub_time} 的动态`);
+                    logger.debug(`超过间隔，跳过  [ ${author?.name} : ${author?.mid} ] ${author?.pub_time} 的动态`);
                     continue;
                 }
                 if (dynamicItem.type === "DYNAMIC_TYPE_FORWARD" && !biliConfigData.pushTransmit)
                     continue;
                 willPushDynamicList.push(dynamicItem);
             }
+            printedList.clear();
             const pushMapInfo = value || {};
             const { chatIds, bot_id, upName, type, chatType } = pushMapInfo;
             for (let pushDynamicData of willPushDynamicList) {

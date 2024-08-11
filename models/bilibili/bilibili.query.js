@@ -232,13 +232,13 @@ class BiliQuery {
                     desc = data?.modules?.module_dynamic?.major?.opus || {};
                     pics = desc?.pics;
                     pics = pics.map((item) => { return item?.url; }) || [];
-                    content = this.parseRichTextNodes(desc?.summary?.text) || "";
+                    content = desc?.summary?.text || "";
                 }
                 else {
                     desc = data?.modules?.module_dynamic?.desc || {};
                     pics = data?.modules?.module_dynamic?.major?.draw?.items;
                     pics = [];
-                    content = this.parseRichTextNodes(desc?.text);
+                    content = desc?.text;
                 }
                 if (!desc && !author)
                     return;
@@ -260,13 +260,13 @@ class BiliQuery {
                     pics = pics.map((item) => {
                         return item.url;
                     });
-                    content = this.parseRichTextNodes(desc?.summary?.text) || "";
+                    content = desc?.summary?.text || "";
                 }
                 else {
                     desc = data?.modules?.module_dynamic?.desc;
                     pics = data?.modules?.module_dynamic?.major?.draw?.items;
                     pics = pics.map((item) => { return item?.src; });
-                    content = this.parseRichTextNodes(desc?.text);
+                    content = desc?.text;
                 }
                 if (!desc && !pics && !author)
                     return;
@@ -295,7 +295,7 @@ class BiliQuery {
                     pics = desc?.pics;
                     pics = pics.map((item) => { return item.url; }) || [];
                     dynamicTitle = desc?.title;
-                    content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || "";
+                    content = desc?.summary?.text || "";
                 }
                 else {
                     desc = data?.modules?.module_dynamic?.major?.article || {};
@@ -324,7 +324,7 @@ class BiliQuery {
             case "DYNAMIC_TYPE_FORWARD":
                 author = data?.modules?.module_author;
                 desc = data?.modules?.module_dynamic?.desc || {};
-                content = this.parseRichTextNodes(desc?.text);
+                content = desc?.text;
                 if (!desc && !author)
                     return;
                 if (!data.orig)

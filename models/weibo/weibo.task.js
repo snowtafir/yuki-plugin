@@ -45,20 +45,25 @@ class WeiboTask {
         for (let [key, value] of uidMap) {
             const tempDynamicList = dynamicList[key] || [];
             const willPushDynamicList = [];
+            const printedList = new Set();
             for (let dynamicItem of tempDynamicList) {
                 let raw_post = dynamicItem || {};
                 let user = raw_post?.mblog?.user || {};
-                logger.info(`正在检测微博动态 [ ${user?.screen_name} : ${user?.id} ]`);
+                if (!printedList.has(user?.id)) {
+                    logger.info(`正在检测微博动态 [ ${user?.screen_name} : ${user?.id} ]`);
+                    printedList.add(user?.id);
+                }
                 if (!raw_post?.mblog?.created_at)
                     continue;
                 if (Number(now - (WeiboQuery.getDynamicCreatetDate(raw_post) / 1000)) > interval) {
-                    logger.info(`超过间隔，跳过   [ ${user?.screen_name} : ${user?.id} ] ${raw_post?.mblog?.created_at} 的动态`);
+                    logger.debug(`超过间隔，跳过   [ ${user?.screen_name} : ${user?.id} ] ${raw_post?.mblog?.created_at} 的动态`);
                     continue;
                 }
                 if (dynamicItem.type === "DYNAMIC_TYPE_FORWARD" && !weiboConfigData.pushTransmit)
                     continue;
                 willPushDynamicList.push(dynamicItem);
             }
+            printedList.clear();
             const pushMapInfo = value || {};
             const { chatIds, bot_id, upName, type, chatType } = pushMapInfo;
             for (let pushDynamicData of willPushDynamicList) {
