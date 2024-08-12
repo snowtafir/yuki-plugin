@@ -61,7 +61,7 @@ async function pollLoginQRCode(e, qrcodeKey) {
         }
         else if (data.data.code === 86101) {
             await new Promise((resolve) => setTimeout(resolve, 2000));
-            (logger ?? Bot.logger)?.mark(`yuki-yuki插件：扫码B站登录：未扫码，轮询中...`);
+            (logger ?? Bot.logger)?.mark(`优纪插件：扫码B站登录：未扫码，轮询中...`);
             return pollLoginQRCode(e, qrcodeKey);
         }
         else if (data.data.code === 86090) {
@@ -90,7 +90,7 @@ async function checkBiliLogin(e) {
         redirect: "follow",
     });
     const resData = await res.json();
-    Bot.logger?.mark(`B站动态请求code:${JSON.stringify(resData)}`);
+    Bot.logger?.debug(`B站验证登录状态:${JSON.stringify(resData)}`);
     if (resData.code === 0) {
         let uname = resData.data?.uname;
         let mid = resData.data?.mid;

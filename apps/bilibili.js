@@ -13,7 +13,7 @@ class YukiBili extends plugin {
             name: "yuki-plugin-bilibili",
             dsc: "b站相关指令",
             event: "message",
-            priority: 550,
+            priority: -50,
             rule: [
                 {
                     reg: "^(#|\/)(yuki|优纪)?执行(b站|B站|bili|bilibili|哔哩|哔哩哔哩)任务$",

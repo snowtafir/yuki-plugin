@@ -10,7 +10,7 @@ class YukiWeibo extends plugin {
             name: "yuki-plugin-weibo",
             dsc: "微博相关指令",
             event: "message",
-            priority: 550,
+            priority: 0,
             rule: [
                 {
                     reg: "^(#|\/)(yuki|优纪)?执行(微博|weibo|WEIBO)任务$",

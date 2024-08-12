@@ -8,7 +8,7 @@ class YukiHelp extends plugin {
             name: "yuki-help",
             des: "优纪帮助",
             event: "message",
-            priority: 550,
+            priority: 0,
             rule: [
                 {
                     reg: "^(#|\/)(yuki|优纪)帮助$",

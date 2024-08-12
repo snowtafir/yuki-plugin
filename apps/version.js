@@ -8,7 +8,7 @@ class YukiVersion extends plugin {
             name: "yuki-version",
             dsc: "优纪版本",
             event: "message",
-            priority: 550,
+            priority: 0,
             rule: [
                 {
                     reg: "^(#|\/)(yuki|优纪)版本$",

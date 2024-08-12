@@ -19,8 +19,8 @@ body::-webkit-scrollbar {
 }
 
 @font-face {
-  font-family: "iconfont";
-  src: url("./../../fonts/iconfont.16acc2.ttf");
+  font-family: "OPSans";
+  src: url("./../../fonts/OPSans.woff2");
   font-weight: normal;
   font-style: normal;
 }
@@ -34,7 +34,7 @@ body::-webkit-scrollbar {
 
 body {
   font-size: 16px;
-  font-family: "iconfont";
+  font-family: "OPSans";
   transform: scale(1.5);
   transform-origin: 0 0;
   color: white;
@@ -78,7 +78,7 @@ body {
   padding: 10px 15px;
   font-size: 12px;
   font-weight: normal;
-  font-family: "iconfont";
+  font-family: "OPSans";
   background: transparent;
   color: rgba(0, 0, 0);
 }
@@ -112,5 +112,5 @@ body {
   text-align: center;
   font-size: 14px;
   color: rgb(15, 15, 15);
-  font-family: 'iconfont';
+  font-family: 'OPSans';
 }
