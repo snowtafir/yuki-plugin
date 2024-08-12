@@ -60,7 +60,7 @@
       desc: "#取消微博推送(视频|文章|图文|转发)UID"
     - icon: restaurant_smoothie
       title: "#微博全部订阅列表"
-      desc: "查看本Bot所有的B站订阅列表"
+      desc: "查看本Bot所有的微博订阅列表"
     - icon: archaic_stone
       title: "#微博订阅列表"
       desc: "查看 本群/私聊 添加的微博订阅列表"
