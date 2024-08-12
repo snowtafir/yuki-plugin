@@ -38,12 +38,6 @@ export default defineConfig({
 >```
 >git clone --branch main https://github.com/snowtafir/yuki-plugin.git ./plugins/yuki-plugin
 >```
-> [!NOTE]
-> 如果你的网络环境较差，无法连接到 Github，可以使用 [GitHub Proxy](https://mirror.ghproxy.com/) 提供的文件代理加速下载服务
->
-> ```
-> git clone https://mirror.ghproxy.com/https://github.com/snowtafir/yuki-plugin.git ./plugins/yuki-plugin
-> ```
 
 ##### ```Yunzai-V3：```
 >gitee仓库：
