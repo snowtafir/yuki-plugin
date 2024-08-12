@@ -1,5 +1,13 @@
+@font-face {
+  font-family: "OPSans";
+  src: url("./../../fonts/OPSans.woff2");
+  font-weight: normal;
+  font-style: normal;
+}
+
 body {
   width: 563px !important;
+  font-family: "OPSans";
 }
 
 .container {
