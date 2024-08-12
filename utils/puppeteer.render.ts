@@ -60,7 +60,7 @@ export class YukiPuppeteerRender extends Puppeteer {
         await page.setExtraHTTPHeaders(Options.header);
       }
 
-      await page.goto(`file://${htmlPath}`, { timeout: Options?.timeout ?? 120000, waitUntil: ["load", "networkidle2"] });
+      await page.goto(`file://${htmlPath}`, { timeout: Options?.timeout ?? 120000, waitUntil: ["load", "networkidle0"] });
 
       const body = await page.$(Options?.tab ?? 'body')
       if (!body) return false
