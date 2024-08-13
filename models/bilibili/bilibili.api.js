@@ -5,6 +5,7 @@ class BiliApi {
         biliSpaceUserInfo: `https://api.bilibili.com/x/space/acc/info`,
         biliSpaceUserInfoWbi: `https://api.bilibili.com/x/space/wbi/acc/info`,
         biliSearchUp: `https://api.bilibili.com/x/web-interface/search/type`,
+        biliSearchUpWbi: `https://api.bilibili.com/x/web-interface/wbi/search/type`,
         biliLiveStatus: 'https://api.live.bilibili.com/room/v1/Room/get_status_info_by_uids',
         biliCard: "https://api.bilibili.com/x/web-interface/card",
         biliStat: "https://api.bilibili.com/x/relation/stat",
