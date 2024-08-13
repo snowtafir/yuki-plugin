@@ -65,7 +65,7 @@ export class BiliGetWebData {
 
   /**通过关键词搜索up*/
   async searchBiliUserInfoByKeyword(keyword: string) {
-    const url = BiliApi.BILIBIL_API.biliSearchUp;
+    const url = BiliApi.BILIBIL_API.biliSearchUpWbi;
     let { cookie } = await readSyncCookie();
 
     const data = {
@@ -73,10 +73,13 @@ export class BiliGetWebData {
       page: 1,
       search_type: 'bili_user',
       order: 'totalrank',
-      pagesize: 5
     }
+    let signCookie = await readSavedCookieItems(cookie, ["SESSDATA"], false) || await readSavedCookieOtherItems(cookie, ["SESSDATA"]);
+    const { w_rid, time_stamp } = await getWbiSign(data, BiliApi.BILIBILI_HEADERS, signCookie);
     const params = {
-      ...data
+      ...data,
+      w_rid: w_rid,
+      wts: time_stamp
     };
     const res = await axios.get(url, {
       params,

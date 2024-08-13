@@ -153,15 +153,18 @@ export default class YukiBili extends plugin {
         return false;
       }
 
-      const resData = res.data || {};
+      const { code, data } = res.data || {};
 
-      if (resData.code !== 0) {
-        this.e.reply(`订阅校验失败~\nup主uid：${uid} 可能是无效的，或遭遇了风控，请稍后再试~`);
-        logger.mark(`yuki-plugin addDynamicSub Failed：${JSON.stringify(resData)}`);
+      if (code === -352) {
+        this.e.reply(`遭遇风控，订阅校验失败~\n请检查Cookie配置后再试~`);
+        logger.mark(`yuki-plugin addDynamicSub Failed：${JSON.stringify(res.data)}`);
         return true;
       }
-
-      const { items } = resData.data || {};
+      const { has_more, items } = data || {};
+      if ((code === 0) && (has_more === false)) {
+        this.e.reply(`订阅校验失败~\nup主uid：${uid} 无效，请核对uid后再试~`);
+        return;
+      }
 
       let name = items.length > 0 ? (items[0].modules.module_author?.name || uid) : uid;
 
@@ -543,11 +546,14 @@ export default class YukiBili extends plugin {
 
     const { code, data } = res.data || {};
 
-    if (code === -799) {
-      this.e.reply("遭遇风控：请求过于频繁，请稍后再试。");
+    if (code === -400) {
+      this.e.reply("获取请求错误~");
+      return;
+    } else if (code === -403) {
+      this.e.reply("可能是Cookie过期或api参数错误，\n访问权限不足，获取失败。");
       return;
     } else if (code === -404) {
-      this.e.reply("输入的uid无效。");
+      this.e.reply("用户不存在，输入的uid无效。");
       return;
     }
     const message = [
@@ -558,13 +564,13 @@ export default class YukiBili extends plugin {
 
     if (data.live_room) {
       message.push(
-        `\n***********\n---直播信息---`,
+        `***********\n---直播信息---`,
         `\n直播标题：${data?.live_room?.title}`,
         `\n直播房间：${data?.live_room?.roomid}`,
         `\n直播状态：${data?.live_room?.liveStatus ? "直播中" : "未开播"}`,
-        `\n直播链接：${data?.live_room?.url}`,
         `\n观看人数：${data?.live_room?.watched_show?.num}人`
       );
+      this.e.reply(`直播链接：${data?.live_room?.url}`);
     }
     this.e.reply(message);
   }
@@ -582,19 +588,29 @@ export default class YukiBili extends plugin {
 
     const { code, data } = await res.data || {};
 
-    if (code !== 0 || !data.result) {
-      this.e.reply("哦豁~没有搜索到该用户捏，请换个关键词试试吧~");
+    if (code === -400) {
+      this.e.reply("搜索请求错误~");
+      return;
+    } else if (code === -412) {
+      this.e.reply("未配置可用Cookie，请求被拦截，请配置Cookie后再试吧~");
+      return;
+    }
+    if (!data.result) {
+      this.e.reply("哦豁~没有搜索到该关键词相关的up主信息，请换个关键词试试吧~");
+      return;
+    }
+    if (!Array.isArray(data.result) || !data.result.every(item =>
+      typeof item === 'object' && 'uname' in item && 'mid' in item && 'fans' in item)) {
+      this.e.reply("哦豁~数据格式有误，请检查后重试！");
       return;
     }
 
     const messages = [];
 
-    data.result.map((item: { uname: any; mid: any; fans: any; }, index: number) => {
-      if (index < 5) {
-        messages.push(`${item.uname}\nUID：${item.mid}\n粉丝数：${item.fans}${index < 4 ? "\n" : ""}`);
-      }
-      return item;
-    });
+    for (let index = 0; index < Math.min((data.result).length, 5); index++) {
+      const item: { uname: string; mid: number; fans: number; } = data.result[index];
+      messages.push(`${item.uname}\nUID：${item.mid}\n粉丝数：${item.fans}${index < 4 ? "\n" : ""}`);
+    }
 
     this.e.reply(messages.join("\n"));
   }

@@ -15,6 +15,8 @@ export class BiliApi {
 
     //通过关键词${upKeyword}搜索up主 parama = { keyword: 'upKeyword', page: 1, search_type: 'bili_user', order: 'totalrank', pagesize: 5  }
     biliSearchUp: `https://api.bilibili.com/x/web-interface/search/type`,
+    //通过关键词${upKeyword}搜索up主 parama = { keyword: 'upKeyword', page: 1, search_type: 'bili_user', order: 'totalrank'  }，需要wbi签名
+    biliSearchUpWbi: `https://api.bilibili.com/x/web-interface/wbi/search/type`,
 
     biliLiveStatus: 'https://api.live.bilibili.com/room/v1/Room/get_status_info_by_uids',
     biliCard: "https://api.bilibili.com/x/web-interface/card",
