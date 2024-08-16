@@ -7,11 +7,13 @@ import { WeiboQuery } from './weibo.query.js';
 
 class WeiboTask {
     taskName;
-    key;
+    groupKey;
+    privateKey;
     e;
     constructor(e) {
         this.taskName = "weiboTask";
-        this.key = "Yz:yuki:weibo:upPush:";
+        this.groupKey = "Yz:yuki:weibo:upPush:group:";
+        this.privateKey = "Yz:yuki:weibo:upPush:private:";
     }
     async runTask() {
         let weiboConfigData = await Config.getUserConfig("weibo", "config");
@@ -25,6 +27,10 @@ class WeiboTask {
     }
     async processWeiboData(weiboPushData, uidMap, dynamicList) {
         for (let chatType in weiboPushData) {
+            if (!uidMap.has(chatType)) {
+                uidMap.set(chatType, new Map());
+            }
+            const chatTypeMap = uidMap.get(chatType);
             for (let chatId in weiboPushData[chatType]) {
                 const subUpsOfChat = weiboPushData[chatType][chatId] || [];
                 for (let subInfoOfup of subUpsOfChat) {
@@ -33,47 +39,49 @@ class WeiboTask {
                         const dynamicData = resp || [];
                         dynamicList[subInfoOfup.uid] = dynamicData;
                     }
-                    const chatIds = Array.from(new Set([...Object((uidMap.get(subInfoOfup.uid) && uidMap.get(subInfoOfup.uid).chatIds) || []), chatId]));
+                    const chatIds = Array.from(new Set([...Object((chatTypeMap.get(subInfoOfup.uid) && chatTypeMap.get(subInfoOfup.uid).chatIds) || []), chatId]));
                     const bot_id = subInfoOfup.bot_id || [];
                     const { name, type } = subInfoOfup;
-                    uidMap.set(subInfoOfup.uid, { chatIds, bot_id, upName: name, type, chatType });
+                    chatTypeMap.set(subInfoOfup.uid, { chatIds, bot_id, upName: name, type });
                     await this.randomDelay(1000, 4000);
                 }
             }
         }
     }
     async pushDynamicMessages(uidMap, dynamicList, now, interval, weiboConfigData) {
-        for (let [key, value] of uidMap) {
-            const tempDynamicList = dynamicList[key] || [];
-            const willPushDynamicList = [];
-            const printedList = new Set();
-            for (let dynamicItem of tempDynamicList) {
-                let raw_post = dynamicItem || {};
-                let user = raw_post?.mblog?.user || {};
-                if (!printedList.has(user?.id)) {
-                    logger.info(`正在检测微博动态 [ ${user?.screen_name} : ${user?.id} ]`);
-                    printedList.add(user?.id);
+        for (let [chatType, chatTypeMap] of uidMap) {
+            for (let [key, value] of chatTypeMap) {
+                const tempDynamicList = dynamicList[key] || [];
+                const willPushDynamicList = [];
+                const printedList = new Set();
+                for (let dynamicItem of tempDynamicList) {
+                    let raw_post = dynamicItem || {};
+                    let user = raw_post?.mblog?.user || {};
+                    if (!printedList.has(user?.id)) {
+                        logger.info(`正在检测微博动态 [ ${user?.screen_name} : ${user?.id} ]`);
+                        printedList.add(user?.id);
+                    }
+                    if (!raw_post?.mblog?.created_at)
+                        continue;
+                    if (Number(now - (WeiboQuery.getDynamicCreatetDate(raw_post) / 1000)) > interval) {
+                        logger.info(`超过间隔，跳过   [ ${user?.screen_name} : ${user?.id} ] ${raw_post?.mblog?.created_at} 的动态`);
+                        continue;
+                    }
+                    if (dynamicItem.type === "DYNAMIC_TYPE_FORWARD" && !weiboConfigData.pushTransmit)
+                        continue;
+                    willPushDynamicList.push(dynamicItem);
                 }
-                if (!raw_post?.mblog?.created_at)
-                    continue;
-                if (Number(now - (WeiboQuery.getDynamicCreatetDate(raw_post) / 1000)) > interval) {
-                    logger.info(`超过间隔，跳过   [ ${user?.screen_name} : ${user?.id} ] ${raw_post?.mblog?.created_at} 的动态`);
-                    continue;
-                }
-                if (dynamicItem.type === "DYNAMIC_TYPE_FORWARD" && !weiboConfigData.pushTransmit)
-                    continue;
-                willPushDynamicList.push(dynamicItem);
-            }
-            printedList.clear();
-            const pushMapInfo = value || {};
-            const { chatIds, bot_id, upName, type, chatType } = pushMapInfo;
-            for (let pushDynamicData of willPushDynamicList) {
-                if (chatIds && chatIds.length) {
-                    for (let chatId of chatIds) {
-                        if (type && type.length && !type.includes(pushDynamicData.type))
-                            continue;
-                        await this.sendDynamic(chatId, bot_id, upName, pushDynamicData, weiboConfigData, chatType);
-                        await this.randomDelay(2000, 10500);
+                printedList.clear();
+                const pushMapInfo = value || {};
+                const { chatIds, bot_id, upName, type } = pushMapInfo;
+                for (let pushDynamicData of willPushDynamicList) {
+                    if (chatIds && chatIds.length) {
+                        for (let chatId of chatIds) {
+                            if (type && type.length && !type.includes(pushDynamicData.type))
+                                continue;
+                            await this.sendDynamic(chatId, bot_id, upName, pushDynamicData, weiboConfigData, chatType);
+                            await this.randomDelay(2000, 10500);
+                        }
                     }
                 }
             }
@@ -81,7 +89,15 @@ class WeiboTask {
     }
     async sendDynamic(chatId, bot_id, upName, pushDynamicData, weiboConfigData, chatType) {
         const id_str = WeiboQuery.getDynamicId(pushDynamicData);
-        let sended = await Redis.get(`${this.key}${chatId}:${id_str}`);
+        let sended, markKey;
+        if (chatType === "group") {
+            markKey = this.groupKey;
+            sended = await Redis.get(`${markKey}${chatId}:${id_str}`);
+        }
+        else if (chatType === "private") {
+            markKey = this.privateKey;
+            sended = await Redis.get(`${markKey}${chatId}:${id_str}`);
+        }
         if (sended)
             return;
         if (!!weiboConfigData.pushMsgMode) {
@@ -111,7 +127,7 @@ class WeiboTask {
             let imgs = await this.renderDynamicCard(uid, renderData, ScreenshotOptionsData);
             if (!imgs)
                 return;
-            Redis.set(`${this.key}${chatId}:${id_str}`, "1", { EX: 3600 * 10 });
+            Redis.set(`${markKey}${chatId}:${id_str}`, "1", { EX: 3600 * 10 });
             (logger ?? Bot.logger)?.mark("优纪插件：B站动态执行推送");
             for (let i = 0; i < imgs.length; i++) {
                 const image = imgs[i];
@@ -122,7 +138,7 @@ class WeiboTask {
         }
         else {
             const dynamicMsg = await WeiboQuery.formatTextDynamicData(upName, pushDynamicData, false, weiboConfigData);
-            Redis.set(`${this.key}${chatId}:${id_str}`, "1", { EX: 3600 * 10 });
+            Redis.set(`${markKey}${chatId}:${id_str}`, "1", { EX: 3600 * 10 });
             if (dynamicMsg == "continue" || dynamicMsg == false) {
                 return "return";
             }
@@ -206,7 +222,7 @@ class WeiboTask {
             });
         }
         else if (chatType === "private") {
-            await (Bot[bot_id] ?? Bot)?.pickUser(String(chatId)).sendMsg(message)
+            await (Bot[bot_id] ?? Bot)?.pickFriend(String(chatId)).sendMsg(message)
                 .catch((error) => {
                 (logger ?? Bot.logger)?.error(`用户[${chatId}]推送失败：${JSON.stringify(error)}`);
             });
