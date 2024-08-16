@@ -1,5 +1,4 @@
 import QRCode from 'qrcode';
-//import { Bot, Redis, Segment, EventType } from 'yunzai';
 import { MainProps } from "../../components/dynamic/MainPage";
 import Config from '../../utils/config';
 import Image from '../../utils/image';
@@ -14,11 +13,13 @@ declare const logger: any;
 
 export class BiliTask {
   taskName: string;
-  key: string;
+  groupKey: string;
+  privateKey: string;
   e?: any;
   constructor(e?: any) {
     this.taskName = "biliTask";
-    this.key = "Yz:yuki:bili:upPush:";
+    this.groupKey = "Yz:yuki:bili:upPush:group:";
+    this.privateKey = "Yz:yuki:bili:upPush:private:";
   }
 
   async hendleEventDynamicData(uid: string | number, count: number = 0): Promise<any> {
@@ -47,7 +48,7 @@ export class BiliTask {
     let biliPushData = await Config.getUserConfig("bilibili", "push");
     let interval: number = biliConfigData.interval || 7200;
     let lastLiveStatus = JSON.parse(await redis.get("yuki:bililive:lastlivestatus")) || {};
-    const uidMap = new Map(); // 存放 uid 与推送信息的映射
+    const uidMap: Map<any, Map<string, any>> = new Map(); // 存放group 和 private 对应所属 uid 与推送信息的映射
     const dynamicList = {}; // 存放获取的所有动态，键为 uid，值为动态数组
 
     await this.processBiliData(biliPushData, uidMap, dynamicList, lastLiveStatus);
@@ -63,8 +64,12 @@ export class BiliTask {
    * @param dynamicList 动态列表
    * @param lastLiveStatus 最后直播状态
    */
-  async processBiliData(biliPushData: any, uidMap: Map<any, any>, dynamicList: any, lastLiveStatus: any) {
+  async processBiliData(biliPushData: any, uidMap: Map<any, Map<string, any>>, dynamicList: any, lastLiveStatus: any) {
     for (let chatType in biliPushData) { // 遍历 group 和 private
+
+      if (!uidMap.has(chatType)) { uidMap.set(chatType, new Map()); }
+      const chatTypeMap = uidMap.get(chatType); // 建立当前 chatType (group 或 private) 的 uid 映射
+
       for (let chatId in biliPushData[chatType]) {
         const subUpsOfChat: { uid: string; bot_id: string[]; name: string; type: string[] }[] = biliPushData[chatType][chatId] || [];
         for (let subInfoOfup of subUpsOfChat) {
@@ -90,10 +95,10 @@ export class BiliTask {
             return;
           }
 
-          const chatIds: any[] = Array.from(new Set([...Object((uidMap.get(subInfoOfup.uid) && uidMap.get(subInfoOfup.uid).chatIds) || []), chatId]));
+          const chatIds: any[] = Array.from(new Set([...Object((chatTypeMap.get(subInfoOfup.uid) && chatTypeMap.get(subInfoOfup.uid).chatIds) || []), chatId]));
           const bot_id: string[] | number[] = subInfoOfup.bot_id || [];
           const { name, type } = subInfoOfup;
-          uidMap.set(subInfoOfup.uid, { chatIds, bot_id, upName: name, type, chatType });
+          chatTypeMap.set(subInfoOfup.uid, { chatIds, bot_id, upName: name, type });
           await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * (8000 - 2000 + 1) + 2000))); // 随机延时2-8秒
         }
       }
@@ -108,39 +113,41 @@ export class BiliTask {
    * @param interval 推送间隔时间
    * @param biliConfigData Bilibili配置数据
    */
-  async pushDynamicMessages(uidMap: Map<any, any>, dynamicList: any, now: number, interval: number, biliConfigData: any) {
-    for (let [key, value] of uidMap) {
-      const tempDynamicList = dynamicList[key] || [];
-      const willPushDynamicList = [];
+  async pushDynamicMessages(uidMap: Map<any, Map<string, any>>, dynamicList: any, now: number, interval: number, biliConfigData: any) {
+    for (let [chatType, chatTypeMap] of uidMap) {
+      for (let [key, value] of chatTypeMap) {
+        const tempDynamicList = dynamicList[key] || [];
+        const willPushDynamicList = [];
 
-      const printedList = new Set(); // 已打印的动态列表
-      for (let dynamicItem of tempDynamicList) {
-        let author = dynamicItem?.modules?.module_author || {};
-        if (!printedList.has(author?.mid)) {
-          logger.info(`正在检测B站动态 [ ${author?.name} : ${author?.mid} ]`);
-          printedList.add(author?.mid);
+        const printedList = new Set(); // 已打印的动态列表
+        for (let dynamicItem of tempDynamicList) {
+          let author = dynamicItem?.modules?.module_author || {};
+          if (!printedList.has(author?.mid)) {
+            logger.info(`正在检测B站动态 [ ${author?.name} : ${author?.mid} ]`);
+            printedList.add(author?.mid);
+          }
+          if (!author?.pub_ts) continue; // 如果动态没有发布时间，跳过当前循环
+          if (Number(now - author.pub_ts) > interval) {
+            logger.debug(`超过间隔，跳过  [ ${author?.name} : ${author?.mid} ] ${author?.pub_time} 的动态`);
+            continue;
+          } // 如果超过推送时间间隔，跳过当前循环
+          if (dynamicItem.type === "DYNAMIC_TYPE_FORWARD" && !biliConfigData.pushTransmit) continue; // 如果关闭了转发动态的推送，跳过当前循环
+          willPushDynamicList.push(dynamicItem);
         }
-        if (!author?.pub_ts) continue; // 如果动态没有发布时间，跳过当前循环
-        if (Number(now - author.pub_ts) > interval) {
-          logger.debug(`超过间隔，跳过  [ ${author?.name} : ${author?.mid} ] ${author?.pub_time} 的动态`);
-          continue;
-        } // 如果超过推送时间间隔，跳过当前循环
-        if (dynamicItem.type === "DYNAMIC_TYPE_FORWARD" && !biliConfigData.pushTransmit) continue; // 如果关闭了转发动态的推送，跳过当前循环
-        willPushDynamicList.push(dynamicItem);
-      }
-      printedList.clear();
+        printedList.clear();
 
-      const pushMapInfo = value || {}; // 获取当前 uid 对应的推送信息
+        const pushMapInfo = value || {}; // 获取当前 uid 对应的推送信息
 
-      const { chatIds, bot_id, upName, type, chatType } = pushMapInfo;
+        const { chatIds, bot_id, upName, type } = pushMapInfo;
 
-      // 遍历待推送的动态数组，发送动态消息
-      for (let pushDynamicData of willPushDynamicList) {
-        if (chatIds && chatIds.length) {
-          for (let chatId of chatIds) {
-            if (type && type.length && !type.includes(pushDynamicData.type)) continue; // 如果禁用了某类型的动态推送，跳过当前循环
-            await this.sendDynamic(chatId, bot_id, upName, pushDynamicData, biliConfigData, chatType); // 发送动态消息
-            await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * (6500 - 2000 + 1) + 2000))); // 随机延时2-6.5秒
+        // 遍历待推送的动态数组，发送动态消息
+        for (let pushDynamicData of willPushDynamicList) {
+          if (chatIds && chatIds.length) {
+            for (let chatId of chatIds) {
+              if (type && type.length && !type.includes(pushDynamicData.type)) continue; // 如果禁用了某类型的动态推送，跳过当前循环
+              await this.sendDynamic(chatId, bot_id, upName, pushDynamicData, biliConfigData, chatType); // 发送动态消息
+              await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * (6500 - 2000 + 1) + 2000))); // 随机延时2-6.5秒
+            }
           }
         }
       }
@@ -151,7 +158,14 @@ export class BiliTask {
   async sendDynamic(chatId: string | number, bot_id: string | number, upName: string, pushDynamicData: any, biliConfigData: any, chatType: string) {
     const id_str = pushDynamicData.id_str;
 
-    let sended: string | null = await redis.get(`${this.key}${chatId}:${id_str}`);
+    let sended: string | null, markKey: string;
+    if (chatType === "group") {
+      markKey = this.groupKey;
+      sended = await redis.get(`${markKey}${chatId}:${id_str}`);
+    } else if (chatType === "private") {
+      markKey = this.privateKey;
+      sended = await redis.get(`${markKey}${chatId}:${id_str}`);
+    }
     if (sended) return; // 如果已经发送过，则直接返回
 
     if (!!biliConfigData.pushMsgMode) {
@@ -186,7 +200,7 @@ export class BiliTask {
       let imgs: Buffer[] | null = await this.renderDynamicCard(uid, renderData, ScreenshotOptionsData);
       if (!imgs) return;
 
-      redis.set(`${this.key}${chatId}:${id_str}`, "1", { EX: 3600 * 10 }); // 设置已发送标记
+      redis.set(`${markKey}${chatId}:${id_str}`, "1", { EX: 3600 * 10 }); // 设置已发送标记
 
       (logger ?? Bot.logger)?.mark("优纪插件：B站动态执行推送");
 
@@ -201,7 +215,7 @@ export class BiliTask {
     } else {
       const dynamicMsg = await BiliQuery.formatTextDynamicData(upName, pushDynamicData, false, biliConfigData); // 构建图文动态消息
 
-      redis.set(`${this.key}${chatId}:${id_str}`, "1", { EX: 3600 * 10 }); // 设置已发送标记
+      redis.set(`${markKey}${chatId}:${id_str}`, "1", { EX: 3600 * 10 }); // 设置已发送标记
 
       if (dynamicMsg == "continue") {
         return "return"; // 如果动态消息构建失败，则直接返回
@@ -309,10 +323,10 @@ export class BiliTask {
           (logger ?? Bot.logger)?.error(`群组[${chatId}]推送失败：${JSON.stringify(error)}`);
         });
     } else if (chatType === "private") {
-      await (Bot[bot_id] ?? Bot)?.pickUser(String(chatId)).sendMsg(message)
+      await (Bot[bot_id] ?? Bot)?.pickFriend(String(chatId)).sendMsg(message)
         .catch((error: any) => {
           (logger ?? Bot.logger)?.error(`用户[${chatId}]推送失败：${JSON.stringify(error)}`);
-        }); // 发送私聊
+        }); // 发送好友私聊
     }
   }
 
