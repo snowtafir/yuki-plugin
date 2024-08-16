@@ -7,11 +7,13 @@ import { BiliQuery } from './bilibili.query.js';
 
 class BiliTask {
     taskName;
-    key;
+    groupKey;
+    privateKey;
     e;
     constructor(e) {
         this.taskName = "biliTask";
-        this.key = "Yz:yuki:bili:upPush:";
+        this.groupKey = "Yz:yuki:bili:upPush:group:";
+        this.privateKey = "Yz:yuki:bili:upPush:private:";
     }
     async hendleEventDynamicData(uid, count = 0) {
         const resp = await new BiliGetWebData().getBiliDynamicListDataByUid(uid);
@@ -49,6 +51,10 @@ class BiliTask {
     }
     async processBiliData(biliPushData, uidMap, dynamicList, lastLiveStatus) {
         for (let chatType in biliPushData) {
+            if (!uidMap.has(chatType)) {
+                uidMap.set(chatType, new Map());
+            }
+            const chatTypeMap = uidMap.get(chatType);
             for (let chatId in biliPushData[chatType]) {
                 const subUpsOfChat = biliPushData[chatType][chatId] || [];
                 for (let subInfoOfup of subUpsOfChat) {
@@ -74,46 +80,48 @@ class BiliTask {
                         logger.error(`获取 ${subInfoOfup.uid} 动态失败，resp 为空`);
                         return;
                     }
-                    const chatIds = Array.from(new Set([...Object((uidMap.get(subInfoOfup.uid) && uidMap.get(subInfoOfup.uid).chatIds) || []), chatId]));
+                    const chatIds = Array.from(new Set([...Object((chatTypeMap.get(subInfoOfup.uid) && chatTypeMap.get(subInfoOfup.uid).chatIds) || []), chatId]));
                     const bot_id = subInfoOfup.bot_id || [];
                     const { name, type } = subInfoOfup;
-                    uidMap.set(subInfoOfup.uid, { chatIds, bot_id, upName: name, type, chatType });
+                    chatTypeMap.set(subInfoOfup.uid, { chatIds, bot_id, upName: name, type });
                     await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * (8000 - 2000 + 1) + 2000)));
                 }
             }
         }
     }
     async pushDynamicMessages(uidMap, dynamicList, now, interval, biliConfigData) {
-        for (let [key, value] of uidMap) {
-            const tempDynamicList = dynamicList[key] || [];
-            const willPushDynamicList = [];
-            const printedList = new Set();
-            for (let dynamicItem of tempDynamicList) {
-                let author = dynamicItem?.modules?.module_author || {};
-                if (!printedList.has(author?.mid)) {
-                    logger.info(`正在检测B站动态 [ ${author?.name} : ${author?.mid} ]`);
-                    printedList.add(author?.mid);
+        for (let [chatType, chatTypeMap] of uidMap) {
+            for (let [key, value] of chatTypeMap) {
+                const tempDynamicList = dynamicList[key] || [];
+                const willPushDynamicList = [];
+                const printedList = new Set();
+                for (let dynamicItem of tempDynamicList) {
+                    let author = dynamicItem?.modules?.module_author || {};
+                    if (!printedList.has(author?.mid)) {
+                        logger.info(`正在检测B站动态 [ ${author?.name} : ${author?.mid} ]`);
+                        printedList.add(author?.mid);
+                    }
+                    if (!author?.pub_ts)
+                        continue;
+                    if (Number(now - author.pub_ts) > interval) {
+                        logger.debug(`超过间隔，跳过  [ ${author?.name} : ${author?.mid} ] ${author?.pub_time} 的动态`);
+                        continue;
+                    }
+                    if (dynamicItem.type === "DYNAMIC_TYPE_FORWARD" && !biliConfigData.pushTransmit)
+                        continue;
+                    willPushDynamicList.push(dynamicItem);
                 }
-                if (!author?.pub_ts)
-                    continue;
-                if (Number(now - author.pub_ts) > interval) {
-                    logger.debug(`超过间隔，跳过  [ ${author?.name} : ${author?.mid} ] ${author?.pub_time} 的动态`);
-                    continue;
-                }
-                if (dynamicItem.type === "DYNAMIC_TYPE_FORWARD" && !biliConfigData.pushTransmit)
-                    continue;
-                willPushDynamicList.push(dynamicItem);
-            }
-            printedList.clear();
-            const pushMapInfo = value || {};
-            const { chatIds, bot_id, upName, type, chatType } = pushMapInfo;
-            for (let pushDynamicData of willPushDynamicList) {
-                if (chatIds && chatIds.length) {
-                    for (let chatId of chatIds) {
-                        if (type && type.length && !type.includes(pushDynamicData.type))
-                            continue;
-                        await this.sendDynamic(chatId, bot_id, upName, pushDynamicData, biliConfigData, chatType);
-                        await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * (6500 - 2000 + 1) + 2000)));
+                printedList.clear();
+                const pushMapInfo = value || {};
+                const { chatIds, bot_id, upName, type } = pushMapInfo;
+                for (let pushDynamicData of willPushDynamicList) {
+                    if (chatIds && chatIds.length) {
+                        for (let chatId of chatIds) {
+                            if (type && type.length && !type.includes(pushDynamicData.type))
+                                continue;
+                            await this.sendDynamic(chatId, bot_id, upName, pushDynamicData, biliConfigData, chatType);
+                            await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * (6500 - 2000 + 1) + 2000)));
+                        }
                     }
                 }
             }
@@ -121,7 +129,15 @@ class BiliTask {
     }
     async sendDynamic(chatId, bot_id, upName, pushDynamicData, biliConfigData, chatType) {
         const id_str = pushDynamicData.id_str;
-        let sended = await redis.get(`${this.key}${chatId}:${id_str}`);
+        let sended, markKey;
+        if (chatType === "group") {
+            markKey = this.groupKey;
+            sended = await redis.get(`${markKey}${chatId}:${id_str}`);
+        }
+        else if (chatType === "private") {
+            markKey = this.privateKey;
+            sended = await redis.get(`${markKey}${chatId}:${id_str}`);
+        }
         if (sended)
             return;
         if (!!biliConfigData.pushMsgMode) {
@@ -151,7 +167,7 @@ class BiliTask {
             let imgs = await this.renderDynamicCard(uid, renderData, ScreenshotOptionsData);
             if (!imgs)
                 return;
-            redis.set(`${this.key}${chatId}:${id_str}`, "1", { EX: 3600 * 10 });
+            redis.set(`${markKey}${chatId}:${id_str}`, "1", { EX: 3600 * 10 });
             (logger ?? Bot.logger)?.mark("优纪插件：B站动态执行推送");
             for (let i = 0; i < imgs.length; i++) {
                 const image = imgs[i];
@@ -162,7 +178,7 @@ class BiliTask {
         }
         else {
             const dynamicMsg = await BiliQuery.formatTextDynamicData(upName, pushDynamicData, false, biliConfigData);
-            redis.set(`${this.key}${chatId}:${id_str}`, "1", { EX: 3600 * 10 });
+            redis.set(`${markKey}${chatId}:${id_str}`, "1", { EX: 3600 * 10 });
             if (dynamicMsg == "continue") {
                 return "return";
             }
@@ -246,7 +262,7 @@ class BiliTask {
             });
         }
         else if (chatType === "private") {
-            await (Bot[bot_id] ?? Bot)?.pickUser(String(chatId)).sendMsg(message)
+            await (Bot[bot_id] ?? Bot)?.pickFriend(String(chatId)).sendMsg(message)
                 .catch((error) => {
                 (logger ?? Bot.logger)?.error(`用户[${chatId}]推送失败：${JSON.stringify(error)}`);
             });
