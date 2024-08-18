@@ -160,7 +160,14 @@ export default class YukiBili extends Plugin {
         return;
       }
 
-      let name = items.length > 0 ? (items[0].modules.module_author?.name || uid) : uid;
+      let name: string | number
+      if (Array.isArray(items)) {
+        if (items.length > 0) {
+          name = items[0].modules?.module_author?.name || uid
+        }
+      } else {
+        name = uid;
+      }
 
       // 添加新的推送数据
       subData[chatType][chatId].push({
