@@ -128,7 +128,15 @@ class YukiBili extends plugin {
                 this.e.reply(`订阅校验失败~\nup主uid：${uid} 无效，请核对uid后再试~`);
                 return;
             }
-            let name = items.length > 0 ? (items[0].modules.module_author?.name || uid) : uid;
+            let name;
+            if (Array.isArray(items)) {
+                if (items.length > 0) {
+                    name = items[0].modules?.module_author?.name || uid;
+                }
+            }
+            else {
+                name = uid;
+            }
             subData[chatType][chatId].push({
                 bot_id: this.e.self_id,
                 uid,
