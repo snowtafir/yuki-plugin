@@ -65,6 +65,11 @@ export class BiliQuery {
           pics = desc?.pics;
           pics = pics.map((item: any) => { return { url: item?.url, width: item?.width, height: item?.height } });
           formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || ""
+        } else if (majorType === "MAJOR_TYPE_DRAW") {
+          desc = data?.modules?.module_dynamic?.desc;
+          pics = data?.modules?.module_dynamic?.major?.draw?.items;
+          pics = pics.map((item: any) => { return { url: item?.url, width: item?.width, height: item?.height } });
+          formatData.data.content = this.parseRichTextNodes(desc?.rich_text_nodes || desc?.text) || "";
         } else {
           desc = data?.modules?.module_dynamic?.desc;
           pics = data?.modules?.module_dynamic?.major?.draw?.items;
@@ -98,6 +103,12 @@ export class BiliQuery {
             formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || "";
             formatData.data.pics = pics;
           }
+        } else if (majorType === "MAJOR_TYPE_ARTICLE") {
+          desc = data?.modules?.module_dynamic?.major?.article || {};
+          pics = desc?.covers;
+          pics = pics.map((item: any) => { return { url: item } }) || [];
+          formatData.data.title = desc?.title;
+          formatData.data.content = this.parseRichTextNodes(desc?.desc);
         } else {
           desc = data?.modules?.module_dynamic?.major?.article || {};
           if (desc.covers && desc.covers.length) {
@@ -154,7 +165,8 @@ export class BiliQuery {
    */
   static parseRichTextNodes = (nodes: any[] | string | any) => {
     if (typeof nodes === 'string') {
-      // 将 \n 替换为 <br> 以实现换行
+      // 将\t 替换为&nbsp;实现空格，\n 替换为 <br> 以实现换行
+      nodes = nodes.replace(/\t/g, '&nbsp;');
       return nodes.replace(/\n/g, '<br>');
     } else if (Array.isArray(nodes)) {
       return nodes.map((node: { type?: string; jump_url?: any; text?: string; rid?: any; icon_name?: string; emoji?: { icon_url?: string, text?: string, size?: number, type?: number } }) => {
@@ -227,7 +239,7 @@ export class BiliQuery {
   }
   /**解析完整文章内容 */
   static praseFullArticleContent(content: string) {
-    content = content.replace(/\n/g, '<br>');
+    content = String(content).replace(/\n/g, '<br>');
     // 使用正则表达式匹配 <img> 标签的 data-src 属性
     const imgTagRegex = /<img[^>]*data-src="([^"]*)"[^>]*>/g;
 
@@ -318,6 +330,11 @@ export class BiliQuery {
             return item.url;
           });
           content = desc?.summary?.text || "";
+        } else if (majorType === "MAJOR_TYPE_DRAW") {
+          desc = data?.modules?.module_dynamic?.desc;
+          pics = data?.modules?.module_dynamic?.major?.draw?.items;
+          pics = pics.map((item: any) => { return item?.src; });
+          content = desc?.text || "";
         } else {
           desc = data?.modules?.module_dynamic?.desc;
           pics = data?.modules?.module_dynamic?.major?.draw?.items;
@@ -359,6 +376,11 @@ export class BiliQuery {
           pics = pics.map((item: any) => { return item.url; }) || [];
           dynamicTitle = desc?.title;
           content = desc?.summary?.text || "";
+        } else if (majorType === "MAJOR_TYPE_ARTICLE") {
+          desc = data?.modules?.module_dynamic?.major?.article || {};
+          pics = desc?.covers || [];
+          dynamicTitle = desc?.title;
+          content = desc?.desc;
         } else {
           desc = data?.modules?.module_dynamic?.major?.article || {};
           if (desc.covers && desc.covers.length) {
