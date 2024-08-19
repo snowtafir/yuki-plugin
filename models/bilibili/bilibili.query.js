@@ -54,6 +54,12 @@ class BiliQuery {
                     pics = pics.map((item) => { return { url: item?.url, width: item?.width, height: item?.height }; });
                     formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || "";
                 }
+                else if (majorType === "MAJOR_TYPE_DRAW") {
+                    desc = data?.modules?.module_dynamic?.desc;
+                    pics = data?.modules?.module_dynamic?.major?.draw?.items;
+                    pics = pics.map((item) => { return { url: item?.url, width: item?.width, height: item?.height }; });
+                    formatData.data.content = this.parseRichTextNodes(desc?.rich_text_nodes || desc?.text) || "";
+                }
                 else {
                     desc = data?.modules?.module_dynamic?.desc;
                     pics = data?.modules?.module_dynamic?.major?.draw?.items;
@@ -87,6 +93,13 @@ class BiliQuery {
                         formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || "";
                         formatData.data.pics = pics;
                     }
+                }
+                else if (majorType === "MAJOR_TYPE_ARTICLE") {
+                    desc = data?.modules?.module_dynamic?.major?.article || {};
+                    pics = desc?.covers;
+                    pics = pics.map((item) => { return { url: item }; }) || [];
+                    formatData.data.title = desc?.title;
+                    formatData.data.content = this.parseRichTextNodes(desc?.desc);
                 }
                 else {
                     desc = data?.modules?.module_dynamic?.major?.article || {};
@@ -138,6 +151,7 @@ class BiliQuery {
     ;
     static parseRichTextNodes = (nodes) => {
         if (typeof nodes === 'string') {
+            nodes = nodes.replace(/\t/g, '&nbsp;');
             return nodes.replace(/\n/g, '<br>');
         }
         else if (Array.isArray(nodes)) {
@@ -193,7 +207,7 @@ class BiliQuery {
         }
     }
     static praseFullArticleContent(content) {
-        content = content.replace(/\n/g, '<br>');
+        content = String(content).replace(/\n/g, '<br>');
         const imgTagRegex = /<img[^>]*data-src="([^"]*)"[^>]*>/g;
         content = content.replace(imgTagRegex, (match, p1) => {
             const newSrc = this.formatUrl(p1);
@@ -262,6 +276,12 @@ class BiliQuery {
                     });
                     content = desc?.summary?.text || "";
                 }
+                else if (majorType === "MAJOR_TYPE_DRAW") {
+                    desc = data?.modules?.module_dynamic?.desc;
+                    pics = data?.modules?.module_dynamic?.major?.draw?.items;
+                    pics = pics.map((item) => { return item?.src; });
+                    content = desc?.text || "";
+                }
                 else {
                     desc = data?.modules?.module_dynamic?.desc;
                     pics = data?.modules?.module_dynamic?.major?.draw?.items;
@@ -296,6 +316,12 @@ class BiliQuery {
                     pics = pics.map((item) => { return item.url; }) || [];
                     dynamicTitle = desc?.title;
                     content = desc?.summary?.text || "";
+                }
+                else if (majorType === "MAJOR_TYPE_ARTICLE") {
+                    desc = data?.modules?.module_dynamic?.major?.article || {};
+                    pics = desc?.covers || [];
+                    dynamicTitle = desc?.title;
+                    content = desc?.desc;
                 }
                 else {
                     desc = data?.modules?.module_dynamic?.major?.article || {};
