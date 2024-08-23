@@ -62,10 +62,10 @@ export class YukiPuppeteerRender extends Puppeteer {
 
       await page.goto(`file://${htmlPath}`, { timeout: Options?.timeout ?? 120000, waitUntil: ["load", "networkidle0"] });
 
-      const body = await page.$(Options?.tab ?? 'body')
-      if (!body) return false
+      const element = await page.$(Options?.tab ?? 'body')
+      if (!element) return false
 
-      const boundingBox = await body.boundingBox(); // 获取内容区域的边界框信息
+      const boundingBox = await element.boundingBox(); // 获取内容区域的边界框信息
       const num = Options?.isSplit ? Math.ceil(boundingBox.height / pageHeight) : 1; // 根据是否需要分片，计算分片数量，默认为 1
       pageHeight = Math.round(boundingBox.height / num); //动态调整分片高度，防止过短影响观感。
 
@@ -126,7 +126,7 @@ export class YukiPuppeteerRender extends Puppeteer {
           },
         };
 
-        buff = await page.screenshot(screenshotOptions).catch(err => {
+        buff = await element.screenshot(screenshotOptions).catch(err => {
           logger.error('[puppeteer]', 'screenshot', err)
           return false
         }); // 对指定区域进行截图
