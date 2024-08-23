@@ -8,6 +8,7 @@
 body {
   width: 563px !important;
   font-family: "OPSans", Arial, sans-serif;
+  margin: auto;
 }
 
 .container {
