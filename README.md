@@ -15,11 +15,22 @@
 
 ##### ```Yunzai-Next：```
 
-1. yunzai-next npm包 方式 安装插件：
+1. 方式1： yunzai-next npm包 安装插件：
 >```
 > yarn add yz-yuki-plugin -W
 >```
-接着修改 `yunzaijs/yunzai.config.js`：
+接着修改 `yunzaijs/yunzai.config.js`，按版本选择修改方式：
+
+Yunzai-Next v4.1.28+及以上版本：
+```js
+import { defineConfig } from 'yunzai'
+export default defineConfig({
+  applications: ['yz-system', 'yz-yuki-plugin'], //该行添加 'yz-yuki-plugin'
+  middlewares: ['yz-mw-runtime', 'yunzai-mys/mw']
+})
+```
+
+旧版本：
 ```js
 import yuki from 'yz-yuki-plugin' //新增该行
 export default defineConfig({
@@ -28,7 +39,7 @@ export default defineConfig({
 })
 ```
 
-2. 旧的方式安装：
+2. 方式2（V3的方式）：
 >gitee仓库：
 >```
 >git clone --branch main https://gitee.com/snowtafir/yuki-plugin.git ./plugins/yuki-plugin
@@ -52,6 +63,8 @@ export default defineConfig({
 
 #### 2. 安装依赖
 * Yunzai-Next:
+
+方式2（V3的方式）安装则需要执行：
 ```
 yarn install
 ```
