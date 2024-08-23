@@ -23,10 +23,10 @@ class YukiPuppeteerRender extends Puppeteer {
                 await page.setExtraHTTPHeaders(Options.header);
             }
             await page.goto(`file://${htmlPath}`, { timeout: Options?.timeout ?? 120000, waitUntil: ["load", "networkidle0"] });
-            const body = await page.$(Options?.tab ?? 'body');
-            if (!body)
+            const element = await page.$(Options?.tab ?? 'body');
+            if (!element)
                 return false;
-            const boundingBox = await body.boundingBox();
+            const boundingBox = await element.boundingBox();
             const num = Options?.isSplit ? Math.ceil(boundingBox.height / pageHeight) : 1;
             pageHeight = Math.round(boundingBox.height / num);
             await page.setViewport({
@@ -71,7 +71,7 @@ class YukiPuppeteerRender extends Puppeteer {
                         height: Math.min(pageHeight, boundingBox.height - pageHeight * (i - 1)),
                     },
                 };
-                buff = await page.screenshot(screenshotOptions).catch(err => {
+                buff = await element.screenshot(screenshotOptions).catch(err => {
                     logger.error('[puppeteer]', 'screenshot', err);
                     return false;
                 });
