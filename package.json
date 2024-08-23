@@ -1,6 +1,6 @@
 {
   "name": "yz-yuki-plugin",
-  "version": "1.0.3-rc.2",
+  "version": "1.0.3-rc.3",
   "description": "优纪插件，yunzaijs 关于 微博推送、B站推送 等功能的拓展插件",
   "author": "snowtafir",
   "type": "module",
@@ -32,7 +32,7 @@
     "qrcode": "^1.5.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-puppeteer": "1.0.2",
+    "react-puppeteer": "1.0.3",
     "redis": "^4.7.0",
     "yaml": "^2.5.0",
     "yarn": "^1.19.1"
@@ -67,7 +67,7 @@
     "qrcode": "^1.5.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-puppeteer": "1.0.2",
+    "react-puppeteer": "1.0.3",
     "redis": "^4.7.0",
     "rollup": "^4.20.0",
     "rollup-plugin-auto-external": "^2.0.0",
