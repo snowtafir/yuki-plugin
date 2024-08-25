@@ -134,6 +134,9 @@ export class YukiPuppeteerRender extends Puppeteer {
         numSun++; // 增加截图次数
 
         if (buff !== false) {
+          if (!Buffer.isBuffer(buff)) {
+            buff = Buffer.from(buff)
+          }
           /** 计算图片大小 */
           const kb = (buff?.length / 1024).toFixed(2) + "kb"; // 计算图片大小
 
