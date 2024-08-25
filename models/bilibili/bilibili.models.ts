@@ -39,6 +39,7 @@ export async function applyLoginQRCode(e: any) {
     };
     const ScreenshotOptionsData: ScreenshotOptions = {
       saveHtmlfile: false,
+      modelName: "bili-login"
     }
     const qrCodeImage = await Image.renderPage("bili-login", "LoginQrcodePage", LoginPropsData, ScreenshotOptionsData);
     let qrcodeImg: Buffer[]
@@ -50,6 +51,8 @@ export async function applyLoginQRCode(e: any) {
     msg.push(segment.image(qrcodeImg[0]));
     e.reply('请在3分钟内扫码以完成B站登陆绑定');
     e.reply(msg);
+    (logger ?? Bot.logger)?.info(`优纪插件: 如果发送二维码图片消息失败可复制如下URL, 使用在线或本地二维码生成工具生成二维码并扫码`);
+    (logger ?? Bot.logger)?.info(`优纪插件: 哔哩登陆二维码URL: ${qrcodeUrl}`);
 
     return qrcodeKey;
   } else {
