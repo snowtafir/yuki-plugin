@@ -60,7 +60,7 @@ message.use(
       e.reply("未取得bot主人身份，无权限添加B站动态订阅");
     } else {
       // 从消息中提取UID
-      const uid = e.msg.replace(/^(#|\/)(yuki|优纪)?(订阅|添加|add|ADD)(b站|B站|bili|bilibili|哔哩|哔哩哔哩)推送\s*(视频\s*|图文\s*|文章\s*|转发\s*|直播\s*)*/g, "").trim();
+      const uid = e.msg.replace(/^(#|\/)(yuki|优纪)?(订阅|添加|add|ADD)(b站|B站|bili|bilibili|哔哩|哔哩哔哩)推送\s*(视频\s*|图文\s*|文章\s*|转发\s*|直播\s*)*/g, "").trim().replace(/^(uid|UID)?(:|：)?/g, '');
       if (!uid) {
         e.reply(`请在指令末尾指定订阅的B站up主的UID！`);
         return true;
@@ -143,7 +143,7 @@ message.use(
       e.reply("未取得bot主人身份，无权限删除B站动态订阅");
     } else {
       // 提取用户输入的UID
-      const uid = e.msg.replace(/^(#|\/)(yuki|优纪)?(取消|删除|del|DEL)(b站|B站|bili|bilibili|哔哩|哔哩哔哩)推送\s*(视频\s*|图文\s*|文章\s*|转发\s*|直播\s*)*/g, "").trim();
+      const uid = e.msg.replace(/^(#|\/)(yuki|优纪)?(取消|删除|del|DEL)(b站|B站|bili|bilibili|哔哩|哔哩哔哩)推送\s*(视频\s*|图文\s*|文章\s*|转发\s*|直播\s*)*/g, "").trim().replace(/^(uid|UID)?(:|：)?/g, '');
       if (!uid) {
         e.reply(`请在指令末尾指定订阅的B站up主的UID！`);
         return;
@@ -421,7 +421,7 @@ message.use(
 
       // 处理群组订阅
       if (subData.group && Object.keys(subData.group).length > 0) {
-        messages.push("------群组B站订阅------");
+        messages.push("------群组B站订阅------\n");
         Object.keys(subData.group).forEach((groupId) => {
           messages.push(`群组ID：${groupId}：`);
           subData.group[groupId].forEach((item: { type: any[]; uid: any; name: any; }) => {
@@ -444,7 +444,7 @@ message.use(
 
       // 处理私聊订阅
       if (subData.private && Object.keys(subData.private).length > 0) {
-        messages.push("------私聊B站订阅------");
+        messages.push("\n------私聊B站订阅------");
         Object.keys(subData.private).forEach((userId) => {
           messages.push(`用户ID：${userId}：`);
           subData.private[userId].forEach((item: { type: any[]; uid: any; name: any; }) => {
