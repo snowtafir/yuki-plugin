@@ -77,6 +77,9 @@ class YukiPuppeteerRender extends Puppeteer {
                 });
                 numSun++;
                 if (buff !== false) {
+                    if (!Buffer.isBuffer(buff)) {
+                        buff = Buffer.from(buff);
+                    }
                     const kb = (buff?.length / 1024).toFixed(2) + "kb";
                     logger.mark(`[图片生成][${name}][${numSun}次] ${kb} ${logger.green(`${Date.now() - start}ms`)}`);
                     ret.push(buff);
