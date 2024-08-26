@@ -34,31 +34,42 @@ class Config {
 
   /** 操作并创建配置文件到指定目录 */
   initConfigFiles() {
-    let bilibiliSetFile = path.join(_paths.pluginPath, 'config/bilibili/config.yaml');
-    let bilibiliPushFile = path.join(_paths.pluginPath, 'config/bilibili/push.yaml');
-    let weiboSetFile = path.join(_paths.pluginPath, 'config/weibo/config.yaml');
-    let weiboPushFile = path.join(_paths.pluginPath, 'config/weibo/push.yaml');
-
     const configFiles = [
-      { file: bilibiliSetFile, defaultFile: path.join(_paths.pluginPath, 'defaultConfig/bilibili/config.yaml'), dir: 'config/bilibili' },
-      { file: bilibiliPushFile, defaultFile: path.join(_paths.pluginPath, 'defaultConfig/bilibili/push.yaml'), dir: 'config/bilibili' },
-      { file: weiboSetFile, defaultFile: path.join(_paths.pluginPath, 'defaultConfig/weibo/config.yaml'), dir: 'config/weibo' },
-      { file: weiboPushFile, defaultFile: path.join(_paths.pluginPath, 'defaultConfig/weibo/push.yaml'), dir: 'config/weibo' }
+      {
+        configFile: path.join(_paths.botYukiData, 'config/bilibili/config.yaml'),
+        defaultFile: path.join(_paths.pluginPath, 'defaultConfig/bilibili/config.yaml'),
+        dir: 'config/bilibili'
+      },
+      {
+        configFile: path.join(_paths.botYukiData, 'config/bilibili/push.yaml'),
+        defaultFile: path.join(_paths.pluginPath, 'defaultConfig/bilibili/push.yaml'),
+        dir: 'config/bilibili'
+      },
+      {
+        configFile: path.join(_paths.botYukiData, 'config/weibo/config.yaml'),
+        defaultFile: path.join(_paths.pluginPath, 'defaultConfig/weibo/config.yaml'),
+        dir: 'config/weibo'
+      },
+      {
+        configFile: path.join(_paths.botYukiData, 'config/weibo/push.yaml'),
+        defaultFile: path.join(_paths.pluginPath, 'defaultConfig/weibo/push.yaml'),
+        dir: 'config/weibo'
+      }
     ];
 
-    for (const { file, defaultFile, dir } of configFiles) {
-      if (!fs.existsSync(file)) {
-        const configDir = path.join(_paths.pluginPath, dir);
+    for (const { configFile, defaultFile, dir } of configFiles) {
+      if (!fs.existsSync(configFile)) {
+        const configDir = path.join(_paths.botYukiData, dir);
         if (!fs.existsSync(configDir)) {
           fs.mkdirSync(configDir, { recursive: true });
         }
-        fs.copyFileSync(defaultFile, file);
+        fs.copyFileSync(defaultFile, configFile);
       }
     }
   }
   /**
    * 通用获取配置文件数据方法
-   * @param typeDir 插件为起始的配置文件目录
+   * @param typeDir 配置文件目录类型对应路径 defaultConfig: defaultConfig 或 config: yunzai/data/yuki-plugin/config
    * @param appDir 配置app目录
    * @param functionName 配置文件名称，不包含.yaml后缀
    * @returns {object} 配置数据
@@ -78,19 +89,23 @@ class Config {
 
   /**
    * 获取配置文件路径
-   * @param typeDir 插件为起始的配置文件目录
+   * @param typeDir 配置文件目录类型对应路径 defaultConfig: defaultConfig 或 config: yunzai/data/yuki-plugin/config
    * @param appDir 配置app目录
    * @param functionName 配置文件名称，不包含.yaml后缀
    * @returns {string} 配置文件路径
    */
   getConfigFilePath(typeDir: string, appDir: string, functionName: string): string {
-    return path.join(_paths.pluginPath, `${typeDir}`, `${appDir}`, `${functionName}.yaml`);
+    if (typeDir === "defaultConfig") {
+      return path.join(_paths.pluginPath, `${typeDir}`, `${appDir}`, `${functionName}.yaml`);
+    } else {
+      return path.join(_paths.botYukiData, `${typeDir}`, `${appDir}`, `${functionName}.yaml`);
+    }
   }
 
   /**
    * 监听配置文件的变化
    * @param configFilePath 文件路径
-   * @param typeDir 插件为起始的配置文件目录
+   * @param typeDir 配置文件目录类型 defaultConfig: defaultConfig 或 config: yunzai/data/yuki-plugin/config
    * @param appDir 配置app目录
    * @param functionName 配置文件名称，不包含.yaml后缀
    */
