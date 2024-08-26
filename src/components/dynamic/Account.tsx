@@ -1,7 +1,7 @@
 // Account
 // up账户组件
 import React from 'react';
-import LogoText from './LogoText.tsx';
+import LogoText from '@/components/dynamic/LogoText';
 import { createRequire } from 'react-puppeteer';
 const require = createRequire(import.meta.url)
 

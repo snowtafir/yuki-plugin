@@ -1,11 +1,11 @@
 import JSON from 'json5';
 import lodash from 'lodash';
 import { Bot, Messages, Redis, setBotTask, EventType } from 'yunzai';
-import { BiliQuery } from '../models/bilibili/bilibili.query';
-import { BiliTask } from '../models/bilibili/bilibili.task';
-import Config from '../utils/config';
-import { _paths } from '../utils/paths';
-import { BiliGetWebData } from '../models/bilibili/bilibili.get.web.data';
+import { BiliQuery } from '@/models/bilibili/bilibili.query';
+import { BiliTask } from '@/models/bilibili/bilibili.task';
+import Config from '@/utils/config';
+import { _paths } from '@/utils/paths';
+import { BiliGetWebData } from '@/models/bilibili/bilibili.get.web.data';
 import {
   applyLoginQRCode,
   checkBiliLogin,
@@ -18,7 +18,7 @@ import {
   saveLocalBiliCk,
   saveLoginCookie,
   readTempCk
-} from '../models/bilibili/bilibili.models.ts';
+} from '@/models/bilibili/bilibili.models';
 
 declare const logger: any;
 

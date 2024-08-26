@@ -5,24 +5,25 @@
   "author": "snowtafir",
   "type": "module",
   "license": "MIT",
-  "main": "main.js",
+  "private": false,
   "repository": {
     "type": "git",
     "url": "https://github.com/snowtafir/yuki-plugin.git"
   },
   "scripts": {
-    "app": "npm run css && node --no-warnings=ExperimentalWarning --loader ts-node/esm src/main.js",
-    "dev": "npm run css && nodemon",
-    "img": "npm run css && nodemon --config routes.nodemon.json",
-    "build": "npm run css:m && rollup  --config rollup.config.js",
-    "css": "tailwindcss -i ./src/input.css -o ./public/output.css",
-    "css:m": "tailwindcss -i ./src/input.css -o ./public/output.css -m",
-    "css:watch": "tailwindcss -i ./src/input.css -o ./public/output.css --watch",
+    "app": "npx tsx src/main.ts",
+    "img-dev": "npx tsx watch --clear-screen=false routes.server.ts",
+    "build": "npm run css-m && rollup  --config rollup.config.js",
+    "css-app": "tailwindcss -i ./src/input.css -o ./public/output.css",
+    "css-dev": "tailwindcss -i ./src/input.css -o ./public/output.css --watch",
+    "css-m": "tailwindcss -i ./src/input.css -o ./public/output.css -m",
     "format": "prettier --write ."
   },
   "dependencies": {
     "axios": "^1.7.3",
+    "chalk": "^5.3.0",
     "chokidar": "^3.6.0",
+    "debug": "^4.3.6",
     "jsdom": "^24.1.1",
     "json5": "^2.2.3",
     "md5": "^2.3.0",
@@ -38,6 +39,13 @@
     "yarn": "^1.19.1"
   },
   "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@babel/preset-env": "^7.25.4",
+    "@babel/preset-react": "^7.24.7",
+    "@babel/preset-typescript": "^7.24.7",
+    "@types/chalk": "2.2.0",
+    "@rollup/plugin-babel": "^6.0.4",
+    "@types/lodash": "^4.17.7",
     "@rollup/plugin-commonjs": "^26.0.1",
     "@rollup/plugin-image": "^3.0.3",
     "@rollup/plugin-json": "^6.1.0",
@@ -47,7 +55,6 @@
     "@rollup/plugin-typescript": "^11.1.6",
     "@types/rollup-plugin-auto-external": "^2.0.5",
     "@types/jsdom": "^21.1.7",
-    "@types/lodash": "^4.17.7",
     "@types/md5": "^2.3.5",
     "@types/node": "^22.2.0",
     "@types/node-fetch": "^2.6.11",
@@ -56,6 +63,7 @@
     "@types/react-dom": "^18.3.0",
     "@types/yaml": "1.9.7",
     "axios": "^1.7.3",
+    "babel-plugin-module-resolver": "^5.0.2",
     "chokidar": "^3.6.0",
     "jsdom": "^24.1.1",
     "json5": "^2.2.3",
@@ -76,9 +84,10 @@
     "rollup-plugin-ignore": "^1.0.10",
     "tailwindcss": "^3.4.9",
     "ts-node": "^10.9.2",
+    "tsx": "^4.18.0",
     "typescript": "^5.5.4",
-    "yunzai": "^1.0.1-rc.5",
-    "yunzai-mys": "^1.0.0-rc.1"
+    "yunzai": "^1.0.6",
+    "yunzai-mys": "^1.0.5"
   },
   "files": [
     "public",
@@ -91,18 +100,18 @@
     "LICENSE",
     ".puppeteerrc.cjs"
   ],
-  "types": "lib/types",
+  "types": "lib",
   "exports": {
     ".": {
       "import": "./lib/index.js",
-      "types": "./lib/types/index.d.ts"
+      "types": "./lib/index.d.ts"
     }
   },
   "keywords": [
     "yunzai"
   ],
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+    "registry": "https://registry.npmjs.org"
   },
   "engines": {
     "node": ">=16.14.0"

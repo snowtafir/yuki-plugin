@@ -1,27 +1,68 @@
 import chalk from 'chalk';
-import { applicationOptions, useAppStorage } from 'yunzai';
-import Config from './utils/config';
-import * as apps from './apps/index';
+import { Application, applicationOptions, useEvent } from 'yunzai'
+import Config from '@/utils/config';
+import * as apps from '@/apps/index'
 declare const logger: any;
-const Data = useAppStorage()
+type RulesType = {
+  reg: RegExp | string
+  key: string
+}[]
+
 export default () => {
+  // 预先存储
+  const rules: RulesType = []
+  // options
   return applicationOptions({
     create() {
-      let count = 0;
+      // created
       for (const key in apps) {
-        Data.push(new apps[key]())
-        count++
+        // 推类型
+        const app: typeof Application.prototype = new apps[key]()
+        // 用  reg 和 key 连接起来。
+        // 也可以进行自由排序
+        for (const rule of app.rule) {
+          rules.push({
+            reg: rule.reg,
+            key: key
+          })
+        }
       }
       logger.info(chalk.rgb(0, 190, 255)(`-----------------------------------------`));
-      logger.info(chalk.rgb(255, 225, 255)(`|优纪插件 ${Config.getLatestVersion()} 初始化~`));
-      logger.info(chalk.rgb(255, 245, 255)(`|作者：snowtafir`));
-      logger.info(chalk.rgb(255, 225, 255)(`|仓库地址：`));
-      logger.info(chalk.rgb(255, 245, 255)(`|https://github.com/snowtafir/yuki-plugin`));
+      logger.info(chalk.rgb(255, 225, 255)(`优纪插件 ${Config.getLatestVersion()} 初始化~`));
+      logger.info(chalk.rgb(255, 245, 255)(`作者：snowtafir`));
+      logger.info(chalk.rgb(255, 225, 255)(`仓库地址：`));
+      logger.info(chalk.rgb(255, 245, 255)(`https://github.com/snowtafir/yuki-plugin`));
       logger.info(chalk.rgb(0, 190, 255)(`-----------------------------------------`));
-      logger.info(chalk.rgb(0, 190, 255)(`★ 优纪插件加载完成，共计加载${count}个app`));
+      logger.info(chalk.rgb(0, 190, 255)(`★ 优纪插件加载完成了喵~`));
+
     },
-    mounted() {
-      return Data
+    async mounted(e) {
+      // 存储
+      const data = []
+      // 如果key不存在
+      const cache = {}
+      // 使用event以确保得到正常类型
+      await useEvent(
+        e => {
+          for (const item of rules) {
+            // 匹配正则
+            // 存在key
+            // 第一次new
+            if (
+              new RegExp(item.reg).test(e.msg) &&
+              apps[item.key] &&
+              !cache[item.key]
+            ) {
+              cache[item.key] = true
+              data.push(new apps[item.key]())
+            }
+          }
+        },
+        // 推倒为message类型的event
+        [e, 'message']
+      )
+      // back
+      return data
     }
   })
 }

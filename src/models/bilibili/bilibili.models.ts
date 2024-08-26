@@ -7,12 +7,12 @@ import path from 'path';
 import QRCode from 'qrcode';
 import YAML from "yaml";
 import { Bot, Redis, Segment, EventType } from 'yunzai';
-import { LoginProps } from "../../components/loginQrcode/Page";
-import Image from '../../utils/image';
-import { _paths } from '../../utils/paths';
-import { ScreenshotOptions } from './../../utils/puppeteer.render';
-import { BiliApi } from './bilibili.api';
-import { gen_buvid_fp } from './bilibili.buid.fp';
+import { LoginProps } from "@/components/loginQrcode/Page";
+import Image from '@/utils/image';
+import { _paths } from '@/utils/paths';
+import { ScreenshotOptions } from '@/utils/puppeteer.render';
+import { BiliApi } from '@/models/bilibili/bilibili.api';
+import { gen_buvid_fp } from '@/models/bilibili/bilibili.buid.fp';
 
 declare const logger: any;
 

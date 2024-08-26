@@ -1,9 +1,9 @@
 // MainPage.tsx
 import React from 'react';
-import Account from './Account.tsx';
-import Content from './Content.tsx';
-import ForwardContent from './ForwardContent';
-import Footer from './Footer';
+import Account from '@/components/dynamic/Account';
+import Content from '@/components/dynamic/Content';
+import ForwardContent from '@/components/dynamic/ForwardContent';
+import Footer from '@/components/dynamic/Footer';
 import { createRequire } from 'react-puppeteer';
 
 const require = createRequire(import.meta.url)

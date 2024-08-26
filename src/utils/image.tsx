@@ -1,7 +1,7 @@
 import React from 'react';
 import { Puppeteer, Picture, Component, ComponentCreateOpsionType } from 'react-puppeteer';
-import { YukiPuppeteerRender, ScreenshotOptions } from './puppeteer.render';
-import * as ReactPages from './../components/index'
+import { YukiPuppeteerRender, ScreenshotOptions } from '@/utils/puppeteer.render';
+import * as ReactPages from '@/components/index'
 
 // 初始化 组件渲染对象
 const com = new Component()

@@ -1,0 +1,13 @@
+
+node_modules
+# 忽略所有文件
+/**
+# 不忽略next
+.github
+.vscode
+!/assets
+!/lib
+!/public
+!/resources
+!/defaultConfig
+!.puppeteerrc.cjs

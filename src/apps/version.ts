@@ -1,8 +1,8 @@
 import { Messages, Segment } from 'yunzai';
-import Image from '../utils/image';
-import { VersionProps } from '../components/version/Version';
-import VersionData from '../models/version/version';
-import { ScreenshotOptions } from '../utils/puppeteer.render';
+import Image from '@/utils/image';
+import { VersionProps } from '@/components/version/Version';
+import VersionData from '@/models/version/version';
+import { ScreenshotOptions } from '@/utils/puppeteer.render';
 
 const message = new Messages('message');
 

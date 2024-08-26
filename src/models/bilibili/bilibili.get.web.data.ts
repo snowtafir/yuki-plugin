@@ -1,8 +1,8 @@
 import axios from "axios";
 import lodash from "lodash";
-import { BiliApi } from './bilibili.api';
-import { readSavedCookieItems, readSavedCookieOtherItems, readSyncCookie } from './bilibili.models';
-import { getWbiSign } from './bilibili.wbi';
+import { BiliApi } from '@/models/bilibili//bilibili.api';
+import { readSavedCookieItems, readSavedCookieOtherItems, readSyncCookie } from '@/models/bilibili/bilibili.models';
+import { getWbiSign } from '@/models/bilibili//bilibili.wbi';
 
 export class BiliGetWebData {
   constructor(e?) {

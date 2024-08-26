@@ -1,8 +1,8 @@
 // ForwardContent
 // 转发动态内容组件
 import React from 'react';
-import Account from './Account.tsx';
-import Content from './Content.tsx';
+import Account from '@/components/dynamic/Account.tsx';
+import Content from '@/components/dynamic/Content.tsx';
 import { createRequire } from 'react-puppeteer';
 const require = createRequire(import.meta.url)
 

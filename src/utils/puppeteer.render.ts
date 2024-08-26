@@ -2,7 +2,7 @@
 import { Puppeteer } from 'react-puppeteer';
 import fs from 'fs';
 import path from 'path';
-import { _paths } from './paths'
+import { _paths } from '@/utils/paths'
 
 declare const logger: any;
 
@@ -101,7 +101,7 @@ export class YukiPuppeteerRender extends Puppeteer {
       let numSun = 0;
       let start = Date.now();
       const ret = new Array<Buffer>();
-      let buff: string | false | Buffer;
+      let buff: string | false | Uint8Array;
 
       for (let i = 1; i <= num; i++) {
         if (i > 1) {
@@ -134,15 +134,13 @@ export class YukiPuppeteerRender extends Puppeteer {
         numSun++; // 增加截图次数
 
         if (buff !== false) {
-          if (!Buffer.isBuffer(buff)) {
-            buff = Buffer.from(buff)
-          }
+          let imgBuff: Buffer = !Buffer.isBuffer(buff) ? Buffer.from(buff) : buff;
           /** 计算图片大小 */
-          const kb = (buff?.length / 1024).toFixed(2) + "kb"; // 计算图片大小
+          const kb = (imgBuff?.length / 1024).toFixed(2) + "kb"; // 计算图片大小
 
           logger.mark(`[图片生成][${name}][${numSun}次] ${kb} ${logger.green(`${Date.now() - start}ms`)}`); // 记录日志
 
-          ret.push(buff); // 将截图结果添加到数组中
+          ret.push(imgBuff); // 将截图结果添加到数组中
         } else {
           logger.error(`[puppeteer]`, '截图失败');
         }
