@@ -1,3 +1,10 @@
+# 1.0.4
+* 优化代码，npm 包增加 typescript 类型定义文件
+* 统一配置文件目录：yunzai/data/yuki-plugin/config/，更新后如需使用旧配置文件，请自行移动旧配置文件到新目录
+* 优化哔哩登录日志
+* 优化渲染
+* 增加哔哩 MAJOR_TYPE_DRAW MAJOR_TYPE_ARTICLE 动态子类型
+
 # 1.0.3
 * 修复群组与好友动态推送混淆问题
 * 更新获取B站up信息api
