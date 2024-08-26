@@ -22,23 +22,35 @@ class Config {
         this.initConfigFiles();
     }
     initConfigFiles() {
-        let bilibiliSetFile = path.join(_paths.pluginPath, 'config/bilibili/config.yaml');
-        let bilibiliPushFile = path.join(_paths.pluginPath, 'config/bilibili/push.yaml');
-        let weiboSetFile = path.join(_paths.pluginPath, 'config/weibo/config.yaml');
-        let weiboPushFile = path.join(_paths.pluginPath, 'config/weibo/push.yaml');
         const configFiles = [
-            { file: bilibiliSetFile, defaultFile: path.join(_paths.pluginPath, 'defaultConfig/bilibili/config.yaml'), dir: 'config/bilibili' },
-            { file: bilibiliPushFile, defaultFile: path.join(_paths.pluginPath, 'defaultConfig/bilibili/push.yaml'), dir: 'config/bilibili' },
-            { file: weiboSetFile, defaultFile: path.join(_paths.pluginPath, 'defaultConfig/weibo/config.yaml'), dir: 'config/weibo' },
-            { file: weiboPushFile, defaultFile: path.join(_paths.pluginPath, 'defaultConfig/weibo/push.yaml'), dir: 'config/weibo' }
+            {
+                configFile: path.join(_paths.botYukiData, 'config/bilibili/config.yaml'),
+                defaultFile: path.join(_paths.pluginPath, 'defaultConfig/bilibili/config.yaml'),
+                dir: 'config/bilibili'
+            },
+            {
+                configFile: path.join(_paths.botYukiData, 'config/bilibili/push.yaml'),
+                defaultFile: path.join(_paths.pluginPath, 'defaultConfig/bilibili/push.yaml'),
+                dir: 'config/bilibili'
+            },
+            {
+                configFile: path.join(_paths.botYukiData, 'config/weibo/config.yaml'),
+                defaultFile: path.join(_paths.pluginPath, 'defaultConfig/weibo/config.yaml'),
+                dir: 'config/weibo'
+            },
+            {
+                configFile: path.join(_paths.botYukiData, 'config/weibo/push.yaml'),
+                defaultFile: path.join(_paths.pluginPath, 'defaultConfig/weibo/push.yaml'),
+                dir: 'config/weibo'
+            }
         ];
-        for (const { file, defaultFile, dir } of configFiles) {
-            if (!fs.existsSync(file)) {
-                const configDir = path.join(_paths.pluginPath, dir);
+        for (const { configFile, defaultFile, dir } of configFiles) {
+            if (!fs.existsSync(configFile)) {
+                const configDir = path.join(_paths.botYukiData, dir);
                 if (!fs.existsSync(configDir)) {
                     fs.mkdirSync(configDir, { recursive: true });
                 }
-                fs.copyFileSync(defaultFile, file);
+                fs.copyFileSync(defaultFile, configFile);
             }
         }
     }
@@ -52,7 +64,12 @@ class Config {
         return this[key];
     }
     getConfigFilePath(typeDir, appDir, functionName) {
-        return path.join(_paths.pluginPath, `${typeDir}`, `${appDir}`, `${functionName}.yaml`);
+        if (typeDir === "defaultConfig") {
+            return path.join(_paths.pluginPath, `${typeDir}`, `${appDir}`, `${functionName}.yaml`);
+        }
+        else {
+            return path.join(_paths.botYukiData, `${typeDir}`, `${appDir}`, `${functionName}.yaml`);
+        }
     }
     watch(configFilePath, typeDir, appDir, functionName) {
         const key = `${typeDir}_${appDir}_${functionName}`;
