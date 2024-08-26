@@ -123,14 +123,19 @@ https://m.weibo.cn/u/7643376782 # 7643376782 为崩坏星穹铁道博主uid
 - [x] 微博动态
 
 
-## ✨指令列表
+## 🚀指令列表
 
 <details><summary>点击展开</summary>
+
+> [!IMPORTANT] 
+> 统一的配置文件路径：
+
+`Yunzai/data/yuki-plugin/config/`，启动一次后，即可查看配置文件。
 
 > [!TIP]
 > 指令前缀：`#优纪`、`#yuki`、`/优纪`、`/yuki`，
 
-> 示例：`#优纪订阅B站推送uid`、`#yuki订阅B站推送uid`、`/优纪订阅B站推送uid`、`/yuki订阅B站推送uid`。
+示例：`#优纪订阅B站推送uid`、`#yuki订阅B站推送uid`、`/优纪订阅B站推送uid`、`/yuki订阅B站推送uid`。
 
 | 用途 | 描述 | 指令 |
 | --------- | ----------- | ------------ |
