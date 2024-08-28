@@ -29,8 +29,8 @@ class YukiVersion extends plugin {
         };
         const ScreenshotOptionsData = {
             SOptions: {
-                type: 'jpeg',
-                quality: 85,
+                type: 'webp',
+                quality: 90,
             },
             isSplit: false,
             modelName: 'yukiVersion',

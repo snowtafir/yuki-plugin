@@ -118,7 +118,7 @@ class WeiboTask {
                 isSplit: isSplit,
                 modelName: 'weibo',
                 SOptions: {
-                    type: 'jpeg',
+                    type: 'webp',
                     quality: 98,
                 },
                 saveHtmlfile: false,
