@@ -1,6 +1,6 @@
 import JSON from 'json5';
 import lodash from 'lodash';
-import { Bot, Messages, Redis, setBotTask, EventType } from 'yunzai';
+import { Bot, Messages, Redis, EventType } from 'yunzai';
 import { BiliQuery } from '@/models/bilibili/bilibili.query';
 import { BiliTask } from '@/models/bilibili/bilibili.task';
 import Config from '@/utils/config';
@@ -24,31 +24,17 @@ declare const logger: any;
 
 const message = new Messages('message');
 
-let biliConfigData = Config.getConfigData("config", "bilibili", "config");
 let biliPushData = Config.getConfigData("config", "bilibili", "push");
 
-
-/** B站动态推送定时任务 */
-setBotTask(async (Bot) => {
-  try {
-    newPushTask();
-    if (biliConfigData.pushTaskLog) {
-      Bot.logger.mark("yuki插件---B站动态推送定时任务");
-    }
-  } catch (err) {
-    console.error('B站动态推送定时任务', err);
-  }
-}, biliConfigData.pushStatus ? biliConfigData.pushTime : "")
-
 /** 推送任务 函数 */
-async function newPushTask(e?: EventType) {
+async function biliNewPushTask(e?: EventType) {
   await new BiliTask(e).runTask();
 }
 
-
+/**B站动态推送 */
 message.use(
   async e => {
-    await newPushTask(e)
+    await biliNewPushTask(e)
   },
   [/^(#|\/)(yuki|优纪)?执行(b站|B站|bili|bilibili|哔哩|哔哩哔哩)任务$/]
 )

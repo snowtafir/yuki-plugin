@@ -21,12 +21,12 @@
 >```
 接着修改 `yunzaijs/yunzai.config.js`，按版本选择修改方式：
 
-Yunzai-Next v4.1.28+及以上版本：
+Yunzai-Next v4.1.33+及以上版本：
 ```js
 import { defineConfig } from 'yunzai'
 export default defineConfig({
   applications: ['yz-system', 'yz-yuki-plugin'], //该行添加 'yz-yuki-plugin'
-  middlewares: ['yz-mw-runtime', 'yunzai-mys/mw']
+  middlewares: ['yunzai-mys/runtime', 'yunzai-mys/message']
 })
 ```
 

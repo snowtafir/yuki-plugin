@@ -56,7 +56,7 @@ export default class VersionData {
       });
     }
 
-    // 对版本进行排序并截取最新的5个版本
+    // 对版本进行排序并截取最新的10个版本
     result.sort((a, b) => {
       let aParts = a.version.split('.').map(Number);
       let bParts = b.version.split('.').map(Number);
@@ -70,7 +70,7 @@ export default class VersionData {
       return 0;
     });
 
-    this.cache[key] = result.slice(0, 5);
+    this.cache[key] = result.slice(0, 10);
     return this.cache[key];
   }
 }

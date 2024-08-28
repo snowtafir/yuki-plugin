@@ -1,12 +1,27 @@
 import chalk from 'chalk';
-import { Application, applicationOptions, useEvent } from 'yunzai'
+import { Application, applicationOptions, EventType, setBotTask, useEvent } from 'yunzai'
 import Config from '@/utils/config';
-import * as apps from '@/apps/index'
+import * as apps from '@/apps/index';
+import { BiliTask } from '@/models/bilibili/bilibili.task';
+import { WeiboTask } from '@/models/weibo/weibo.task';
 declare const logger: any;
 type RulesType = {
   reg: RegExp | string
   key: string
 }[]
+
+let biliConfigData = Config.getConfigData("config", "bilibili", "config");
+let weiboConfigData = Config.getConfigData("config", "weibo", "config");
+
+/** B站动态任务 函数 */
+async function biliNewPushTask(e?: EventType) {
+  await new BiliTask(e).runTask();
+}
+
+/** 微博动态任务 函数 */
+async function weiboNewPushTask(e?: EventType) {
+  await new WeiboTask(e).runTask();
+}
 
 export default () => {
   // 预先存储
@@ -35,6 +50,29 @@ export default () => {
       logger.info(chalk.rgb(0, 190, 255)(`-----------------------------------------`));
       logger.info(chalk.rgb(0, 190, 255)(`★ 优纪插件加载完成了喵~`));
 
+      /** B站动态推送定时任务 */
+      setBotTask(async (Bot) => {
+        try {
+          biliNewPushTask();
+          if (biliConfigData.pushTaskLog) {
+            Bot.logger.mark("yuki插件---B站动态推送定时任务");
+          }
+        } catch (err) {
+          console.error('B站动态推送定时任务', err);
+        }
+      }, biliConfigData.pushStatus ? biliConfigData.pushTime : "")
+
+      /** 微博动态推送定时任务 */
+      setBotTask(async (Bot) => {
+        try {
+          await weiboNewPushTask();
+          if (weiboConfigData.pushTaskLog) {
+            Bot.logger.mark("yuki插件---微博动态推送定时任务");
+          }
+        } catch (err) {
+          console.error('微博动态推送定时任务', err);
+        }
+      }, weiboConfigData.pushStatus ? weiboConfigData.pushTime : "");
     },
     async mounted(e) {
       // 存储

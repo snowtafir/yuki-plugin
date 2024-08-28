@@ -1,4 +1,4 @@
-import { Messages, setBotTask, EventType } from 'yunzai';
+import { Messages, EventType } from 'yunzai';
 import { WeiboQuery } from '@/models/weibo/weibo.query';
 import { WeiboTask } from '@/models/weibo/weibo.task';
 import Config from '@/utils/config';
@@ -9,30 +9,17 @@ declare const logger: any;
 
 const message = new Messages('message')
 
-let weiboConfigData = Config.getConfigData("config", "weibo", "config");
 let weiboPushData = Config.getConfigData("config", "weibo", "push");
 
-/** 微博动态推送定时任务 */
-setBotTask(async (Bot) => {
-  try {
-    await newPushTask();
-    if (weiboConfigData.pushTaskLog) {
-      Bot.logger.mark("yuki插件---微博动态推送定时任务");
-    }
-  } catch (err) {
-    console.error('微博动态推送定时任务', err);
-  }
-}, weiboConfigData.pushStatus ? weiboConfigData.pushTime : "");
-
 /** 定义 动态任务 函数 */
-async function newPushTask(e?: EventType) {
+async function weiboNewPushTask(e?: EventType) {
   await new WeiboTask(e).runTask();
 }
 
-
+/**微博动态推送 */
 message.use(
   async e => {
-    await newPushTask(e)
+    await weiboNewPushTask(e)
   },
   [/^(#|\/)(yuki|优纪)?执行(微博|weibo|WEIBO)任务$/]
 )
