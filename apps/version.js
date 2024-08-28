@@ -28,6 +28,10 @@ class YukiVersion extends plugin {
             }))
         };
         const ScreenshotOptionsData = {
+            SOptions: {
+                type: 'jpeg',
+                quality: 85,
+            },
             isSplit: false,
             modelName: 'yukiVersion',
         };
