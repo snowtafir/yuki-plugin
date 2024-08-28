@@ -26,6 +26,10 @@ class YukiHelp extends Plugin {
             }))
         };
         const ScreenshotOptionsData = {
+            SOptions: {
+                type: 'jpeg',
+                quality: 85,
+            },
             isSplit: false,
             modelName: 'yukiHelp',
         };
