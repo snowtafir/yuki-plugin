@@ -24,6 +24,10 @@ message.use(
       }))
     };
     const ScreenshotOptionsData: ScreenshotOptions = {
+      SOptions: {
+        type: 'webp',
+        quality: 90,
+      },
       isSplit: false,
       modelName: 'yukiHelp',
     };
