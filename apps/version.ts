@@ -13,7 +13,7 @@ export default class YukiVersion extends plugin {
       dsc: "优纪版本",
       event: "message",
       priority: 0,
-      rule:[
+      rule: [
         {
           reg: "^(#|\/)(yuki|优纪)版本$",
           fnc: "yukiVersion",
@@ -36,6 +36,10 @@ export default class YukiVersion extends plugin {
       }))
     };
     const ScreenshotOptionsData: ScreenshotOptions = {
+      SOptions: {
+        type: 'webp',
+        quality: 90,
+      },
       isSplit: false,
       modelName: 'yukiVersion',
     };
