@@ -21,12 +21,12 @@
 >```
 接着修改 `yunzaijs/yunzai.config.js`，按版本选择修改方式：
 
-Yunzai-Next v4.1.28+及以上版本：
+Yunzai-Next v4.1.33+及以上版本：
 ```js
 import { defineConfig } from 'yunzai'
 export default defineConfig({
   applications: ['yz-system', 'yz-yuki-plugin'], //该行添加 'yz-yuki-plugin'
-  middlewares: ['yz-mw-runtime', 'yunzai-mys/mw']
+  middlewares: ['yunzai-mys/runtime', 'yunzai-mys/message']
 })
 ```
 
@@ -75,6 +75,12 @@ pnpm install --filter=yuki-plugin
 ```
 
 ## 📦插件配置
+
+> [!IMPORTANT] 
+> 统一的配置文件路径：
+
+`Yunzai/data/yuki-plugin/config/`，启动一次后，即可查看配置文件。
+
 ### 1.B站动态功能：
  使用建议先绑定B站账号或配置cookie，绑定后即可使用相关功能。
 
@@ -126,11 +132,6 @@ https://m.weibo.cn/u/7643376782 # 7643376782 为崩坏星穹铁道博主uid
 ## 🚀指令列表
 
 <details><summary>点击展开</summary>
-
-> [!IMPORTANT] 
-> 统一的配置文件路径：
-
-`Yunzai/data/yuki-plugin/config/`，启动一次后，即可查看配置文件。
 
 > [!TIP]
 > 指令前缀：`#优纪`、`#yuki`、`/优纪`、`/yuki`，
