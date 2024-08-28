@@ -160,7 +160,7 @@ class BiliTask {
                 isSplit: isSplit,
                 modelName: 'bilibili',
                 SOptions: {
-                    type: 'jpeg',
+                    type: 'webp',
                     quality: 98,
                 },
                 saveHtmlfile: false,
