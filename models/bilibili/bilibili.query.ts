@@ -96,9 +96,11 @@ export class BiliQuery {
             const readInfo = await this.getFullArticleContent(this.formatUrl(desc?.jump_url));
             formatData.data.content = this.praseFullArticleContent(readInfo?.content);
             formatData.data.pics = [];
-            if ((formatData.data.content) === null) {
+            if (!(formatData.data.content)) {
               formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || "";
               formatData.data.pics = pics;
+            } else {
+              formatData.data.pics = [];
             }
           } else {
             formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || "";
