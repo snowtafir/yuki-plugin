@@ -87,14 +87,41 @@ message.use(
       const { code, data } = res.data || {};
 
       if (code === -352) {
-        e.reply(`遭遇风控，订阅校验失败~\n请检查Cookie配置后再试~`);
+        e.reply(`遭遇风控，该uid的主页空间动态内容检查失败~\n请检查Cookie配置后再试~\n将跳过校验并保存订阅，请自行检查uid是否正确。`);
         logger.mark(`yuki-plugin addDynamicSub Failed：${JSON.stringify(res.data)}`);
         return true;
       }
       const { has_more, items } = data || {};
+
+      let infoName: string
       if ((code === 0) && (has_more === false)) {
-        e.reply(`订阅校验失败~\nup主uid：${uid} 无效，请核对uid后再试~`);
-        return;
+        e.reply(`检测到该uid的主页空间动态内容为空，\n执行uid：${uid} 校验...`);
+
+        const resp = await new BiliGetWebData(e).getBilibiUserInfoByUid(uid);
+
+        if (resp.statusText !== 'OK') {
+          e.reply("出了点网络问题，发起uid校验失败，等会再试试吧~");
+          return false;
+        }
+
+        const { code, data } = resp.data || {};
+
+        if (code === -400) {
+          e.reply("发起uid检验请求错误~\n将跳过校验并保存订阅，请自行检查uid是否正确。");
+          return true;
+        } else if (code === -403) {
+          e.reply("可能是Cookie过期或api参数错误，\n访问权限不足，发起uid检验失败。\n将跳过校验并保存订阅，请自行检查uid是否正确。");
+          return true;
+        } else if (code === -404) {
+          e.reply(`经过校验，该用户不存在，\n输入的uid： ${uid} 无效。订阅失败。`);
+          return false;
+        } else {
+          infoName = data?.name;
+          e.reply(`昵称：${infoName} \nuid：${uid} 校验成功！`);
+          return true;
+        }
+      } else if (code === 0 && (has_more === true)) {
+        return true;
       }
 
       let name: string | number
@@ -102,6 +129,8 @@ message.use(
         if (items.length > 0) {
           name = items[0].modules?.module_author?.name || uid
         }
+      } else if (infoName) {
+        name = infoName;
       } else {
         name = uid;
       }
