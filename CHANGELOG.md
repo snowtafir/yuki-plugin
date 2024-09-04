@@ -1,3 +1,6 @@
+# 2.0.3
+* 优化提示信息
+
 # 2.0.2
 * fix DYNAMIC_TYPE_ARTICLE
 * 优化Next npm包插件 Task加载
