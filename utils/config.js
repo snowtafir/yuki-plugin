@@ -6,14 +6,14 @@ import path from 'path';
 import { _paths } from './paths.js';
 
 class Config {
-    versionPath;
+    packageJsonPath;
     defaultConfigPath;
     userConfigPath;
     defaultConfig;
     userConfig;
     watcher;
     constructor() {
-        this.versionPath = path.join(_paths.pluginPath, 'CHANGELOG.md');
+        this.packageJsonPath = path.join(_paths.pluginPath, 'package.json');
         this.defaultConfigPath = path.join(_paths.pluginPath, 'defaultConfig');
         this.defaultConfig = {};
         this.userConfigPath = path.join(_paths.pluginPath, 'config');
@@ -109,11 +109,11 @@ class Config {
         this.saveConfig("config", appDir, functionName, config);
     }
     getLatestVersion() {
-        const content = fs.readFileSync(this.versionPath, 'utf-8');
-        const versionPattern = /#\s(\d+\.\d+\.\d+)/g;
-        const match = versionPattern.exec(content);
+        const content = fs.readFileSync(this.packageJsonPath, 'utf-8');
+        const packageJson = JSON.parse(content);
+        const match = packageJson.version;
         if (match) {
-            return match[1];
+            return match;
         }
         else {
             return null;
