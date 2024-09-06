@@ -158,7 +158,6 @@ export default class YukiBili extends plugin {
       if (code === -352) {
         this.e.reply(`遭遇风控，该uid的主页空间动态内容检查失败~\n请检查Cookie配置后再试~\n将跳过校验并保存订阅，请自行检查uid是否正确。`);
         logger.mark(`yuki-plugin addDynamicSub Failed：${JSON.stringify(res.data)}`);
-        return true;
       }
       const { has_more, items } = data || {};
 
@@ -177,20 +176,15 @@ export default class YukiBili extends plugin {
 
         if (code === -400) {
           this.e.reply("发起uid检验请求错误~\n将跳过校验并保存订阅，请自行检查uid是否正确。");
-          return true;
         } else if (code === -403) {
           this.e.reply("可能是Cookie过期或api参数错误，\n访问权限不足，发起uid检验失败。\n将跳过校验并保存订阅，请自行检查uid是否正确。");
-          return true;
         } else if (code === -404) {
           this.e.reply(`经过校验，该用户不存在，\n输入的uid： ${uid} 无效。订阅失败。`);
           return false;
         } else {
           infoName = data?.name;
           this.e.reply(`昵称：${infoName} \nuid：${uid} 校验成功！`);
-          return true;
         }
-      } else if (code === 0 && (has_more === true)) {
-        return true;
       }
 
       let name: string | number
