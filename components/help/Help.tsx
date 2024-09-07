@@ -2,9 +2,13 @@
 import React from 'react';
 import Config from '../../utils/config';
 import { createRequire } from 'react-puppeteer'
+import path from 'path';
+import { _paths } from '../../utils/paths';
 
-const BOT_NAME = 'yunzai'
-const botVersion = "3.1+"
+const botPackageJsonPath = path.join(_paths.root, 'package.json');
+const BOT_NAME = Config.getPackageJsonKey('name', botPackageJsonPath)
+const botVersion = Config.getPackageJsonKey('version', botPackageJsonPath)
+const yukiPluginVersion = Config.getPackageJsonKey('version', path.join(_paths.pluginPath, 'package.json'));
 
 const require = createRequire(import.meta.url);
 
@@ -26,7 +30,7 @@ export default function App({ data }: HelpPageProps) {
       <div className="container" id="container">
         <div className="head_box">
           <div className="id_text">Yuki-Plugin</div>
-          <h2 className="day_text">使用说明-v{Config.getLatestVersion()}</h2>
+          <h2 className="day_text">使用说明-v{yukiPluginVersion}</h2>
         </div>
         {data.map((val, index) => (
           <div className="data_box" key={index}>
@@ -48,7 +52,7 @@ export default function App({ data }: HelpPageProps) {
         ))}
         <div className="logo" style={{ marginTop: '6px' }}>
           Created By {`${BOT_NAME}-v` + `${botVersion}`} & <span className="yuki-plugin-text-title">yuki-plugin</span>-v
-          <span className="italic">{`${Config.getLatestVersion()}`}</span>
+          <span className="italic">{`${yukiPluginVersion}`}</span>
         </div>
       </div>
     </>

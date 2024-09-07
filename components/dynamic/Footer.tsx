@@ -2,9 +2,13 @@
 import React from 'react';
 import Config from '../../utils/config';
 import { createRequire } from 'react-puppeteer';
+import path from 'path';
+import { _paths } from '../../utils/paths';
 
-const BOT_NAME = 'yunzai'
-const botVersion = "3.1+"
+const botPackageJsonPath = path.join(_paths.root, 'package.json');
+const BOT_NAME = Config.getPackageJsonKey('name', botPackageJsonPath);
+const botVersion = Config.getPackageJsonKey('version', botPackageJsonPath);
+const yukiPluginVersion = Config.getPackageJsonKey('version', path.join(_paths.pluginPath, 'package.json'));
 
 const require = createRequire(import.meta.url)
 const bilibililogo: string = require('./../../resources/img/icon/dynamic/bilibili.svg')
@@ -44,7 +48,7 @@ const Footer: React.FC<FooterProps> = ({ data }) => {
           </div>
           <div className="bot-plugin-info" style={{ marginTop: '6px' }}>
             Created By {`${BOT_NAME}-v` + `${botVersion}`} & <span className="yuki-plugin-text-title">yuki-plugin</span>-v
-            <span className="italic">{`${Config.getLatestVersion()}`}</span>
+            <span className="italic">{`${yukiPluginVersion}`}</span>
           </div>
         </div>
         <img src={data.urlImgData} alt="二维码" className="qr-code" />
