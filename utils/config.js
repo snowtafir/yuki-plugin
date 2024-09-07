@@ -6,14 +6,12 @@ import path from 'path';
 import { _paths } from './paths.js';
 
 class Config {
-    packageJsonPath;
     defaultConfigPath;
     userConfigPath;
     defaultConfig;
     userConfig;
     watcher;
     constructor() {
-        this.packageJsonPath = path.join(_paths.pluginPath, 'package.json');
         this.defaultConfigPath = path.join(_paths.pluginPath, 'defaultConfig');
         this.defaultConfig = {};
         this.userConfigPath = path.join(_paths.pluginPath, 'config');
@@ -108,14 +106,20 @@ class Config {
         config[key] = value;
         this.saveConfig("config", appDir, functionName, config);
     }
-    getLatestVersion() {
-        const content = fs.readFileSync(this.packageJsonPath, 'utf-8');
-        const packageJson = JSON.parse(content);
-        const match = packageJson.version;
-        if (match) {
-            return match;
+    getPackageJsonKey(keyName, path) {
+        try {
+            const content = fs.readFileSync(path, 'utf-8');
+            const packageJson = JSON.parse(content);
+            const match = packageJson[keyName];
+            if (match) {
+                return match;
+            }
+            else {
+                return null;
+            }
         }
-        else {
+        catch (error) {
+            logger.error(`getPackageJsonKey error: ${error}`);
             return null;
         }
     }

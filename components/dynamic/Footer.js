@@ -1,9 +1,13 @@
 import React from 'react';
 import Config from '../../utils/config.js';
 import { createRequire } from 'react-puppeteer';
+import path from 'path';
+import { _paths } from '../../utils/paths.js';
 
-const BOT_NAME = 'yunzai';
-const botVersion = "3.1+";
+const botPackageJsonPath = path.join(_paths.root, 'package.json');
+const BOT_NAME = Config.getPackageJsonKey('name', botPackageJsonPath);
+const botVersion = Config.getPackageJsonKey('version', botPackageJsonPath);
+const yukiPluginVersion = Config.getPackageJsonKey('version', path.join(_paths.pluginPath, 'package.json'));
 const require = createRequire(import.meta.url);
 const bilibililogo = require('./../../resources/img/icon/dynamic/bilibili.svg');
 const weibilogo = require('./../../resources/img/icon/dynamic/weibo.svg');
@@ -28,7 +32,7 @@ const Footer = ({ data }) => {
                     " & ",
                     React.createElement("span", { className: "yuki-plugin-text-title" }, "yuki-plugin"),
                     "-v",
-                    React.createElement("span", { className: "italic" }, `${Config.getLatestVersion()}`))),
+                    React.createElement("span", { className: "italic" }, `${yukiPluginVersion}`))),
             React.createElement("img", { src: data.urlImgData, alt: "\u4E8C\u7EF4\u7801", className: "qr-code" }))));
 };
 var Footer$1 = Footer;

@@ -1,9 +1,13 @@
 import React from 'react';
 import Config from '../../utils/config.js';
 import { createRequire } from 'react-puppeteer';
+import path from 'path';
+import { _paths } from '../../utils/paths.js';
 
-const BOT_NAME = 'yunzai';
-const botVersion = "3.1+";
+const botPackageJsonPath = path.join(_paths.root, 'package.json');
+const BOT_NAME = Config.getPackageJsonKey('name', botPackageJsonPath);
+const botVersion = Config.getPackageJsonKey('version', botPackageJsonPath);
+const yukiPluginVersion = Config.getPackageJsonKey('version', path.join(_paths.pluginPath, 'package.json'));
 const require = createRequire(import.meta.url);
 function App({ data }) {
     return (React.createElement(React.Fragment, null,
@@ -13,7 +17,7 @@ function App({ data }) {
                 React.createElement("div", { className: "id_text" }, "Yuki-Plugin"),
                 React.createElement("h2", { className: "day_text" },
                     "\u4F7F\u7528\u8BF4\u660E-v",
-                    Config.getLatestVersion())),
+                    yukiPluginVersion)),
             data.map((val, index) => (React.createElement("div", { className: "data_box", key: index },
                 React.createElement("div", { className: "tab_lable" }, val.group),
                 React.createElement("div", { className: "list" }, val.list.map((item, itemIndex) => (React.createElement("div", { className: "item", key: itemIndex },
@@ -27,7 +31,7 @@ function App({ data }) {
                 " & ",
                 React.createElement("span", { className: "yuki-plugin-text-title" }, "yuki-plugin"),
                 "-v",
-                React.createElement("span", { className: "italic" }, `${Config.getLatestVersion()}`)))));
+                React.createElement("span", { className: "italic" }, `${yukiPluginVersion}`)))));
 }
 
 export { App as default };
