@@ -8,20 +8,34 @@
 
 [![访问量](https://profile-counter.glitch.me/yuki-plugin/count.svg)](https://github.com/snowtafir/yuki-plugin)
 
-## 🌰安装插件
+# 🌰一、安装插件
 
-#### 1. 安装方式选择
-按照网络情况或个人喜好，选择安装方式。
+## 选择安装方式
+按照网络情况以及使用的bot框架是`Yunzai-Next`还是`Yunzai-V3:`，选择对应的安装方式。
 
-##### ```Yunzai-Next：```
+### ***（一）Yunzai-Next***
+> 选择其中一种方式安装插件：
 
-1. 方式1： yunzai-next npm包 安装插件：
->```
-> yarn add yz-yuki-plugin -W
->```
-接着修改 `yunzaijs/yunzai.config.js`，按版本选择修改方式：
+1. npm包安装到`yunzai-next/node_modules`的方式，仅Yunzai-Next支持：
+```
+ yarn add yz-yuki-plugin -W
+```
 
-Yunzai-Next v4.1.33+及以上版本：
+选择启用插件方式：
+
+* 方式1（推荐）：
+
+手动新建 `yunzai-next/yunzai.config.json` 文件，输入如下内容，`applications`字段添加的 `"yz-yuki-plugin"`即为启用本插件：
+
+```json
+{
+  "applications": ["yz-system", "yz-yuki-plugin"],
+  "middlewares": ["yunzai-mys/runtime", "yunzai-mys/mw"]
+}
+```
+* 方式2：
+
+修改 `yunzai-next/yunzai.config.js`：
 ```js
 import { defineConfig } from 'yunzai'
 export default defineConfig({
@@ -30,69 +44,64 @@ export default defineConfig({
 })
 ```
 
-旧版本：
-```js
-import yuki from 'yz-yuki-plugin' //新增该行
-export default defineConfig({
-  applications: [system(), yuki()], //该行添加 yuki() 
-  middlewares: [runtime(), starRail()]
-})
+2. 安装到 `yunzai-next/plugins` 的方式：
+
+> 仅支持Yunzai-Next的分支，选择仓库：
+
+gitee仓库：
+```shell
+git clone --branch main https://gitee.com/snowtafir/yuki-plugin.git ./plugins/yuki-plugin
 ```
 
-2. 方式2（V3的方式）：
->gitee仓库：
->```
->git clone --branch main https://gitee.com/snowtafir/yuki-plugin.git ./plugins/yuki-plugin
->```
-
->github仓库：
->```
->git clone --branch main https://github.com/snowtafir/yuki-plugin.git ./plugins/yuki-plugin
->```
-
-##### ```Yunzai-V3：```
->gitee仓库：
->```
->git clone --branch main3 https://gitee.com/snowtafir/yuki-plugin.git ./plugins/yuki-plugin
->```
-
->github仓库：
->```
->git clone --branch main3 https://github.com/snowtafir/yuki-plugin.git ./plugins/yuki-plugin
->```
-
-#### 2. 安装依赖
-* Yunzai-Next:
-
-方式2（V3的方式）安装则需要执行：
+github仓库：
+```shell
+git clone --branch main https://github.com/snowtafir/yuki-plugin.git ./plugins/yuki-plugin
 ```
+
+* 依赖安装：
+```shell
 yarn install
 ```
 
-* Yunzai-V3:
+### ***（二）Yunzai-V3***
+
+> 仅支持Yunzai-V3（TRSS/Miao）的分支，选择仓库，安装到 `yunzai/plugins`：
+
+gitee仓库：
 ```
+git clone --branch main3 https://gitee.com/snowtafir/yuki-plugin.git ./plugins/yuki-plugin
+```
+
+github仓库：
+```
+git clone --branch main3 https://github.com/snowtafir/yuki-plugin.git ./plugins/yuki-plugin
+```
+
+* 安装依赖
+
+```shell
 pnpm install --filter=yuki-plugin
 ```
 
-## 📦插件配置
+# 📦二、插件配置
 
 > [!IMPORTANT] 
 > 统一的配置文件路径：
 
 `Yunzai/data/yuki-plugin/config/`，启动一次后，即可查看配置文件。
 
-### 1.B站动态功能：
- 使用建议先绑定B站账号或配置cookie，绑定后即可使用相关功能。
+### （一）B站动态功能：
+ 使用前建议先绑定B站账号或配置cookie，绑定后即可使用相关功能。
 
-> **CK优先级：** **#添加B站CK** ＞ ***#扫码B站登录*** ＞ 自动ck。
+> **CK优先级：** **#添加B站CK** ＞ ***#扫码B站登录*** ＞ 自动ck。`只有删除前一个，后一个才生效，删除方法见功能指令。`
 
-`只有删除前一个，后一个才生效，删除方法见功能指令。`
+#### 1）绑定账号（推荐）：
+`#扫码B站登录`，获取B站登录CK。取消使用登录则发送：`#删除B站登录`
 
-#### （1） 绑定账号（推荐）：`#扫码B站登录`，获取B站登录CK。取消使用登录则发送：`#删除B站登录`
-#### （2） 手动配置本地Cookie（可选）：
+#### 2）手动配置本地Cookie（可选）：
  私聊/私信 Bot下发送`#添加B站CK: xxx` 添加本地浏览器 无痕模式下 登录b站 获取的B站cookie。
 
- <details> <summary>本地CK获取方法：</summary>
+<details> <summary>本地CK获取方法：</summary>
 
 ***注意事项：***
 > 你平常使用浏览器访问 b 站为普通模式，cookie会定期自动刷新而导致复制的旧ck一段时间就失效，你应该使用`隐私窗口/无痕式窗口`重新登录b站，并获取新的 cookie。
@@ -111,17 +120,19 @@ pnpm install --filter=yuki-plugin
 > [!TIP]
 > 保存目录：`Yunzai/data/yuki-plugin/biliCookie.yaml`，如需更换/更新cookie 使用新的cookie发送`#添加B站CK: xxx`覆盖绑定即可。停用手动本地ck则发送命令：`#删除B站ck`
 
-### 2.微博动态功能：
-#### （1） 获取微博博主uid：
->博主主页如：
+### （二）微博动态功能：
+* 获取微博博主uid：
+
+博主主页如：
 ```
 https://m.weibo.cn/u/6593199887 # 6593199887 为原神博主uid
 https://m.weibo.cn/u/7643376782 # 7643376782 为崩坏星穹铁道博主uid
 ```
-> 或打开微博app，进入博主主页，右上角点击分享，复制分享链接，在链接里找到相应uid。
-> 微博限制，可能连续获取动态会出现获取连接中断报错，待定时任务自动重试即可。
+或打开微博app，进入博主主页，右上角点击分享，复制分享链接，在链接里找到相应uid。
 
-## 🌈功能列表
+微博限制，可能连续获取动态会出现获取连接中断报错，待定时任务自动重试即可。
+
+# 🌈 三、功能列表
 
 请使用 `优纪帮助`或 `yuki帮助` 获取完整帮助
 
@@ -129,9 +140,9 @@ https://m.weibo.cn/u/7643376782 # 7643376782 为崩坏星穹铁道博主uid
 - [x] 微博动态
 
 
-## 🚀指令列表
+# 🚀 四、指令列表
 
-<details><summary>点击展开</summary>
+<details><summary>指令列表，点击展开</summary>
 
 > [!TIP]
 > 指令前缀：`#优纪`、`#yuki`、`/优纪`、`/yuki`，
@@ -173,20 +184,19 @@ https://m.weibo.cn/u/7643376782 # 7643376782 为崩坏星穹铁道博主uid
 
 </details>
 
-###  🌟 样式预览
-<details><summary>点击展开</summary>
+<details><summary>样式预览，点击展开</summary>
 
 ![](/resources/img/readme/mini-help.jpg)
 
 </details>
 
-## 支持与贡献
+# 🧩 五、支持与贡献
 
 如果你喜欢这个项目，请不妨点个 Star🌟，这是对开发者最大的动力，呜咪~❤️
 
 有意见或者建议也欢迎提交 [Issues](https://github.com/snowtafir/yuki-plugin/issues) 和 [Pull requests](https://github.com/snowtafir/yuki-plugin/pulls)。
 
-## license/声明
+# 🌟 六、license/声明
 - this project is inspired by [trss-xianxin-plugin](https://github.com/snowtafir/xianxin-plugin)
 - 基于  `MIT` 协议开源，但有如下额外限制：
 1. 其中`resources/img/icon/`目录下的素材来源于网络，不保证商业使用，请遵守相关版权法律，如有侵权请联系本人删除。
@@ -194,7 +204,7 @@ https://m.weibo.cn/u/7643376782 # 7643376782 为崩坏星穹铁道博主uid
 3. ```严禁用于非法行为```
 
 
-## 🔗 链接/致谢
+# 🔗 七、链接/致谢
 
 |                              Nickname                               | Contribution            |
 | :-----------------------------------------------------------------: | ----------------------- |
