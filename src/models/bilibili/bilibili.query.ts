@@ -91,15 +91,28 @@ export class BiliQuery {
           pics = desc?.pics;
           pics = pics.map((item: any) => { return { url: item?.url, width: item?.width, height: item?.height } }) || [];
           formatData.data.title = desc?.title;
+          // 文章内容过长，则尝试获取全文
           if ((desc?.summary?.text)?.length >= 480) {
-            const readInfo = await this.getFullArticleContent(this.formatUrl(desc?.jump_url));
-            formatData.data.content = this.praseFullArticleContent(readInfo?.content);
-            formatData.data.pics = [];
-            if (!(formatData.data.content)) {
+            const { readInfo, articleType } = await this.getFullArticleContent(this.formatUrl(desc?.jump_url));
+            // 文章链接类型为 cv（旧类型） 或者 opus（新类型）
+            if (articleType === "cv") {
+              formatData.data.content = this.praseFullOldTypeArticleContent(readInfo?.content);
+              if (String(formatData.data.content).length < 100) {
+                formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || "";
+                formatData.data.pics = pics;
+              } else {
+                formatData.data.pics = [];
+              }
+            } else if (articleType === "opus") {
+              const { content, img } = this.praseFullNewTypeArticleContent(readInfo?.paragraphs);
+              formatData.data.content = content;
+              formatData.data.pics = (img && img.length > 0) ? img : pics;
+              if (content && content.length < 100) {
+                formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text);
+              }
+            } else {
               formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || "";
               formatData.data.pics = pics;
-            } else {
-              formatData.data.pics = [];
             }
           } else {
             formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || "";
@@ -108,7 +121,7 @@ export class BiliQuery {
         } else if (majorType === "MAJOR_TYPE_ARTICLE") {
           desc = data?.modules?.module_dynamic?.major?.article || {};
           pics = desc?.covers;
-          pics = pics.map((item: any) => { return { url: item } }) || [];
+          pics = pics.map((item: any) => ({ url: item }));
           formatData.data.title = desc?.title;
           formatData.data.content = this.parseRichTextNodes(desc?.desc);
         } else {
@@ -217,8 +230,8 @@ export class BiliQuery {
   };
 
   /**获取完整B站文章内容 
-* @param postId - 文章ID
-* @returns {Json}完整的B站文章内容json数据
+ * @param postUrl - 文章链接: https://www.bilibili.com/read/cvxxxx 或者 https://www.bilibili.com/opus/xxxx
+ * @returns {Json} 完整的B站文章内容json数据
 */
   static async getFullArticleContent(postUrl: string) {
     const Cookie = await readSyncCookie();
@@ -228,19 +241,31 @@ export class BiliQuery {
         responseType: 'text'
       });
       const text = response.data;
-      const match = text.match(/"readInfo":([\s\S]+?),"readViewInfo":/);
-      if (match) {
-        const full_json_text = match[1];
-        const readInfo = JSON.parse(full_json_text);
-        return readInfo;
+      let match: any, readInfo: any, articleType: string;
+      if (/^https:\/\/www.bilibili.com\/read\/cv/.test(postUrl)) {
+        match = String(text).match(/"readInfo":([\s\S]+?),"readViewInfo":/);
+        if (match) {
+          const full_json_text = match[1];
+          readInfo = JSON.parse(full_json_text);
+          articleType = 'cv'
+          return { readInfo, articleType };
+        }
+      } else if (/^https:\/\/www.bilibili.com\/opus\//.test(postUrl)) {
+        match = String(text).match(/"module_content":([\s\S]+?),\s*"module_type":"MODULE_TYPE_CONTENT"/);
+        if (match) {
+          const full_json_text = match[1];
+          readInfo = JSON.parse(full_json_text);
+          articleType = 'opus'
+          return { readInfo, articleType };
+        }
       }
     } catch (err) {
       logger?.error(`优纪插件：获取B站完整文章内容失败 [ ${postUrl} ] : ${err}`);
       return null;
     }
   }
-  /**解析完整文章内容 */
-  static praseFullArticleContent(content: string) {
+  /**解析旧版完整文章内容 */
+  static praseFullOldTypeArticleContent(content: string) {
     content = String(content).replace(/\n/g, '<br>');
     // 使用正则表达式匹配 <img> 标签的 data-src 属性
     const imgTagRegex = /<img[^>]*data-src="([^"]*)"[^>]*>/g;
@@ -253,6 +278,84 @@ export class BiliQuery {
 
     return content;
   }
+
+  /**解析新版完整文章内容
+  * @param paragraphs - MODULE_TYPE_CONTENT 类型文章的段落数组
+  */
+  static praseFullNewTypeArticleContent = (paragraphs: any[] | any) => {
+    if (Array.isArray(paragraphs)) {
+      // 筛选出正文和图片
+      paragraphs = paragraphs.filter(paragraph => paragraph.para_type === 1 || paragraph.para_type === 2);
+
+      let content: string = "";
+      let img: any[] = [];
+
+      paragraphs.forEach((item: { align?: number, para_type?: number; text?: { nodes?: any[] }; pic?: { pics?: any[] } }) => {
+        switch (item.para_type) {
+          case 1:
+            // 处理正文
+            content += item.text.nodes.map((node: any) => {
+              let nodeType = node.type;
+              if (nodeType === 'TEXT_NODE_TYPE_RICH') {
+                let richType = node?.rich?.type;
+                switch (richType) {
+                  case 'RICH_TEXT_NODE_TYPE_TOPIC':
+                    // 确保链接以 https:// 开头
+                    let jumpUrl = node?.rich?.jump_url;
+                    if (jumpUrl && !jumpUrl.startsWith('http://') && !jumpUrl.startsWith('https://')) {
+                      jumpUrl = `https://${jumpUrl}`;
+                    }
+                    return `<span class="bili-rich-text-module topic" href="${jumpUrl}">${node?.rich?.text}</span>`;
+
+                  case 'RICH_TEXT_NODE_TYPE_TEXT':
+                    // 正文将 \n 替换为 <br> 以实现换行
+                    return node?.rich?.text.replace(/\n/g, '<br>');
+
+                  case 'RICH_TEXT_NODE_TYPE_AT':
+                    // 处理 @ 类型，使用官方的HTML标签写法
+                    return `<span data-module="desc" data-type="at" data-oid="${node?.rich?.rid}" class="bili-rich-text-module at">${node?.rich?.text}</span>`;
+
+                  case 'RICH_TEXT_NODE_TYPE_LOTTERY':
+                    // 处理互动抽奖类型，使用官方的HTML标签写法
+                    return `<span data-module="desc" data-type="lottery" data-oid="${node?.rich?.rid}" class="bili-rich-text-module lottery">${node?.rich?.text}</span>`;
+
+                  case 'RICH_TEXT_NODE_TYPE_WEB':
+                    // 处理 RICH_TEXT_NODE_TYPE_WEB 类型，直接拼接 text 属性
+                    return node?.rich?.text;
+
+                  case 'RICH_TEXT_NODE_TYPE_EMOJI':
+                    // 处理表情类型，使用 img 标签显示表情
+                    const emoji = node?.rich?.emoji;
+                    return `<img src="${emoji?.icon_url}" alt="${emoji?.text}" title="${emoji?.text}" style="vertical-align: middle; width: ${emoji?.size}em; height: ${emoji?.size}em;">`;
+
+                  case 'RICH_TEXT_NODE_TYPE_GOODS':
+                    // 处理商品推广类型，使用官方的HTML标签写法
+                    const goods_url = node?.rich?.jump_url;
+                    return `<span data-module="desc" data-type="goods" data-url="${goods_url}" data-oid="${node?.rich?.rid}" class="bili-rich-text-module goods ${node?.rich?.icon_name}">&ZeroWidthSpace;${node?.rich?.text}</span>`;
+                  default:
+                    return node;
+                }
+              } else if (nodeType === "TEXT_NODE_TYPE_WORD") {
+                return `${node?.word?.words}<br>`;
+              }
+            }).join('');
+            break;
+          case 2:
+            // 处理图片
+            img = img.concat(item?.pic?.pics.map((item: any) => { return { url: item?.url, width: item?.width, height: item?.height } }) || []);
+            break;
+          default:
+            break;
+        }
+      });
+
+      return { content, img };
+    } else {
+      // 未知类型，返回null
+      return null;
+    }
+  };
+
 
   // 处理斜杠开头的链接
   static formatUrl(url: string): string {
