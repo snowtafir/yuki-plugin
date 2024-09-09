@@ -52,7 +52,7 @@ export default function App({ data }: HelpPageProps) {
         ))}
         <div className="logo" style={{ marginTop: '6px' }}>
           Created By {`${BOT_NAME}-v` + `${botVersion}`} & <span className="yuki-plugin-text-title">yuki-plugin</span>-v
-          <span className="italic">{`${yukiPluginVersion}`}</span>
+          <span className="italic">{yukiPluginVersion}</span>
         </div>
       </div>
     </>

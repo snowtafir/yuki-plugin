@@ -47,7 +47,7 @@ const Footer: React.FC<FooterProps> = ({ data }) => {
           </div>
           <div className="bot-plugin-info" style={{ marginTop: '6px' }}>
             Created By {`${BOT_NAME}-v` + `${botVersion}`} & <span className="yuki-plugin-text-title">yuki-plugin</span>-v
-            <span className="italic">{`${yukiPluginVersion}`}</span>
+            <span className="italic">{yukiPluginVersion}</span>
           </div>
         </div>
         <img src={data.urlImgData} alt="二维码" className="qr-code" />
