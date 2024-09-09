@@ -1,7 +1,9 @@
 // QrcodeLoginPage.tsx
 import React from 'react';
-import { createRequire } from 'react-puppeteer';
-const require = createRequire(import.meta.url);
+import { _paths } from '@/utils/paths';
+import path from 'path';
+
+const LoginQrcodeCss: string = path.join(_paths.pluginResources, 'css/loginQrcode/Page.css')
 
 export type LoginProps = {
   data: {
@@ -12,7 +14,7 @@ export type LoginProps = {
 export default function App({ data }: LoginProps) {
   return (
     <>
-      <link rel="stylesheet" href={require("./../../../resources/css/loginQrcode/Page.css")} />
+      <link rel="stylesheet" href={LoginQrcodeCss} />
       <div className='container w-96 max-h-96 m-auto text-lg p-5'>
         <div className="txt-0 text-center mt-3 mb-3 p-1 text-blue-500" >
           Created By yuki-plugin<br />扫码登录B站获取CK

@@ -2,12 +2,12 @@
 // up账户组件
 import React from 'react';
 import LogoText from '@/components/dynamic/LogoText';
-import { createRequire } from 'react-puppeteer';
-const require = createRequire(import.meta.url)
+import { _paths } from '@/utils/paths';
+import path from 'path';
 
-
-const bilibililogo: string = require('./../../../resources/img/icon/dynamic/bilibili.svg')
-const weibilogo: string = require('./../../../resources/img/icon/dynamic/weibo.svg')
+const Bilibililogo: string = path.join(_paths.pluginResources, 'img/icon/dynamic/bilibili.svg')
+const Weibilogo: string = path.join(_paths.pluginResources, 'img/icon/dynamic/weibo.svg')
+const AccountCss: string = path.join(_paths.pluginResources, 'css/dynamic/Account.css')
 
 type AccountProps = {
   data: {
@@ -27,7 +27,7 @@ const Account: React.FC<AccountProps> = ({ data }) => {
 
   return (
     <>
-      <link rel="stylesheet" href={require("./../../../resources/css/dynamic/Account.css")} />
+      <link rel="stylesheet" href={AccountCss} />
       <div className="account">
         <div className="avatar-container">
           <img src={data.face} alt="头像" className="avatar" />
@@ -38,8 +38,8 @@ const Account: React.FC<AccountProps> = ({ data }) => {
           </div>
         </div>
         <div className="logo-container">
-          {data.appName === 'bilibili' && renderLogo(bilibililogo, 'bilibili-logo')}
-          {data.appName === 'weibo' && renderLogo(weibilogo, 'weibo-logo')}
+          {data.appName === 'bilibili' && renderLogo(Bilibililogo, 'bilibili-logo')}
+          {data.appName === 'weibo' && renderLogo(Weibilogo, 'weibo-logo')}
           <LogoText data={data} />
         </div>
       </div>

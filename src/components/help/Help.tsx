@@ -2,11 +2,13 @@
 import React from 'react';
 import { BOT_NAME, ConfigController } from 'yunzai';
 import Config from '@/utils/config';
-import { createRequire } from 'react-puppeteer';
+import { _paths } from '@/utils/paths';
+import path from 'path';
 
 const botVersion = ConfigController.package?.version
 
-const require = createRequire(import.meta.url);
+const HelpCss: string = path.join(_paths.pluginResources, 'css/help/help.css')
+const iconPath = (iconName: string) => path.join(_paths.pluginResources, `img/icon/puplic/${iconName}.png`)
 
 export type HelpPageProps = {
   data: {
@@ -22,7 +24,7 @@ export type HelpPageProps = {
 export default function App({ data }: HelpPageProps) {
   return (
     <>
-      <link rel="stylesheet" href={require('./../../../resources/css/help/help.css')} />
+      <link rel="stylesheet" href={HelpCss} />
       <div className="container" id="container">
         <div className="head_box">
           <div className="id_text">Yuki-Plugin</div>
@@ -36,7 +38,7 @@ export default function App({ data }: HelpPageProps) {
             <div className="list">
               {val.list.map((item, itemIndex) => (
                 <div className="item" key={itemIndex}>
-                  <img className="icon" src={require(`./../../../resources/img/icon/puplic/${item.icon}.png`)} alt={item.title} />
+                  <img className="icon" src={iconPath(item.icon)} alt={item.title} />
                   <div className="title">
                     <div className="text">{item.title}</div>
                     <div className="dec">{item.desc}</div>

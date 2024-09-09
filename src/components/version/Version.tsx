@@ -1,11 +1,12 @@
 import React from 'react';
 import { BOT_NAME, ConfigController } from 'yunzai';
 import Config from '../../utils/config';
-import { createRequire } from 'react-puppeteer';
+import { _paths } from '@/utils/paths';
+import path from 'path';
 
 const botVersion = ConfigController.package?.version
 
-const require = createRequire(import.meta.url);
+const VersionCss: string = path.join(_paths.pluginResources, 'css/version/version.css')
 
 export type VersionProps = {
   data: {
@@ -17,7 +18,7 @@ export type VersionProps = {
 export default function App({ data }: VersionProps) {
   return (
     <>
-      <link rel="stylesheet" href={require("./../../../resources/css/version/version.css")} />
+      <link rel="stylesheet" href={VersionCss} />
       <div className="container" id="container">
         {data.map((item, idx) => (
           <div key={idx} className="version-card">

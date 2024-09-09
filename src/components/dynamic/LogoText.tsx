@@ -1,8 +1,10 @@
 // LogoText
 // Logo 文本组件
 import React from 'react';
-import { createRequire } from 'react-puppeteer';
-const require = createRequire(import.meta.url)
+import { _paths } from '@/utils/paths';
+import path from 'path';
+
+const LogoTextCss: string = path.join(_paths.pluginResources, 'css/dynamic/LogoText.css')
 
 type LogoTextProps = {
   data: {
@@ -13,7 +15,7 @@ type LogoTextProps = {
 
 const LogoText: React.FC<LogoTextProps> = ({ data }) => (
   <>
-    <link rel="stylesheet" href={require('./../../../resources/css/dynamic/LogoText.css')} />
+    <link rel="stylesheet" href={LogoTextCss} />
     {data.appName === 'bilibili' && (
       <div className="bilibili-logo-text">{data.category}</div>
     )}
