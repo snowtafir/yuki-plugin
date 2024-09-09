@@ -5,7 +5,8 @@ import Config from '@/utils/config';
 import { _paths } from '@/utils/paths';
 import path from 'path';
 
-const botVersion = ConfigController.package?.version
+const botVersion = ConfigController.package?.version;
+const yukiPluginVersion = Config.getPackageJsonKey('version', path.join(_paths.pluginPath, 'package.json'));
 
 const HelpCss: string = path.join(_paths.pluginResources, 'css/help/help.css')
 const iconPath = (iconName: string) => path.join(_paths.pluginResources, `img/icon/puplic/${iconName}.png`)
@@ -28,7 +29,7 @@ export default function App({ data }: HelpPageProps) {
       <div className="container" id="container">
         <div className="head_box">
           <div className="id_text">Yuki-Plugin</div>
-          <h2 className="day_text">使用说明-v{Config.getLatestVersion()}</h2>
+          <h2 className="day_text">使用说明-v{yukiPluginVersion}</h2>
         </div>
         {data.map((val, index) => (
           <div className="data_box" key={index}>
@@ -50,7 +51,7 @@ export default function App({ data }: HelpPageProps) {
         ))}
         <div className="logo" style={{ marginTop: '6px' }}>
           Created By {`${BOT_NAME}-v` + `${botVersion}`} & <span className="yuki-plugin-text-title">yuki-plugin</span>-v
-          <span className="italic">{`${Config.getLatestVersion()}`}</span>
+          <span className="italic">{yukiPluginVersion}</span>
         </div>
       </div>
     </>

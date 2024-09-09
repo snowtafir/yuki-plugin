@@ -12,7 +12,6 @@ declare const logger: any;
  * Config 类用于管理配置文件的读取和监听
  */
 class Config {
-  readonly packageJsonPath: string;
   readonly defaultConfigPath: string;
   readonly userConfigPath: string;
   defaultConfig: Record<string, any>;
@@ -20,7 +19,6 @@ class Config {
   watcher: Record<string, chokidar.FSWatcher>;
 
   constructor() {
-    this.packageJsonPath = path.join(_paths.pluginPath, 'package.json');
     /** 默认设置 */
     this.defaultConfigPath = path.join(_paths.pluginPath, 'defaultConfig');
     this.defaultConfig = {};
@@ -177,15 +175,23 @@ class Config {
     this.saveConfig("config", appDir, functionName, config); // 保存更新后的配置
   }
 
-  /** 读取package.json文件，获取最新版本号*/
-  getLatestVersion(): string | null {
-    const content = fs.readFileSync(this.packageJsonPath, 'utf-8');
-    const packageJson: { [key: string]: any } = JSON.parse(content);
-    const match: string | null = packageJson.version;
+  /** 读取package.json文件，获取指定key的值 
+   * @param keyName 要获取的key名称
+   * @param path package.json文件路径
+  */
+  getPackageJsonKey(keyName: string, path: string): string | null {
+    try {
+      const content = fs.readFileSync(path, 'utf-8');
+      const packageJson: { [key: string]: any } = JSON.parse(content);
+      const match: string | null = packageJson[keyName];
 
-    if (match) {
-      return match;
-    } else {
+      if (match) {
+        return match;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      logger.error(`getPackageJsonKey error: ${error}`);
       return null;
     }
   }

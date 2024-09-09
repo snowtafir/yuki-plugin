@@ -1,10 +1,13 @@
 import chalk from 'chalk';
 import Config from '@/utils/config';
 import { _paths } from '@/utils/paths';
+import path from 'path';
 import YukiBili from '@/apps/bilibili';
 import YukiHelp from '@/apps/help.ts';
 import YukiVersion from '@/apps/version';
 import YukiWeibo from '@/apps/weibo';
+
+const yukiPluginVersion = Config.getPackageJsonKey('version', path.join(_paths.pluginPath, 'package.json'));
 
 let apps = { YukiBili, YukiHelp, YukiVersion, YukiWeibo }
 let rules = {}
@@ -21,7 +24,7 @@ for (let key in apps) {
 declare const logger: any;
 
 logger.info(chalk.rgb(0, 190, 255)(`-----------------------------------------`));
-logger.info(chalk.rgb(255, 225, 255)(`|优纪插件 ${Config.getLatestVersion()} 初始化~`));
+logger.info(chalk.rgb(255, 225, 255)(`|优纪插件 ${yukiPluginVersion} 初始化~`));
 logger.info(chalk.rgb(255, 245, 255)(`|作者：snowtafir`));
 logger.info(chalk.rgb(255, 225, 255)(`|仓库地址：`));
 logger.info(chalk.rgb(255, 245, 255)(`|https://github.com/snowtafir/yuki-plugin`));

@@ -5,7 +5,8 @@ import Config from '@/utils/config';
 import { _paths } from '@/utils/paths';
 import path from 'path';
 
-const botVersion = ConfigController.package?.version
+const botVersion = ConfigController.package?.version;
+const yukiPluginVersion = Config.getPackageJsonKey('version', path.join(_paths.pluginPath, 'package.json'));
 
 const bilibililogo: string = path.join(_paths.pluginResources, 'img/icon/dynamic/bilibili.svg')
 const weibilogo: string = path.join(_paths.pluginResources, 'img/icon/dynamic/weibo.svg')
@@ -45,7 +46,7 @@ const Footer: React.FC<FooterProps> = ({ data }) => {
           </div>
           <div className="bot-plugin-info" style={{ marginTop: '6px' }}>
             Created By {`${BOT_NAME}-v` + `${botVersion}`} & <span className="yuki-plugin-text-title">yuki-plugin</span>-v
-            <span className="italic">{`${Config.getLatestVersion()}`}</span>
+            <span className="italic">{yukiPluginVersion}</span>
           </div>
         </div>
         <img src={data.urlImgData} alt="二维码" className="qr-code" />
