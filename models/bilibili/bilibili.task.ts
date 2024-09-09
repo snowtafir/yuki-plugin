@@ -1,11 +1,11 @@
 import QRCode from 'qrcode';
-import { MainProps } from "../../components/dynamic/MainPage";
-import Config from '../../utils/config';
-import Image from '../../utils/image';
-import { ScreenshotOptions } from './../../utils/puppeteer.render';
-import { BiliGetWebData } from './bilibili.get.web.data';
-import { postGateway, readSyncCookie } from './bilibili.models';
-import { BiliQuery } from './bilibili.query';
+import { MainProps } from "@/components/dynamic/MainPage";
+import Config from '@/utils/config';
+import Image from '@/utils/image';
+import { ScreenshotOptions } from '@/utils/puppeteer.render';
+import { BiliGetWebData } from '@/models/bilibili/bilibili.get.web.data';
+import { postGateway, readSyncCookie } from '@/models/bilibili/bilibili.models';
+import { BiliQuery } from '@/models/bilibili/bilibili.query';
 
 declare const Bot: any, redis: any, segment: any;
 

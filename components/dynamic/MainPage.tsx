@@ -1,12 +1,13 @@
 // MainPage.tsx
 import React from 'react';
-import Account from './Account.tsx';
-import Content from './Content.tsx';
-import ForwardContent from './ForwardContent';
-import Footer from './Footer';
-import { createRequire } from 'react-puppeteer';
+import Account from '@/components/dynamic/Account.tsx';
+import Content from '@/components/dynamic/Content.tsx';
+import ForwardContent from '@/components/dynamic/ForwardContent';
+import Footer from '@/components/dynamic//Footer';
+import { _paths } from '@/utils/paths';
+import path from 'path';
 
-const require = createRequire(import.meta.url)
+const MainPageCss: string = path.join(_paths.pluginResources, 'css/dynamic/MainPage.css')
 
 export type MainProps = {
   data: {
@@ -44,7 +45,7 @@ export type MainProps = {
 export default function App({ data }: MainProps) {
   return (
     <>
-      <link rel="stylesheet" href={`${require('./../../resources/css/dynamic/MainPage.css')}`} />
+      <link rel="stylesheet" href={MainPageCss} />
       <div className="outside-border">
         <div className="container">
           <Account data={data} />

@@ -3,7 +3,7 @@ import YAML from 'yaml';
 import chokidar from "chokidar";
 import lodash from "lodash";
 import path from 'path';
-import { _paths } from "./paths";
+import { _paths } from "@/utils/paths";
 
 // 声明 logger 为全局变量
 declare const logger: any;

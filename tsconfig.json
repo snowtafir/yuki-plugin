@@ -32,7 +32,12 @@
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
     "outDir": "./dist",
-    "rootDir": "./"
+    "rootDir": "./",
+    // pages
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["./*"]
+    }
   },
   "ts-node": {
     "esm": true,

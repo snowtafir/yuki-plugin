@@ -1,7 +1,6 @@
 // Footer.tsx
 import React from 'react';
 import Config from '../../utils/config';
-import { createRequire } from 'react-puppeteer';
 import path from 'path';
 import { _paths } from '../../utils/paths';
 
@@ -10,9 +9,9 @@ const BOT_NAME = Config.getPackageJsonKey('name', botPackageJsonPath);
 const botVersion = Config.getPackageJsonKey('version', botPackageJsonPath);
 const yukiPluginVersion = Config.getPackageJsonKey('version', path.join(_paths.pluginPath, 'package.json'));
 
-const require = createRequire(import.meta.url)
-const bilibililogo: string = require('./../../resources/img/icon/dynamic/bilibili.svg')
-const weibilogo: string = require('./../../resources/img/icon/dynamic/weibo.svg')
+const bilibililogo: string = path.join(_paths.pluginResources, 'img/icon/dynamic/bilibili.svg')
+const weibilogo: string = path.join(_paths.pluginResources, 'img/icon/dynamic/weibo.svg')
+const FooterCss: string = path.join(_paths.pluginResources, 'css/dynamic/Footer.css')
 
 type FooterProps = {
   data: {
@@ -27,7 +26,7 @@ const Footer: React.FC<FooterProps> = ({ data }) => {
 
   return (
     <>
-      <link rel="stylesheet" href={require('./../../resources/css/dynamic/Footer.css')} />
+      <link rel="stylesheet" href={FooterCss} />
       <div className="footer">
         <div className="footer-text-container">
           {data.appName === 'bilibili' && (

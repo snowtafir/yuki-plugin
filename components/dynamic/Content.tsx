@@ -1,7 +1,11 @@
 // DynamicContent.tsx
 import React from 'react';
-import { createRequire } from 'react-puppeteer';
-const require = createRequire(import.meta.url)
+import { _paths } from '@/utils/paths';
+import path from 'path';
+
+const ContentBoxGrid4Css: string = path.join(_paths.pluginResources, 'css/dynamic/Content.box.grid.4.css')
+const ContentBoxGrid9Css: string = path.join(_paths.pluginResources, 'css/dynamic/Content.box.grid.9.css')
+const ContentCss: string = path.join(_paths.pluginResources, 'css/dynamic/Content.css')
 
 type ContentProps = {
   data: {
@@ -28,8 +32,8 @@ const Content: React.FC<ContentProps> = ({ data }) => {
       })}
     </div>
   );
-  const boxGrid_4 = <link key="0" rel="stylesheet" href={require('./../../resources/css/dynamic/Content.box.grid.4.css')} />
-  const boxGrid_9 = <link key="0" rel="stylesheet" href={require('./../../resources/css/dynamic/Content.box.grid.9.css')} />
+  const boxGrid_4 = <link key="0" rel="stylesheet" href={ContentBoxGrid4Css} />
+  const boxGrid_9 = <link key="0" rel="stylesheet" href={ContentBoxGrid9Css} />
   /**动态宫格样式 */
   function getBoxGridStyle(pics: Array<any>) {
     if (!Array.isArray(pics) || pics.length === 0) {
@@ -86,7 +90,7 @@ const Content: React.FC<ContentProps> = ({ data }) => {
     return null;
   }
   const boxGrid = data.boxGrid && (data.pics && getBoxGridStyle(data.pics));
-  const contentCss = <link rel="stylesheet" href={require('./../../resources/css/dynamic/Content.css')} />
+  const contentCss = <link rel="stylesheet" href={ContentCss} />
   switch (data.type) {
     case 'DYNAMIC_TYPE_LIVE_RCMD':
       return (

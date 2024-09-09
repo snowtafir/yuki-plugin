@@ -1,15 +1,14 @@
 import React from 'react';
-import Config from '../../utils/config';
-import { createRequire } from 'react-puppeteer';
+import Config from '@/utils/config';
 import path from 'path';
-import { _paths } from '../../utils/paths';
+import { _paths } from '@/utils/paths';
 
 const botPackageJsonPath = path.join(_paths.root, 'package.json');
 const BOT_NAME = Config.getPackageJsonKey('name', botPackageJsonPath)
 const botVersion = Config.getPackageJsonKey('version', botPackageJsonPath)
 const yukiPluginVersion = Config.getPackageJsonKey('version', path.join(_paths.pluginPath, 'package.json'));
 
-const require = createRequire(import.meta.url);
+const VersionCss: string = path.join(_paths.pluginResources, 'css/version/version.css')
 
 export type VersionProps = {
   data: {
@@ -21,7 +20,7 @@ export type VersionProps = {
 export default function App({ data }: VersionProps) {
   return (
     <>
-      <link rel="stylesheet" href={require("./../../resources/css/version/version.css")} />
+      <link rel="stylesheet" href={VersionCss} />
       <div className="container" id="container">
         {data.map((item, idx) => (
           <div key={idx} className="version-card">

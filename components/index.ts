@@ -1,6 +1,6 @@
-const MainPage = (await import('./dynamic/MainPage.js')).default;
-const Help = (await import('./help/Help.js')).default;
-const LoginQrcodePage = (await import('./loginQrcode/Page.js')).default;
-const Version = (await import('./version/Version.js')).default;
+const MainPage = (await import('@/components/dynamic/MainPage')).default;
+const Help = (await import('@/components/help/Help')).default;
+const LoginQrcodePage = (await import('@/components/loginQrcode/Page')).default;
+const Version = (await import('@/components/version/Version')).default;
 
 export { Help, LoginQrcodePage, MainPage, Version };

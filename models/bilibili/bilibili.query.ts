@@ -1,6 +1,6 @@
 import moment from "moment";
-import { readSyncCookie } from "./bilibili.models";
-import { BiliApi } from "./bilibili.api";
+import { readSyncCookie } from "@/models/bilibili/bilibili.models";
+import { BiliApi } from "@/models/bilibili/bilibili.api";
 import axios from "axios";
 import lodash from "lodash";
 

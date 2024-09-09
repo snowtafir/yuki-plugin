@@ -1,7 +1,7 @@
-import Image from '../utils/image';
-import { VersionProps } from '../components/version/Version';
-import VersionData from '../models/version/version';
-import { ScreenshotOptions } from '../utils/puppeteer.render';
+import Image from '@/utils/image';
+import { VersionProps } from '@/components/version/Version';
+import VersionData from '@/models/version/version';
+import { ScreenshotOptions } from '@/utils/puppeteer.render';
 import plugin from "../../../lib/plugins/plugin.js";
 
 declare const segment: any;

@@ -1,7 +1,7 @@
 import chalk from 'chalk';
-import Config from './utils/config';
+import Config from '@/utils/config';
 import path from 'path';
-import { _paths } from './utils/paths';
+import { _paths } from '@/utils/paths';
 
 const yukiPluginVersion = Config.getPackageJsonKey('version', path.join(_paths.pluginPath, 'package.json'));
 

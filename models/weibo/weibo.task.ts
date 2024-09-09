@@ -1,10 +1,10 @@
 import QRCode from 'qrcode';
-import { MainProps } from "../../components/dynamic/MainPage";
-import Config from '../../utils/config';
-import Image from '../../utils/image';
-import { ScreenshotOptions } from '../../utils/puppeteer.render';
-import { WeiboGetWebData } from './weibo.get.web.data';
-import { WeiboQuery } from './weibo.query';
+import { MainProps } from "@/components/dynamic/MainPage";
+import Config from '@/utils/config';
+import Image from '@/utils/image';
+import { ScreenshotOptions } from '@/utils/puppeteer.render';
+import { WeiboGetWebData } from '@/models/weibo/weibo.get.web.data';
+import { WeiboQuery } from '@/models/weibo/weibo.query';
 
 declare const Bot: any, redis: any, segment: any;
 
