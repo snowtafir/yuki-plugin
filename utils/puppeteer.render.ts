@@ -22,8 +22,11 @@ export type ScreenshotOptions = {
   saveHtmlfile?: boolean
 }
 
-export class YukiPuppeteerRender extends Puppeteer {
-
+export class YukiPuppeteerRender {
+  private puppeteerInstance: Puppeteer;
+  constructor(puppeteerInstance: Puppeteer) {
+    this.puppeteerInstance = puppeteerInstance;
+  }
   /**
    * 截图并返回buffer
    * @param htmlPath 绝对路径
@@ -40,12 +43,12 @@ export class YukiPuppeteerRender extends Puppeteer {
    * @returns {false | {img: buffer[]}}
    */
   async yukiScreenshot(htmlPath: string, Options?: ScreenshotOptions): Promise<false | { img: Buffer[]; }> {
-    if (!(await this.isStart())) return false
+    if (!(await this.puppeteerInstance.isStart())) return false
     let name = Options?.modelName ?? 'yuki-plugin';
     let pageHeight = Options?.pageSplitHeight ?? 8000; // 分割图片高度，默认 8000
 
     try {
-      const page = await this.browser?.newPage().catch(err => {
+      const page = await this.puppeteerInstance.browser?.newPage().catch(err => {
         logger.error(err)
       })
       if (!page) return false
