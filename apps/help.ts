@@ -1,8 +1,8 @@
 import { Plugin, Segment } from 'yunzai';
-import Image from '../utils/image';
-import { HelpPageProps } from '../components/help/Help';
-import Help from '../models/help/help';
-import { ScreenshotOptions } from '../utils/puppeteer.render';
+import Image from '@/utils/image';
+import { HelpPageProps } from '@/components/help/Help';
+import Help from '@/models/help/help';
+import { ScreenshotOptions } from '@/utils/puppeteer.render';
 
 export default class YukiHelp extends Plugin {
   constructor() {

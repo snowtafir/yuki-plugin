@@ -2,7 +2,7 @@
 import { Puppeteer } from 'react-puppeteer';
 import fs from 'fs';
 import path from 'path';
-import { _paths } from './paths'
+import { _paths } from '@/utils/paths'
 
 declare const logger: any;
 

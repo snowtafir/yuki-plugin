@@ -1,5 +1,5 @@
 import { EventType } from 'yunzai';
-import Config from '../../utils/config';
+import Config from '@/utils/config';
 
 export default class Help {
   e?: EventType;
