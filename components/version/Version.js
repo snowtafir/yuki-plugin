@@ -1,6 +1,5 @@
 import React from 'react';
 import Config from '../../utils/config.js';
-import { createRequire } from 'react-puppeteer';
 import path from 'path';
 import { _paths } from '../../utils/paths.js';
 
@@ -8,10 +7,10 @@ const botPackageJsonPath = path.join(_paths.root, 'package.json');
 const BOT_NAME = Config.getPackageJsonKey('name', botPackageJsonPath);
 const botVersion = Config.getPackageJsonKey('version', botPackageJsonPath);
 const yukiPluginVersion = Config.getPackageJsonKey('version', path.join(_paths.pluginPath, 'package.json'));
-const require = createRequire(import.meta.url);
+const VersionCss = path.join(_paths.pluginResources, 'css/version/version.css');
 function App({ data }) {
     return (React.createElement(React.Fragment, null,
-        React.createElement("link", { rel: "stylesheet", href: require("./../../resources/css/version/version.css") }),
+        React.createElement("link", { rel: "stylesheet", href: VersionCss }),
         React.createElement("div", { className: "container", id: "container" },
             data.map((item, idx) => (React.createElement("div", { key: idx, className: "version-card" },
                 React.createElement("div", { className: "title" },
@@ -25,7 +24,7 @@ function App({ data }) {
                 " & ",
                 React.createElement("span", { className: "yuki-plugin-text-title" }, "yuki-plugin"),
                 "-v",
-                React.createElement("span", { className: "italic" }, `${yukiPluginVersion}`)))));
+                React.createElement("span", { className: "italic" }, yukiPluginVersion)))));
 }
 
 export { App as default };

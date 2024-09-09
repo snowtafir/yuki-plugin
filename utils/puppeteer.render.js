@@ -1,16 +1,19 @@
-import { Puppeteer } from 'react-puppeteer';
 import fs__default from 'fs';
 import path from 'path';
 import { _paths } from './paths.js';
 
-class YukiPuppeteerRender extends Puppeteer {
+class YukiPuppeteerRender {
+    puppeteerInstance;
+    constructor(puppeteerInstance) {
+        this.puppeteerInstance = puppeteerInstance;
+    }
     async yukiScreenshot(htmlPath, Options) {
-        if (!(await this.isStart()))
+        if (!(await this.puppeteerInstance.isStart()))
             return false;
         let name = Options?.modelName ?? 'yuki-plugin';
         let pageHeight = Options?.pageSplitHeight ?? 8000;
         try {
-            const page = await this.browser?.newPage().catch(err => {
+            const page = await this.puppeteerInstance.browser?.newPage().catch(err => {
                 logger.error(err);
             });
             if (!page)

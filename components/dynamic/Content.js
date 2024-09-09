@@ -1,7 +1,10 @@
 import React from 'react';
-import { createRequire } from 'react-puppeteer';
+import { _paths } from '../../utils/paths.js';
+import path from 'path';
 
-const require = createRequire(import.meta.url);
+const ContentBoxGrid4Css = path.join(_paths.pluginResources, 'css/dynamic/Content.box.grid.4.css');
+const ContentBoxGrid9Css = path.join(_paths.pluginResources, 'css/dynamic/Content.box.grid.9.css');
+const ContentCss = path.join(_paths.pluginResources, 'css/dynamic/Content.css');
 const Content = ({ data }) => {
     const picItems = data.pics && (React.createElement("div", { className: 'pic-content' }, data.pics.map((item, index) => {
         if (item) {
@@ -10,8 +13,8 @@ const Content = ({ data }) => {
         }
         return null;
     })));
-    const boxGrid_4 = React.createElement("link", { key: "0", rel: "stylesheet", href: require('./../../resources/css/dynamic/Content.box.grid.4.css') });
-    const boxGrid_9 = React.createElement("link", { key: "0", rel: "stylesheet", href: require('./../../resources/css/dynamic/Content.box.grid.9.css') });
+    const boxGrid_4 = React.createElement("link", { key: "0", rel: "stylesheet", href: ContentBoxGrid4Css });
+    const boxGrid_9 = React.createElement("link", { key: "0", rel: "stylesheet", href: ContentBoxGrid9Css });
     function getBoxGridStyle(pics) {
         if (!Array.isArray(pics) || pics.length === 0) {
             return null;
@@ -64,7 +67,7 @@ const Content = ({ data }) => {
         return null;
     }
     const boxGrid = data.boxGrid && (data.pics && getBoxGridStyle(data.pics));
-    const contentCss = React.createElement("link", { rel: "stylesheet", href: require('./../../resources/css/dynamic/Content.css') });
+    const contentCss = React.createElement("link", { rel: "stylesheet", href: ContentCss });
     switch (data.type) {
         case 'DYNAMIC_TYPE_LIVE_RCMD':
             return (React.createElement(React.Fragment, null,
