@@ -1,15 +1,17 @@
 import React from 'react';
 import { ConfigController, BOT_NAME } from 'yunzai';
 import Config from '../../utils/config.js';
-import { createRequire } from 'react-puppeteer';
+import { _paths } from '../../utils/paths.js';
+import path from 'path';
 
 const botVersion = ConfigController.package?.version;
-const require = createRequire(import.meta.url);
-const bilibililogo = require('./../../resources/img/icon/dynamic/bilibili.svg');
-const weibilogo = require('./../../resources/img/icon/dynamic/weibo.svg');
+const yukiPluginVersion = Config.getPackageJsonKey('version', path.join(_paths.pluginPath, 'package.json'));
+const bilibililogo = path.join(_paths.pluginResources, 'img/icon/dynamic/bilibili.svg');
+const weibilogo = path.join(_paths.pluginResources, 'img/icon/dynamic/weibo.svg');
+const FooterCss = path.join(_paths.pluginResources, 'css/dynamic/Footer.css');
 const Footer = ({ data }) => {
     return (React.createElement(React.Fragment, null,
-        React.createElement("link", { rel: "stylesheet", href: require('./../../resources/css/dynamic/Footer.css') }),
+        React.createElement("link", { rel: "stylesheet", href: FooterCss }),
         React.createElement("div", { className: "footer" },
             React.createElement("div", { className: "footer-text-container" },
                 data.appName === 'bilibili' && (React.createElement("svg", { className: 'w-32 h-10 bili-logo-0', style: { width: '8rem', height: '2.5rem' } },
@@ -28,7 +30,7 @@ const Footer = ({ data }) => {
                     " & ",
                     React.createElement("span", { className: "yuki-plugin-text-title" }, "yuki-plugin"),
                     "-v",
-                    React.createElement("span", { className: "italic" }, `${Config.getLatestVersion()}`))),
+                    React.createElement("span", { className: "italic" }, yukiPluginVersion))),
             React.createElement("img", { src: data.urlImgData, alt: "\u4E8C\u7EF4\u7801", className: "qr-code" }))));
 };
 var Footer$1 = Footer;
