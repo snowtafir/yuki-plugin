@@ -1,6 +1,8 @@
 import chalk from 'chalk';
 import { Application, applicationOptions, EventType, setBotTask, useEvent } from 'yunzai'
 import Config from '@/utils/config';
+import path from 'path';
+import { _paths } from '@/utils/paths';
 import * as apps from '@/apps/index';
 import { BiliTask } from '@/models/bilibili/bilibili.task';
 import { WeiboTask } from '@/models/weibo/weibo.task';
@@ -9,6 +11,8 @@ type RulesType = {
   reg: RegExp | string
   key: string
 }[]
+
+const yukiPluginVersion = Config.getPackageJsonKey('version', path.join(_paths.pluginPath, 'package.json'));
 
 let biliConfigData = Config.getConfigData("config", "bilibili", "config");
 let weiboConfigData = Config.getConfigData("config", "weibo", "config");
@@ -43,7 +47,7 @@ export default () => {
         }
       }
       logger.info(chalk.rgb(0, 190, 255)(`-----------------------------------------`));
-      logger.info(chalk.rgb(255, 225, 255)(`优纪插件 ${Config.getLatestVersion()} 初始化~`));
+      logger.info(chalk.rgb(255, 225, 255)(`优纪插件 ${yukiPluginVersion} 初始化~`));
       logger.info(chalk.rgb(255, 245, 255)(`作者：snowtafir`));
       logger.info(chalk.rgb(255, 225, 255)(`仓库地址：`));
       logger.info(chalk.rgb(255, 245, 255)(`https://github.com/snowtafir/yuki-plugin`));

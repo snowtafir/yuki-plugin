@@ -4,7 +4,8 @@ import Config from '../../utils/config';
 import { _paths } from '@/utils/paths';
 import path from 'path';
 
-const botVersion = ConfigController.package?.version
+const botVersion = ConfigController.package?.version;
+const yukiPluginVersion = Config.getPackageJsonKey('version', path.join(_paths.pluginPath, 'package.json'));
 
 const VersionCss: string = path.join(_paths.pluginResources, 'css/version/version.css')
 
@@ -34,7 +35,7 @@ export default function App({ data }: VersionProps) {
         ))}
         <div className="logo" style={{ marginTop: '6px' }}>
           Created By {`${BOT_NAME}-v` + `${botVersion}`} & <span className="yuki-plugin-text-title">yuki-plugin</span>-v
-          <span className="italic">{`${Config.getLatestVersion()}`}</span>
+          <span className="italic">{yukiPluginVersion}</span>
         </div>
       </div>
     </>
