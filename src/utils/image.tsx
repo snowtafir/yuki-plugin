@@ -1,23 +1,21 @@
 import React from 'react';
-import { Puppeteer, Picture, Component, ComponentCreateOpsionType } from 'react-puppeteer';
+import { Picture, ComponentCreateOpsionType } from 'react-puppeteer';
 import { YukiPuppeteerRender, ScreenshotOptions } from '@/utils/puppeteer.render';
 import * as ReactPages from '@/components/index'
 
-// 初始化 组件渲染对象
-const com = new Component()
-
-const yukiPuppeteerRender = new YukiPuppeteerRender();
-
 export class Image extends Picture {
+  private yukiPuppeteerRender: YukiPuppeteerRender;
   /**
-   * 初始化运行Puppeteer
+   * 整合截图方法
    */
   constructor() {
     // 继承实例
     super()
-    // start
-    this.Pup = new Puppeteer()
-    this.Pup.start()
+    // 组件渲染对象
+    this.Com;
+    // start puppeteer
+    this.Pup.start();
+    this.yukiPuppeteerRender = new YukiPuppeteerRender(this.Pup);
   }
 
   /**
@@ -36,8 +34,8 @@ export class Image extends Picture {
     ComponentCreateOpsion?: ComponentCreateOpsionType,
   ): Promise<false | { img: Buffer[]; }> {
     const Page = ReactPages[page]
-    return yukiPuppeteerRender.yukiScreenshot(
-      com.compile({
+    return this.yukiPuppeteerRender.yukiScreenshot(
+      this.Com.compile({
         join_dir: page,
         html_name: `${uid}.html`,
         html_body: <Page {...props} />,
