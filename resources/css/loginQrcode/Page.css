@@ -6,13 +6,16 @@
 }
 
 body {
-  width: 563px !important;
+  width: 463px !important;
   font-family: "OPSans";
-  margin: auto;
+}
+
+.main-container{
+  width: 463px;
 }
 
 .container {
-  width: 24rem;
+  width: 380px;
   max-height: 40rem;
   margin: auto;
   font-size: 1.125rem
