@@ -13,7 +13,8 @@ class YukiPuppeteerRender {
         let name = Options?.modelName ?? 'yuki-plugin';
         let pageHeight = Options?.pageSplitHeight ?? 8000;
         try {
-            const page = await this.puppeteerInstance.browser?.newPage().catch(err => {
+            const browser = this.puppeteerInstance.browser;
+            const page = await browser?.newPage().catch(err => {
                 logger.error(err);
             });
             if (!page)
