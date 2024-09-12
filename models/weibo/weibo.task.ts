@@ -1,7 +1,7 @@
 import QRCode from 'qrcode';
 import { MainProps } from "@/components/dynamic/MainPage";
 import Config from '@/utils/config';
-import Image from '@/utils/image';
+import { renderPage } from '@/utils/image';
 import { ScreenshotOptions } from '@/utils/puppeteer.render';
 import { WeiboGetWebData } from '@/models/weibo/weibo.get.web.data';
 import { WeiboQuery } from '@/models/weibo/weibo.query';
@@ -267,7 +267,7 @@ export class WeiboTask {
    * @returns 图片数据
    */
   async renderDynamicCard(uid: string | number, renderData: MainProps, ScreenshotOptionsData: ScreenshotOptions): Promise<Buffer[] | null> {
-    const dynamicMsg = await Image.renderPage(uid, "MainPage", renderData, ScreenshotOptionsData); // 渲染动态卡片
+    const dynamicMsg = await renderPage(uid, "MainPage", renderData, ScreenshotOptionsData); // 渲染动态卡片
     if (dynamicMsg !== false) {
       return dynamicMsg.img; // 缓存图片数据
     } else {
