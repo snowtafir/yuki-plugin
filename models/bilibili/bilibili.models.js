@@ -7,7 +7,7 @@ import path from 'path';
 import QRCode from 'qrcode';
 import YAML from 'yaml';
 import { Segment, Bot, Redis } from 'yunzai';
-import Image from '../../utils/image.js';
+import { renderPage } from '../../utils/image.js';
 import { _paths } from '../../utils/paths.js';
 import { BiliApi } from './bilibili.api.js';
 
@@ -30,7 +30,7 @@ async function applyLoginQRCode(e) {
             saveHtmlfile: false,
             modelName: "bili-login",
         };
-        const qrCodeImage = await Image.renderPage("bili-login", "LoginQrcodePage", LoginPropsData, ScreenshotOptionsData);
+        const qrCodeImage = await renderPage("bili-login", "LoginQrcodePage", LoginPropsData, ScreenshotOptionsData);
         let qrcodeImg;
         if (qrCodeImage !== false) {
             const { img } = qrCodeImage;

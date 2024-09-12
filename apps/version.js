@@ -1,5 +1,5 @@
 import { Plugin, Segment } from 'yunzai';
-import Image from '../utils/image.js';
+import { renderPage } from '../utils/image.js';
 import VersionData from '../models/version/version.js';
 
 class YukiVersion extends Plugin {
@@ -30,7 +30,7 @@ class YukiVersion extends Plugin {
             isSplit: false,
             modelName: 'yukiVersion',
         };
-        const helpImg = await Image.renderPage("version", "Version", renderData, ScreenshotOptionsData);
+        const helpImg = await renderPage("version", "Version", renderData, ScreenshotOptionsData);
         let imgRes;
         if (helpImg !== false) {
             const { img } = helpImg;

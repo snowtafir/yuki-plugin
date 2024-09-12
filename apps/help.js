@@ -1,5 +1,5 @@
 import { Plugin, Segment } from 'yunzai';
-import Image from '../utils/image.js';
+import { renderPage } from '../utils/image.js';
 import Help from '../models/help/help.js';
 
 class YukiHelp extends Plugin {
@@ -33,7 +33,7 @@ class YukiHelp extends Plugin {
             isSplit: false,
             modelName: 'yukiHelp',
         };
-        const helpImg = await Image.renderPage("help", "Help", renderData, ScreenshotOptionsData);
+        const helpImg = await renderPage("help", "Help", renderData, ScreenshotOptionsData);
         let imgRes;
         if (helpImg !== false) {
             const { img } = helpImg;
