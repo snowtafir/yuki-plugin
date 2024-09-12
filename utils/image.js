@@ -11,7 +11,7 @@ class Image extends Picture {
         this.Pup.start();
         this.yukiPuppeteerRender = new YukiPuppeteerRender(this.Pup);
     }
-    async renderPage(uid, page, props = {}, ScreenshotOptions, ComponentCreateOpsion) {
+    async _renderPage(uid, page, props = {}, ScreenshotOptions, ComponentCreateOpsion) {
         const Page = index[page];
         return this.yukiPuppeteerRender.yukiScreenshot(this.Com.compile({
             join_dir: page,
@@ -21,6 +21,36 @@ class Image extends Picture {
         }), ScreenshotOptions);
     }
 }
-var Image$1 = new Image();
+let instance = null;
+const queue = [];
+let isProcessing = false;
+const processQueue = async () => {
+    if (queue.length === 0) {
+        isProcessing = false;
+        return;
+    }
+    isProcessing = true;
+    const { uid, page, props, ScreenshotOptions, ComponentCreateOpsion, resolve, reject } = queue.shift();
+    try {
+        const img = await instance._renderPage(uid, page, props, ScreenshotOptions, ComponentCreateOpsion);
+        resolve(img);
+    }
+    catch (error) {
+        console.error(error);
+        reject(false);
+    }
+    processQueue();
+};
+const renderPage = async (uid, page, props = {}, ScreenshotOptions, ComponentCreateOpsion) => {
+    if (!instance) {
+        instance = new Image();
+    }
+    return new Promise((resolve, reject) => {
+        queue.push({ uid, page, props, ScreenshotOptions, ComponentCreateOpsion, resolve, reject });
+        if (!isProcessing) {
+            processQueue();
+        }
+    });
+};
 
-export { Image, Image$1 as default };
+export { renderPage };

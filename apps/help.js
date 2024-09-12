@@ -1,4 +1,4 @@
-import Image from '../utils/image.js';
+import { renderPage } from '../utils/image.js';
 import Help from '../models/help/help.js';
 import plugin from '../../../lib/plugins/plugin.js';
 
@@ -38,7 +38,7 @@ class YukiHelp extends plugin {
             isSplit: false,
             modelName: 'yukiHelp',
         };
-        const helpImg = await Image.renderPage("help", "Help", renderData, ScreenshotOptionsData);
+        const helpImg = await renderPage("help", "Help", renderData, ScreenshotOptionsData);
         let imgRes;
         if (helpImg !== false) {
             const { img } = helpImg;

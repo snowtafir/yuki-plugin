@@ -1,4 +1,4 @@
-import Image from '../utils/image.js';
+import { renderPage } from '../utils/image.js';
 import VersionData from '../models/version/version.js';
 import plugin from '../../../lib/plugins/plugin.js';
 
@@ -35,7 +35,7 @@ class YukiVersion extends plugin {
             isSplit: false,
             modelName: 'yukiVersion',
         };
-        const helpImg = await Image.renderPage("version", "Version", renderData, ScreenshotOptionsData);
+        const helpImg = await renderPage("version", "Version", renderData, ScreenshotOptionsData);
         let imgRes;
         if (helpImg !== false) {
             const { img } = helpImg;

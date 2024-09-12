@@ -1,6 +1,6 @@
 import QRCode from 'qrcode';
 import Config from '../../utils/config.js';
-import Image from '../../utils/image.js';
+import { renderPage } from '../../utils/image.js';
 import { BiliGetWebData } from './bilibili.get.web.data.js';
 import { readSyncCookie, postGateway } from './bilibili.models.js';
 import { BiliQuery } from './bilibili.query.js';
@@ -246,7 +246,7 @@ class BiliTask {
         }
     }
     async renderDynamicCard(uid, renderData, ScreenshotOptionsData) {
-        const dynamicMsg = await Image.renderPage(uid, "MainPage", renderData, ScreenshotOptionsData);
+        const dynamicMsg = await renderPage(uid, "MainPage", renderData, ScreenshotOptionsData);
         if (dynamicMsg !== false) {
             return dynamicMsg.img;
         }

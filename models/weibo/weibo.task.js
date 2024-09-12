@@ -1,6 +1,6 @@
 import QRCode from 'qrcode';
 import Config from '../../utils/config.js';
-import Image from '../../utils/image.js';
+import { renderPage } from '../../utils/image.js';
 import { WeiboGetWebData } from './weibo.get.web.data.js';
 import { WeiboQuery } from './weibo.query.js';
 
@@ -205,7 +205,7 @@ class WeiboTask {
         }
     }
     async renderDynamicCard(uid, renderData, ScreenshotOptionsData) {
-        const dynamicMsg = await Image.renderPage(uid, "MainPage", renderData, ScreenshotOptionsData);
+        const dynamicMsg = await renderPage(uid, "MainPage", renderData, ScreenshotOptionsData);
         if (dynamicMsg !== false) {
             return dynamicMsg.img;
         }

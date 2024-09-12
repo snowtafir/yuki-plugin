@@ -33,18 +33,11 @@ class YukiPuppeteerRender {
             const boundingBox = await element.boundingBox();
             const num = Options?.isSplit ? Math.ceil(boundingBox.height / pageHeight) : 1;
             pageHeight = Math.round(boundingBox.height / num);
-            await page.setViewport({
-                width: boundingBox.width + 50,
-                height: pageHeight + 100
-            });
+            await page.setViewport({ width: boundingBox.width + 50, height: pageHeight + 100 });
             if (Options?.addStyle) {
-                await page.addStyleTag({
-                    content: Options.addStyle,
-                });
+                await page.addStyleTag({ content: Options.addStyle, });
             }
-            await page.addStyleTag({
-                content: `img[src$=".gif"] {animation-play-state: paused !important;}`
-            });
+            await page.addStyleTag({ content: `img[src$=".gif"] {animation-play-state: paused !important;}` });
             if (Options?.saveHtmlfile === true) {
                 const htmlContent = await page.content();
                 const Dir = path.join(_paths.root, `/temp/html/yuki-plugin/${name}/`);
@@ -54,15 +47,11 @@ class YukiPuppeteerRender {
                 fs__default.writeFileSync(`${Dir}${Date.now()}.html`, htmlContent);
             }
             logger.info('[puppeteer] success');
-            let numSun = 0;
             let start = Date.now();
             const ret = new Array();
-            let buff;
             for (let i = 1; i <= num; i++) {
                 if (i > 1) {
-                    await page.evaluate(pageHeight => {
-                        window.scrollBy(0, pageHeight);
-                    }, pageHeight);
+                    await page.evaluate(pageHeight => { window.scrollBy(0, pageHeight); }, pageHeight);
                     await new Promise((resolve) => setTimeout(resolve, 500));
                 }
                 let renderOptions = Options?.SOptions ?? { type: 'png' };
@@ -75,15 +64,14 @@ class YukiPuppeteerRender {
                         height: Math.min(pageHeight, boundingBox.height - pageHeight * (i - 1)),
                     },
                 };
-                buff = await element.screenshot(screenshotOptions).catch(err => {
+                const buff = await element.screenshot(screenshotOptions).catch(err => {
                     logger.error('[puppeteer]', 'screenshot', err);
                     return false;
                 });
-                numSun++;
                 if (buff !== false) {
-                    let imgBuff = !Buffer.isBuffer(buff) ? Buffer.from(buff) : buff;
+                    const imgBuff = !Buffer.isBuffer(buff) ? Buffer.from(buff) : buff;
                     const kb = (imgBuff?.length / 1024).toFixed(2) + "kb";
-                    logger.mark(`[图片生成][${name}][${numSun}次] ${kb} ${logger.green(`${Date.now() - start}ms`)}`);
+                    logger.mark(`[图片生成][${name}][${i}次] ${kb} ${logger.green(`${Date.now() - start}ms`)}`);
                     ret.push(imgBuff);
                 }
                 else {
