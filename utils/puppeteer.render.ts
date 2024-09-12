@@ -51,7 +51,7 @@ export class YukiPuppeteerRender {
     try {
       const browser = this.puppeteerInstance.browser as Browser;
       const page = await browser?.newPage().catch(err => {
-        logger.error(err)
+        logger.error(err);
       })
       if (!page) return false
 
@@ -74,22 +74,15 @@ export class YukiPuppeteerRender {
       const num = Options?.isSplit ? Math.ceil(boundingBox.height / pageHeight) : 1; // 根据是否需要分片，计算分片数量，默认为 1
       pageHeight = Math.round(boundingBox.height / num); //动态调整分片高度，防止过短影响观感。
 
-      await page.setViewport({
-        width: boundingBox.width + 50,
-        height: pageHeight + 100
-      })
+      await page.setViewport({ width: boundingBox.width + 50, height: pageHeight + 100 });
 
       // 根据 style 的值来修改 CSS 样式
       if (Options?.addStyle) {
-        await page.addStyleTag({
-          content: Options.addStyle,
-        });
+        await page.addStyleTag({ content: Options.addStyle, });
       }
 
       // 禁止 GIF 动图播放
-      await page.addStyleTag({
-        content: `img[src$=".gif"] {animation-play-state: paused !important;}`
-      });
+      await page.addStyleTag({ content: `img[src$=".gif"] {animation-play-state: paused !important;}` });
 
       // 是否保存 html 文件
       if (Options?.saveHtmlfile === true) {
@@ -103,19 +96,14 @@ export class YukiPuppeteerRender {
 
       logger.info('[puppeteer] success')
 
-      let numSun = 0;
       let start = Date.now();
       const ret = new Array<Buffer>();
-      let buff: string | false | Uint8Array;
 
       for (let i = 1; i <= num; i++) {
         if (i > 1) {
-          await page.evaluate(pageHeight => {
-            window.scrollBy(0, pageHeight); // 在页面上下文中执行滚动操作
-          }, pageHeight);
+          await page.evaluate(pageHeight => { window.scrollBy(0, pageHeight); }, pageHeight); // 在页面上下文中执行滚动操作
           await new Promise((resolve) => setTimeout(resolve, 500)); // 等待一段时间，确保页面加载完成
         }
-
 
         let renderOptions = Options?.SOptions ?? { type: 'png' }
         const screenshotOptions = {
@@ -131,19 +119,17 @@ export class YukiPuppeteerRender {
           },
         };
 
-        buff = await element.screenshot(screenshotOptions).catch(err => {
+        const buff: string | false | Uint8Array = await element.screenshot(screenshotOptions).catch(err => {
           logger.error('[puppeteer]', 'screenshot', err)
           return false
         }); // 对指定区域进行截图
 
-        numSun++; // 增加截图次数
-
         if (buff !== false) {
-          let imgBuff: Buffer = !Buffer.isBuffer(buff) ? Buffer.from(buff) : buff;
+          const imgBuff: Buffer = !Buffer.isBuffer(buff) ? Buffer.from(buff) : buff;
           /** 计算图片大小 */
           const kb = (imgBuff?.length / 1024).toFixed(2) + "kb"; // 计算图片大小
 
-          logger.mark(`[图片生成][${name}][${numSun}次] ${kb} ${logger.green(`${Date.now() - start}ms`)}`); // 记录日志
+          logger.mark(`[图片生成][${name}][${i}次] ${kb} ${logger.green(`${Date.now() - start}ms`)}`); // 记录日志
 
           ret.push(imgBuff); // 将截图结果添加到数组中
         } else {

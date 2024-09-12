@@ -1,5 +1,5 @@
 import { Plugin, Segment } from 'yunzai';
-import Image from '@/utils/image';
+import { renderPage } from '@/utils/image';
 import { VersionProps } from '@/components/version/Version';
 import VersionData from '@/models/version/version';
 import { ScreenshotOptions } from '@/utils/puppeteer.render';
@@ -37,7 +37,7 @@ export default class YukiVersion extends Plugin {
       modelName: 'yukiVersion',
     };
 
-    const helpImg = await Image.renderPage("version", "Version", renderData, ScreenshotOptionsData);
+    const helpImg = await renderPage("version", "Version", renderData, ScreenshotOptionsData);
 
     let imgRes: { img: Buffer[]; }
     if (helpImg !== false) {
