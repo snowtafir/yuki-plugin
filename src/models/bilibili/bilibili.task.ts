@@ -2,7 +2,7 @@ import QRCode from 'qrcode';
 import { Bot, Redis, Segment, EventType } from 'yunzai';
 import { MainProps } from "@/components/dynamic/MainPage";
 import Config from '@/utils/config';
-import Image from '@/utils/image';
+import { renderPage } from '@/utils/image';
 import { ScreenshotOptions } from '@/utils/puppeteer.render';
 import { BiliGetWebData } from '@/models/bilibili/bilibili.get.web.data';
 import { postGateway, readSyncCookie } from '@/models/bilibili/bilibili.models';
@@ -300,7 +300,7 @@ export class BiliTask {
    * @returns 图片数据
    */
   async renderDynamicCard(uid: string, renderData: MainProps, ScreenshotOptionsData: ScreenshotOptions): Promise<Buffer[] | null> {
-    const dynamicMsg = await Image.renderPage(uid, "MainPage", renderData, ScreenshotOptionsData); // 渲染动态卡片
+    const dynamicMsg = await renderPage(uid, "MainPage", renderData, ScreenshotOptionsData); // 渲染动态卡片
     if (dynamicMsg !== false) {
       return dynamicMsg.img; // 缓存图片数据
     } else {

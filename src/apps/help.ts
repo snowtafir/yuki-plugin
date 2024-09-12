@@ -1,5 +1,5 @@
 import { Segment, Messages } from 'yunzai';
-import Image from '@/utils/image';
+import { renderPage } from '@/utils/image';
 import { HelpPageProps } from '@/components/help/Help';
 import Help from '@/models/help/help';
 import { ScreenshotOptions } from '@/utils/puppeteer.render';
@@ -32,7 +32,7 @@ message.use(
       modelName: 'yukiHelp',
     };
 
-    const helpImg = await Image.renderPage("help", "Help", renderData, ScreenshotOptionsData);
+    const helpImg = await renderPage("help", "Help", renderData, ScreenshotOptionsData);
 
     let imgRes: { img: Buffer[]; }
     if (helpImg !== false) {

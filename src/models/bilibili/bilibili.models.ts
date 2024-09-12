@@ -8,7 +8,7 @@ import QRCode from 'qrcode';
 import YAML from "yaml";
 import { Bot, Redis, Segment, EventType } from 'yunzai';
 import { LoginProps } from "@/components/loginQrcode/Page";
-import Image from '@/utils/image';
+import { renderPage } from '@/utils/image';
 import { _paths } from '@/utils/paths';
 import { ScreenshotOptions } from '@/utils/puppeteer.render';
 import { BiliApi } from '@/models/bilibili/bilibili.api';
@@ -42,7 +42,7 @@ export async function applyLoginQRCode(e: EventType) {
       saveHtmlfile: false,
       modelName: "bili-login"
     }
-    const qrCodeImage = await Image.renderPage("bili-login", "LoginQrcodePage", LoginPropsData, ScreenshotOptionsData);
+    const qrCodeImage = await renderPage("bili-login", "LoginQrcodePage", LoginPropsData, ScreenshotOptionsData);
     let qrcodeImg: Buffer[]
     if (qrCodeImage !== false) {
       const { img } = qrCodeImage;
