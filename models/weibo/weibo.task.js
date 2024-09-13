@@ -128,7 +128,7 @@ class WeiboTask {
             if (!imgs)
                 return;
             Redis.set(`${markKey}${chatId}:${id_str}`, "1", { EX: 3600 * 10 });
-            (logger ?? Bot.logger)?.mark("优纪插件：B站动态执行推送");
+            (logger ?? Bot.logger)?.mark("优纪插件：微博动态执行推送");
             for (let i = 0; i < imgs.length; i++) {
                 const image = imgs[i];
                 await this.sendMessage(chatId, bot_id, chatType, Segment.image(image));
