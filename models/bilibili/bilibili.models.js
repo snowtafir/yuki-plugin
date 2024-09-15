@@ -17,6 +17,9 @@ async function applyLoginQRCode(e) {
         headers: lodash.merge(BiliApi.BIlIBILI_LOGIN_HEADERS, { 'user-agent': BiliApi.BILIBILI_HEADERS['User-Agent'] }, { 'Host': 'passport.bilibili.com', }),
         redirect: "follow",
     });
+    if (!response.ok) {
+        throw new Error(`获取B站登录二维码URL网络请求失败，状态码: ${response.status}`);
+    }
     const res = await response.json();
     if (res?.code === 0) {
         const qrcodeKey = res.data.qrcode_key;
@@ -30,13 +33,18 @@ async function applyLoginQRCode(e) {
             modelName: "bili-login"
         };
         const qrCodeImage = await renderPage("bili-login", "LoginQrcodePage", LoginPropsData, ScreenshotOptionsData);
-        let qrcodeImg;
+        let qrCodeBufferArray = [];
         if (qrCodeImage !== false) {
             const { img } = qrCodeImage;
-            qrcodeImg = img;
+            qrCodeBufferArray = img;
         }
         let msg = [];
-        msg.push(segment.image(qrcodeImg[0]));
+        if (qrCodeBufferArray.length === 0) {
+            msg.push('渲染二维码图片失败，请查看终端输出的实时日志，\n复制哔哩登陆二维码URL，使用在线或本地二维码生成工具生成二维码并扫码。');
+        }
+        else {
+            msg.push(segment.image(qrCodeBufferArray[0]));
+        }
         e.reply('请在3分钟内扫码以完成B站登陆绑定');
         e.reply(msg);
         (logger ?? Bot.logger)?.info(`优纪插件: 如果发送二维码图片消息失败可复制如下URL, 使用在线或本地二维码生成工具生成二维码并扫码`);
@@ -55,6 +63,9 @@ async function pollLoginQRCode(e, qrcodeKey) {
         headers: lodash.merge(BiliApi.BIlIBILI_LOGIN_HEADERS, { 'User-agent': BiliApi.BILIBILI_HEADERS['User-Agent'] }, { 'Host': 'passport.bilibili.com', }),
         redirect: "follow",
     });
+    if (!response.ok) {
+        throw new Error(`处理B站登录token网络请求失败，状态码: ${response.status}`);
+    }
     const data = await response.json();
     if (data.code === 0) {
         if (data.data.code === 0) {
