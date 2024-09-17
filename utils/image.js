@@ -7,8 +7,6 @@ class Image extends Picture {
     yukiPuppeteerRender;
     constructor() {
         super();
-        this.Com;
-        this.Pup.start();
         this.yukiPuppeteerRender = new YukiPuppeteerRender(this.Pup);
     }
     async _renderPage(uid, page, props = {}, ScreenshotOptions, ComponentCreateOpsion) {
