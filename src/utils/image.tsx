@@ -10,14 +10,15 @@ class Image extends Picture {
 
   /**
    * 构造函数，整合截图方法
+   * @param launchOptions Puppeteer 启动选项，可选。父类有默认的设置。
    */
   constructor() {
     // 继承父类实例
     super();
-    // 组件渲染对象
-    this.Com;
-    // 启动 Puppeteer
-    this.Pup.start();
+    // 父类已经实例化组件渲染对象
+    //this.Com;
+    // 父类已经实例化启动 Puppeteer
+    //this.Pup.start();
     // 初始化 YukiPuppeteerRender 实例
     this.yukiPuppeteerRender = new YukiPuppeteerRender(this.Pup);
   }

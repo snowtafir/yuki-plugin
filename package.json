@@ -1,6 +1,6 @@
 {
   "name": "yz-yuki-plugin",
-  "version": "2.0.4-2",
+  "version": "2.0.4-3",
   "description": "优纪插件，yunzaijs 关于 微博推送、B站推送 等功能的拓展插件",
   "author": "snowtafir",
   "type": "module",
@@ -21,7 +21,7 @@
     "check-format": "git diff --exit-code"
   },
   "dependencies": {
-    "axios": "^1.7.3",
+    "axios": "^1.7.7",
     "chalk": "^5.3.0",
     "chokidar": "^3.6.0",
     "debug": "^4.3.6",
@@ -30,7 +30,7 @@
     "md5": "^2.3.0",
     "moment": "^2.30.1",
     "node-fetch": "^3.3.2",
-    "puppeteer": "^23.3.0",
+    "puppeteer": "^23.3.1",
     "qrcode": "^1.5.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -63,7 +63,7 @@
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@types/yaml": "1.9.7",
-    "axios": "^1.7.3",
+    "axios": "^1.7.7",
     "babel-plugin-module-resolver": "^5.0.2",
     "chokidar": "^3.6.0",
     "jsdom": "^24.1.1",
@@ -72,7 +72,7 @@
     "node-fetch": "^3.3.2",
     "nodemon": "^3.1.4",
     "prettier": "^3.3.3",
-    "puppeteer": "^23.3.0",
+    "puppeteer": "^23.3.1",
     "qrcode": "^1.5.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -87,7 +87,7 @@
     "ts-node": "^10.9.2",
     "tsx": "^4.19.0",
     "typescript": "^5.5.4",
-    "yunzai": "^1.1.4",
+    "yunzai": "^1.1.6",
     "yunzai-mys": "^1.0.6"
   },
   "files": [
