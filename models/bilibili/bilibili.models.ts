@@ -12,6 +12,7 @@ import { _paths } from '@/utils/paths';
 import { ScreenshotOptions } from '@/utils/puppeteer.render';
 import { BiliApi } from '@/models/bilibili/bilibili.api';
 import { gen_buvid_fp } from '@/models/bilibili/bilibili.buid.fp';
+import { getBiliTicket } from '@/models/bilibili/bilibili.ticket';
 
 declare const logger: any, Bot: any, redis: any, segment: any;
 
@@ -426,11 +427,11 @@ export async function getNewTempCk() {
 
   const result = await postGateway(newTempCk);
 
-  const { code, data } = await result.data; // 解析校验结果
+  const data = await result.data; // 解析校验结果
 
-  if (code !== 0) {
-    logger?.mark(`优纪插件：tempCK，Gateway校验失败：${JSON.stringify(data)}`);
-  } else if (code === 0) {
+  if (data?.code !== 0) {
+    logger?.error(`优纪插件：tempCK，Gateway校验失败：${JSON.stringify(data)}`);
+  } else if (data?.code === 0) {
     logger?.mark(`优纪插件：tempCK，Gateway校验成功：${JSON.stringify(data)}`);
   }
 }
@@ -593,21 +594,22 @@ async function getPayload(cookie: string) {
  * @returns 返回POST请求的结果
  */
 export async function postGateway(cookie: string) {
-  const payload = getPayload(cookie);
+  const data = { payload: await getPayload(cookie) };
   const requestUrl = 'https://api.bilibili.com/x/internal/gaia-gateway/ExClimbWuzhi';
 
-  const headers = lodash.merge({}, BiliApi.BILIBILI_HEADERS, {
-    'Cookie': cookie,
-    'Content-type': 'Application/json',
-    'Charset': 'UTF-8',
-  }, {
-    'Host': 'api.bilibili.com',
-    'Origin': 'https://www.bilibili.com',
-    'Referer': 'https://www.bilibili.com/',
-  });
+  const config = {
+    headers: lodash.merge({}, BiliApi.BILIBILI_HEADERS, {
+      'Cookie': cookie,
+      'Content-type': 'application/json;charset=UTF-8',
+    }, {
+      'Host': 'api.bilibili.com',
+      'Origin': 'https://www.bilibili.com',
+      'Referer': 'https://www.bilibili.com/',
+    })
+  }
 
   try {
-    const res = await axios.post(requestUrl, { payload }, { headers });
+    const res = await axios.post(requestUrl, data, config);
     return res;
   } catch (error) {
     logger.error('Error making POST request:', error);
@@ -623,4 +625,28 @@ export async function get_buvid_fp(cookie: string) {
   const seedget = Math.floor(Math.random() * (60 - 1 + 1) + 1);
   let buvidFp = gen_buvid_fp(uuid, seedget);
   return `buvid_fp=${buvidFp};`;
+}
+
+/**
+ * 获取有效bili_ticket并添加到cookie
+ * @param {string} cookie
+ * @returns {Promise<{ cookie: string; }>} 返回包含最新有效的bili_ticket的cookie
+ */
+export async function cookieWithBiliTicket(cookie: string): Promise<string> {
+  const BiliJctKey = "Yz:yuki:bili:bili_ticket"
+  cookie = await readSavedCookieItems(cookie, ['bili_ticket'], true);
+  const biliTicket = await redis.get(BiliJctKey);
+  if (!biliTicket) {
+    try {
+      const csrf = await readSavedCookieItems(cookie, ['bili_jct'], false);
+      const { ticket, ttl } = await getBiliTicket(csrf);
+      await redis.set(BiliJctKey, ticket, { EX: ttl });
+      return cookie + `;bili_ticket=${ticket};`;
+    } catch (error) {
+      logger?.error(`${error}`);
+      return cookie;
+    }
+  } else {
+    return cookie + `;bili_ticket=${biliTicket};`;
+  }
 }
