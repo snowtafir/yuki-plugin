@@ -22,6 +22,5 @@ const Account = ({ data }) => {
                 data.appName === 'weibo' && renderLogo(Weibilogo, 'weibo-logo'),
                 React.createElement(LogoText, { data: data })))));
 };
-var Account$1 = Account;
 
-export { Account$1 as default };
+export { Account as default };
