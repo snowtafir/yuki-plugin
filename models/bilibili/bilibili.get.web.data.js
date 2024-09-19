@@ -1,7 +1,7 @@
 import axios from 'axios';
 import lodash from 'lodash';
 import { BiliApi } from './bilibili.api.js';
-import { readSyncCookie, readSavedCookieItems, readSavedCookieOtherItems } from './bilibili.models.js';
+import { readSyncCookie, cookieWithBiliTicket, readSavedCookieItems, readSavedCookieOtherItems } from './bilibili.models.js';
 import { getWbiSign } from './bilibili.wbi.js';
 
 class BiliGetWebData {
@@ -10,6 +10,7 @@ class BiliGetWebData {
     async getBiliDynamicListDataByUid(uid) {
         const url = BiliApi.BILIBIL_API.biliDynamicInfoList;
         let { cookie } = await readSyncCookie();
+        cookie = await cookieWithBiliTicket(cookie);
         const data = {
             offset: '',
             host_mid: uid,
@@ -37,6 +38,7 @@ class BiliGetWebData {
     async getBilibiUserInfoByUid(uid) {
         const url = BiliApi.BILIBIL_API.biliSpaceUserInfoWbi;
         let { cookie } = await readSyncCookie();
+        cookie = await cookieWithBiliTicket(cookie);
         const data = {
             mid: uid,
             jsonp: 'jsonp',
@@ -58,6 +60,7 @@ class BiliGetWebData {
     async searchBiliUserInfoByKeyword(keyword) {
         const url = BiliApi.BILIBIL_API.biliSearchUpWbi;
         let { cookie } = await readSyncCookie();
+        cookie = await cookieWithBiliTicket(cookie);
         const data = {
             keyword: keyword,
             page: 1,

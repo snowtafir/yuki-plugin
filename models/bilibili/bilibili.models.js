@@ -9,6 +9,7 @@ import YAML from 'yaml';
 import { renderPage } from '../../utils/image.js';
 import { _paths } from '../../utils/paths.js';
 import { BiliApi } from './bilibili.api.js';
+import { getBiliTicket } from './bilibili.ticket.js';
 
 async function applyLoginQRCode(e) {
     const url = 'https://passport.bilibili.com/x/passport-login/web/qrcode/generate?source=main-fe-header';
@@ -320,11 +321,11 @@ async function getNewTempCk() {
     let newTempCk = `${uuid}${buvid3_buvid4}${b_lsid}`;
     await saveTempCk(newTempCk);
     const result = await postGateway(newTempCk);
-    const { code, data } = await result.data;
-    if (code !== 0) {
-        logger?.mark(`优纪插件：tempCK，Gateway校验失败：${JSON.stringify(data)}`);
+    const data = await result.data;
+    if (data?.code !== 0) {
+        logger?.error(`优纪插件：tempCK，Gateway校验失败：${JSON.stringify(data)}`);
     }
-    else if (code === 0) {
+    else if (data?.code === 0) {
         logger?.mark(`优纪插件：tempCK，Gateway校验成功：${JSON.stringify(data)}`);
     }
 }
@@ -473,19 +474,20 @@ async function getPayload(cookie) {
     return JSON.stringify(payloadOriginData);
 }
 async function postGateway(cookie) {
-    const payload = getPayload(cookie);
+    const data = { payload: await getPayload(cookie) };
     const requestUrl = 'https://api.bilibili.com/x/internal/gaia-gateway/ExClimbWuzhi';
-    const headers = lodash.merge({}, BiliApi.BILIBILI_HEADERS, {
-        'Cookie': cookie,
-        'Content-type': 'Application/json',
-        'Charset': 'UTF-8',
-    }, {
-        'Host': 'api.bilibili.com',
-        'Origin': 'https://www.bilibili.com',
-        'Referer': 'https://www.bilibili.com/',
-    });
+    const config = {
+        headers: lodash.merge({}, BiliApi.BILIBILI_HEADERS, {
+            'Cookie': cookie,
+            'Content-type': 'application/json;charset=UTF-8',
+        }, {
+            'Host': 'api.bilibili.com',
+            'Origin': 'https://www.bilibili.com',
+            'Referer': 'https://www.bilibili.com/',
+        })
+    };
     try {
-        const res = await axios.post(requestUrl, { payload }, { headers });
+        const res = await axios.post(requestUrl, data, config);
         return res;
     }
     catch (error) {
@@ -493,5 +495,25 @@ async function postGateway(cookie) {
         throw error;
     }
 }
+async function cookieWithBiliTicket(cookie) {
+    const BiliJctKey = "Yz:yuki:bili:bili_ticket";
+    cookie = await readSavedCookieItems(cookie, ['bili_ticket'], true);
+    const biliTicket = await redis.get(BiliJctKey);
+    if (!biliTicket) {
+        try {
+            const csrf = await readSavedCookieItems(cookie, ['bili_jct'], false);
+            const { ticket, ttl } = await getBiliTicket(csrf);
+            await redis.set(BiliJctKey, ticket, { EX: ttl });
+            return cookie + `;bili_ticket=${ticket};`;
+        }
+        catch (error) {
+            logger?.error(`${error}`);
+            return cookie;
+        }
+    }
+    else {
+        return cookie + `;bili_ticket=${biliTicket};`;
+    }
+}
 
-export { applyLoginQRCode, checkBiliLogin, exitBiliLogin, genUUID, gen_b_lsid, getNewTempCk, pollLoginQRCode, postGateway, readSavedCookieItems, readSavedCookieOtherItems, readSyncCookie, readTempCk, saveLocalBiliCk, saveLoginCookie, saveTempCk };
+export { applyLoginQRCode, checkBiliLogin, cookieWithBiliTicket, exitBiliLogin, genUUID, gen_b_lsid, getNewTempCk, pollLoginQRCode, postGateway, readSavedCookieItems, readSavedCookieOtherItems, readSyncCookie, readTempCk, saveLocalBiliCk, saveLoginCookie, saveTempCk };
