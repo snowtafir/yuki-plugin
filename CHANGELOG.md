@@ -1,4 +1,5 @@
 # 2.0.4
+* 优化B站风控相关，新增bili_tiket参数
 * fix Repeated Instantiation puppeteer
 * 优化获取B站登录ck
 * 添加截图列队，优化配置文件注释
