@@ -11,5 +11,6 @@ const ForwardContent = ({ data }) => (React.createElement(React.Fragment, null,
         React.createElement("div", { className: "orig-container", id: "orig-container" },
             React.createElement(Account, { data: data }),
             React.createElement(Content, { data: data })))));
+var ForwardContent$1 = ForwardContent;
 
-export { ForwardContent as default };
+export { ForwardContent$1 as default };

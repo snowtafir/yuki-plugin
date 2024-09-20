@@ -34,5 +34,6 @@ const Footer = ({ data }) => {
                     React.createElement("span", { className: "italic" }, yukiPluginVersion))),
             React.createElement("img", { src: data.urlImgData, alt: "\u4E8C\u7EF4\u7801", className: "qr-code" }))));
 };
+var Footer$1 = Footer;
 
-export { Footer as default };
+export { Footer$1 as default };
