@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { Bot, Segment } from 'yunzai';
-import { readSyncCookie } from './bilibili.models.js';
+import { readSyncCookie, cookieWithBiliTicket } from './bilibili.models.js';
 import { BiliApi } from './bilibili.api.js';
 import axios from 'axios';
 import lodash from 'lodash';
@@ -204,10 +204,11 @@ class BiliQuery {
         }
     };
     static async getFullArticleContent(postUrl) {
-        const Cookie = await readSyncCookie();
+        let { cookie } = await readSyncCookie();
+        cookie = await cookieWithBiliTicket(cookie);
         try {
             const response = await axios.get(postUrl, {
-                headers: lodash.merge(BiliApi.BILIBILI_ARTICLE_HEADERS, { "Cookie": `${Cookie}`, "Host": "www.bilibili.com" }),
+                headers: lodash.merge(BiliApi.BILIBILI_ARTICLE_HEADERS, { "Cookie": `${cookie}`, "Host": "www.bilibili.com" }),
                 responseType: 'text'
             });
             const text = response.data;

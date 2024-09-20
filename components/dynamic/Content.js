@@ -116,5 +116,6 @@ const Content = ({ data }) => {
                     picItems)));
     }
 };
+var Content$1 = Content;
 
-export { Content as default };
+export { Content$1 as default };
