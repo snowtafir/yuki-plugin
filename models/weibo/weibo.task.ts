@@ -39,14 +39,31 @@ export class WeiboTask {
    * @param uidMap uid 映射
    * @param dynamicList 动态列表
    */
-  async processWeiboData(weiboPushData: any, uidMap: Map<any, Map<string, any>>, dynamicList: any) {
+  async processWeiboData(weiboPushData: {
+    group?: {
+      [chatId: string]: {
+        bot_id: string;
+        uid: string;
+        name: string;
+        type: string[];
+      }[];
+    };
+    private?: {
+      [chatId: string]: {
+        bot_id: string;
+        uid: string;
+        name: string;
+        type: string[];
+      }[];
+    };
+  }, uidMap: Map<any, Map<string, any>>, dynamicList: any) {
     for (let chatType in weiboPushData) { // 遍历 group 和 private
 
       if (!uidMap.has(chatType)) { uidMap.set(chatType, new Map()); }
       const chatTypeMap = uidMap.get(chatType); // 建立当前 chatType (group 或 private) 的 uid 映射
 
       for (let chatId in weiboPushData[chatType]) {
-        const subUpsOfChat: { uid: string; bot_id: string[]; name: string; type: string[] }[] = weiboPushData[chatType][chatId] || [];
+        const subUpsOfChat: { uid: string; bot_id: string[]; name: string; type: string[] }[] = Array.prototype.slice.call(weiboPushData[chatType][chatId] || []);
         for (let subInfoOfup of subUpsOfChat) {
           const resp: any = await new WeiboGetWebData().getBloggerDynamicList(subInfoOfup.uid); // 获取指定 uid 的动态列表
           if (resp) {
