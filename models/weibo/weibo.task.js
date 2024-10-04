@@ -31,7 +31,7 @@ class WeiboTask {
             }
             const chatTypeMap = uidMap.get(chatType);
             for (let chatId in weiboPushData[chatType]) {
-                const subUpsOfChat = weiboPushData[chatType][chatId] || [];
+                const subUpsOfChat = Array.prototype.slice.call(weiboPushData[chatType][chatId] || []);
                 for (let subInfoOfup of subUpsOfChat) {
                     const resp = await new WeiboGetWebData().getBloggerDynamicList(subInfoOfup.uid);
                     if (resp) {

@@ -56,7 +56,7 @@ class BiliTask {
             }
             const chatTypeMap = uidMap.get(chatType);
             for (let chatId in biliPushData[chatType]) {
-                const subUpsOfChat = biliPushData[chatType][chatId] || [];
+                const subUpsOfChat = Array.prototype.slice.call(biliPushData[chatType][chatId] || []);
                 for (let subInfoOfup of subUpsOfChat) {
                     if (!lastLiveStatus[subInfoOfup.uid]) {
                         lastLiveStatus[subInfoOfup.uid] = 0;

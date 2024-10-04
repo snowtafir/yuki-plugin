@@ -1,3 +1,4 @@
+import fetch from 'node-fetch';
 import { createHmac } from 'crypto';
 import { BiliApi } from './bilibili.api.js';
 
