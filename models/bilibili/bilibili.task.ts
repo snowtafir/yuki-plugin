@@ -64,14 +64,31 @@ export class BiliTask {
    * @param dynamicList 动态列表
    * @param lastLiveStatus 最后直播状态
    */
-  async processBiliData(biliPushData: any, uidMap: Map<any, Map<string, any>>, dynamicList: any, lastLiveStatus: any) {
+  async processBiliData(biliPushData: {
+    group?: {
+      [chatId: string]: {
+        bot_id: string;
+        uid: string;
+        name: string;
+        type: string[];
+      }[];
+    };
+    private?: {
+      [chatId: string]: {
+        bot_id: string;
+        uid: string;
+        name: string;
+        type: string[];
+      }[];
+    };
+  }, uidMap: Map<any, Map<string, any>>, dynamicList: any, lastLiveStatus: any) {
     for (let chatType in biliPushData) { // 遍历 group 和 private
 
       if (!uidMap.has(chatType)) { uidMap.set(chatType, new Map()); }
       const chatTypeMap = uidMap.get(chatType); // 建立当前 chatType (group 或 private) 的 uid 映射
 
       for (let chatId in biliPushData[chatType]) {
-        const subUpsOfChat: { uid: string; bot_id: string[]; name: string; type: string[] }[] = biliPushData[chatType][chatId] || [];
+        const subUpsOfChat: { uid: string; bot_id: string[]; name: string; type: string[] }[] = Array.prototype.slice.call(biliPushData[chatType][chatId] || []);
         for (let subInfoOfup of subUpsOfChat) {
           if (!lastLiveStatus[subInfoOfup.uid]) {
             lastLiveStatus[subInfoOfup.uid] = 0;
