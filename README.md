@@ -196,6 +196,10 @@ https://m.weibo.cn/u/7643376782 # 7643376782 为崩坏星穹铁道博主uid
 
 有意见或者建议也欢迎提交 [Issues](https://github.com/snowtafir/yuki-plugin/issues) 和 [Pull requests](https://github.com/snowtafir/yuki-plugin/pulls)。
 
+> [!TIP] 
+> 1. main、main3分支为编译分支，请勿直接在该分支上进行开发，请使用dev、dev3、npm分支进行同步开发，并提交Pull requests。
+> 2. 提交PR后由管理员审核，审核成功并合并后会自动进行github actions编译，最终提交编译好的代码到main、main3分支以及发布到npm。
+
 # 🌟 六、license/声明
 - this project is inspired by [trss-xianxin-plugin](https://github.com/snowtafir/xianxin-plugin)
 - 基于  `MIT` 协议开源，但有如下额外限制：
