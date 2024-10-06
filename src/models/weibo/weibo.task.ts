@@ -57,6 +57,7 @@ export class WeiboTask {
       }[];
     };
   }, uidMap: Map<any, Map<string, any>>, dynamicList: any) {
+    const requestedDataOfUids = new Map<string, any>(); // 存放已请求的 uid 映射
     for (let chatType in weiboPushData) { // 遍历 group 和 private
 
       if (!uidMap.has(chatType)) { uidMap.set(chatType, new Map()); }
@@ -65,7 +66,16 @@ export class WeiboTask {
       for (let chatId in weiboPushData[chatType]) {
         const subUpsOfChat: { uid: string; bot_id: string[]; name: string; type: string[] }[] = Array.prototype.slice.call(weiboPushData[chatType][chatId] || []);
         for (let subInfoOfup of subUpsOfChat) {
-          const resp: any = await new WeiboGetWebData().getBloggerDynamicList(subInfoOfup.uid); // 获取指定 uid 的动态列表
+
+          let resp: any;
+          // 检查是否已经请求过该 uid
+          if (requestedDataOfUids.has(subInfoOfup.uid)) {
+            resp = requestedDataOfUids.get(subInfoOfup.uid); // 从已请求的映射中获取响应数据
+          } else {
+            resp = await await new WeiboGetWebData().getBloggerDynamicList(subInfoOfup.uid); // 获取指定 uid 的动态列表
+            requestedDataOfUids.set(subInfoOfup.uid, resp); // 将响应数据存储到映射中
+          }
+
           if (resp) {
             const dynamicData = resp || [];
             dynamicList[subInfoOfup.uid] = dynamicData;
@@ -79,6 +89,7 @@ export class WeiboTask {
         }
       }
     }
+    requestedDataOfUids.clear(); // 清空已请求的映射
   }
 
   /**
@@ -122,7 +133,7 @@ export class WeiboTask {
             for (let chatId of chatIds) {
               if (type && type.length && !type.includes(pushDynamicData.type)) continue; // 如果禁用了某类型的动态推送，跳过当前循环
               await this.sendDynamic(chatId, bot_id, upName, pushDynamicData, weiboConfigData, chatType); // 发送动态消息
-              await this.randomDelay(2000, 10500); // 随机延时2-10.5秒
+              await this.randomDelay(1000, 2000); // 随机延时1-2秒
             }
           }
         }
@@ -191,9 +202,11 @@ export class WeiboTask {
       for (let i = 0; i < imgs.length; i++) {
         const image: Buffer = imgs[i];
         await this.sendMessage(chatId, bot_id, chatType, Segment.image(image));
-        await this.randomDelay(2000, 6500); // 随机延时2-6.5秒
+        await this.randomDelay(1000, 2000); // 随机延时1-2秒
       }
-      await this.randomDelay(1000, 2000);
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
     } else {
       const dynamicMsg: string[] | "continue" | false = await WeiboQuery.formatTextDynamicData(upName, pushDynamicData, false, weiboConfigData); //构建文字动态消息
 
@@ -211,7 +224,7 @@ export class WeiboTask {
       }
 
       await this.sendMessage(chatId, bot_id, chatType, dynamicMsg);
-      await this.randomDelay(1000, 2000);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
   }
 
