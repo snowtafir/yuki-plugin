@@ -30,7 +30,7 @@ export class BiliTask {
     } else if (resjson.code === -352) {
       await postGateway(cookie);
       if (count < 3) {
-        await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * (10500 - 2000 + 1) + 2000))); // 随机延时2-10.5秒
+        await this.randomDelay(2000, 8000); // 随机延时2-8秒
         await this.hendleEventDynamicData(uid, count + 1);
         logger.error(`获取 ${uid} 动态，Gateway count：${String(count)}`);
       } else {
@@ -81,6 +81,7 @@ export class BiliTask {
       }[];
     };
   }, uidMap: Map<any, Map<string, any>>, dynamicList: any, lastLiveStatus: any) {
+    const requestedDataOfUids = new Map<string, any>(); // 存放已请求的 uid 映射
     for (let chatType in biliPushData) { // 遍历 group 和 private
 
       if (!uidMap.has(chatType)) { uidMap.set(chatType, new Map()); }
@@ -93,7 +94,14 @@ export class BiliTask {
             lastLiveStatus[subInfoOfup.uid] = 0;
           }
 
-          const resp: any = await this.hendleEventDynamicData(subInfoOfup.uid);
+          let resp: any;
+          // 检查是否已经请求过该 uid
+          if (requestedDataOfUids.has(subInfoOfup.uid)) {
+            resp = requestedDataOfUids.get(subInfoOfup.uid); // 从已请求的映射中获取响应数据
+          } else {
+            resp = await this.hendleEventDynamicData(subInfoOfup.uid);
+            requestedDataOfUids.set(subInfoOfup.uid, resp); // 将响应数据存储到映射中
+          }
 
           if (resp) {
             if (resp.code === 0) {
@@ -115,10 +123,11 @@ export class BiliTask {
           const bot_id: string[] | number[] = subInfoOfup.bot_id || [];
           const { name, type } = subInfoOfup;
           chatTypeMap.set(subInfoOfup.uid, { chatIds, bot_id, upName: name, type });
-          await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * (8000 - 2000 + 1) + 2000))); // 随机延时2-8秒
+          await this.randomDelay(1000, 4000); // 随机延时1-4秒
         }
       }
     }
+    requestedDataOfUids.clear(); // 清空已请求的映射
   }
 
   /**
@@ -162,7 +171,7 @@ export class BiliTask {
             for (let chatId of chatIds) {
               if (type && type.length && !type.includes(pushDynamicData.type)) continue; // 如果禁用了某类型的动态推送，跳过当前循环
               await this.sendDynamic(chatId, bot_id, upName, pushDynamicData, biliConfigData, chatType); // 发送动态消息
-              await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * (6500 - 2000 + 1) + 2000))); // 随机延时2-6.5秒
+              await this.randomDelay(1000, 2000); // 随机延时1-2秒
             }
           }
         }
@@ -223,7 +232,7 @@ export class BiliTask {
       for (let i = 0; i < imgs.length; i++) {
         const image: Buffer = imgs[i];
         await this.sendMessage(chatId, bot_id, chatType, Segment.image(image));
-        await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * (6500 - 2000 + 1) + 2000))); // 随机延时2-6.5秒
+        await this.randomDelay(1000, 2000); // 随机延时1-2秒
       }
 
       await new Promise((resolve) => setTimeout(resolve, 1000)); // 休眠1秒
