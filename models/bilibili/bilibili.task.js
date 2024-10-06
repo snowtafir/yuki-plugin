@@ -25,7 +25,7 @@ class BiliTask {
         else if (resjson.code === -352) {
             await postGateway(cookie);
             if (count < 3) {
-                await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * (10500 - 2000 + 1) + 2000)));
+                await this.randomDelay(2000, 8000);
                 await this.hendleEventDynamicData(uid, count + 1);
                 logger.error(`获取 ${uid} 动态，Gateway count：${String(count)}`);
             }
@@ -50,6 +50,7 @@ class BiliTask {
         await this.pushDynamicMessages(uidMap, dynamicList, now, interval, biliConfigData);
     }
     async processBiliData(biliPushData, uidMap, dynamicList, lastLiveStatus) {
+        const requestedDataOfUids = new Map();
         for (let chatType in biliPushData) {
             if (!uidMap.has(chatType)) {
                 uidMap.set(chatType, new Map());
@@ -61,7 +62,14 @@ class BiliTask {
                     if (!lastLiveStatus[subInfoOfup.uid]) {
                         lastLiveStatus[subInfoOfup.uid] = 0;
                     }
-                    const resp = await this.hendleEventDynamicData(subInfoOfup.uid);
+                    let resp;
+                    if (requestedDataOfUids.has(subInfoOfup.uid)) {
+                        resp = requestedDataOfUids.get(subInfoOfup.uid);
+                    }
+                    else {
+                        resp = await this.hendleEventDynamicData(subInfoOfup.uid);
+                        requestedDataOfUids.set(subInfoOfup.uid, resp);
+                    }
                     if (resp) {
                         if (resp.code === 0) {
                             const dynamicData = resp.data?.items || [];
@@ -84,10 +92,11 @@ class BiliTask {
                     const bot_id = subInfoOfup.bot_id || [];
                     const { name, type } = subInfoOfup;
                     chatTypeMap.set(subInfoOfup.uid, { chatIds, bot_id, upName: name, type });
-                    await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * (8000 - 2000 + 1) + 2000)));
+                    await this.randomDelay(1000, 4000);
                 }
             }
         }
+        requestedDataOfUids.clear();
     }
     async pushDynamicMessages(uidMap, dynamicList, now, interval, biliConfigData) {
         for (let [chatType, chatTypeMap] of uidMap) {
@@ -120,7 +129,7 @@ class BiliTask {
                             if (type && type.length && !type.includes(pushDynamicData.type))
                                 continue;
                             await this.sendDynamic(chatId, bot_id, upName, pushDynamicData, biliConfigData, chatType);
-                            await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * (6500 - 2000 + 1) + 2000)));
+                            await this.randomDelay(1000, 2000);
                         }
                     }
                 }
@@ -172,7 +181,7 @@ class BiliTask {
             for (let i = 0; i < imgs.length; i++) {
                 const image = imgs[i];
                 await this.sendMessage(chatId, bot_id, chatType, segment.image(image));
-                await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * (6500 - 2000 + 1) + 2000)));
+                await this.randomDelay(1000, 2000);
             }
             await new Promise((resolve) => setTimeout(resolve, 1000));
         }

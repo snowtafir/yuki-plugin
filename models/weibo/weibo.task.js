@@ -25,6 +25,7 @@ class WeiboTask {
         await this.pushDynamicMessages(uidMap, dynamicList, now, interval, weiboConfigData);
     }
     async processWeiboData(weiboPushData, uidMap, dynamicList) {
+        const requestedDataOfUids = new Map();
         for (let chatType in weiboPushData) {
             if (!uidMap.has(chatType)) {
                 uidMap.set(chatType, new Map());
@@ -33,7 +34,14 @@ class WeiboTask {
             for (let chatId in weiboPushData[chatType]) {
                 const subUpsOfChat = Array.prototype.slice.call(weiboPushData[chatType][chatId] || []);
                 for (let subInfoOfup of subUpsOfChat) {
-                    const resp = await new WeiboGetWebData().getBloggerDynamicList(subInfoOfup.uid);
+                    let resp;
+                    if (requestedDataOfUids.has(subInfoOfup.uid)) {
+                        resp = requestedDataOfUids.get(subInfoOfup.uid);
+                    }
+                    else {
+                        resp = await await new WeiboGetWebData().getBloggerDynamicList(subInfoOfup.uid);
+                        requestedDataOfUids.set(subInfoOfup.uid, resp);
+                    }
                     if (resp) {
                         const dynamicData = resp || [];
                         dynamicList[subInfoOfup.uid] = dynamicData;
@@ -46,6 +54,7 @@ class WeiboTask {
                 }
             }
         }
+        requestedDataOfUids.clear();
     }
     async pushDynamicMessages(uidMap, dynamicList, now, interval, weiboConfigData) {
         for (let [chatType, chatTypeMap] of uidMap) {
@@ -79,7 +88,7 @@ class WeiboTask {
                             if (type && type.length && !type.includes(pushDynamicData.type))
                                 continue;
                             await this.sendDynamic(chatId, bot_id, upName, pushDynamicData, weiboConfigData, chatType);
-                            await this.randomDelay(2000, 10500);
+                            await this.randomDelay(1000, 2000);
                         }
                     }
                 }
@@ -131,9 +140,9 @@ class WeiboTask {
             for (let i = 0; i < imgs.length; i++) {
                 const image = imgs[i];
                 await this.sendMessage(chatId, bot_id, chatType, segment.image(image));
-                await this.randomDelay(2000, 6500);
+                await this.randomDelay(1000, 2000);
             }
-            await this.randomDelay(1000, 2000);
+            await new Promise((resolve) => setTimeout(resolve, 1000));
         }
         else {
             const dynamicMsg = await WeiboQuery.formatTextDynamicData(upName, pushDynamicData, false, weiboConfigData);
@@ -148,7 +157,7 @@ class WeiboTask {
                 }
             }
             await this.sendMessage(chatId, bot_id, chatType, dynamicMsg);
-            await this.randomDelay(1000, 2000);
+            await new Promise((resolve) => setTimeout(resolve, 1000));
         }
     }
     buildRenderData(extentData, urlQrcodeData, boxGrid) {
