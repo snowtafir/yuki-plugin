@@ -5,21 +5,20 @@ import plugin from '../../../lib/plugins/plugin.js';
 class YukiVersion extends plugin {
     constructor() {
         super({
-            name: "yuki-version",
-            dsc: "优纪版本",
-            event: "message",
+            name: 'yuki-version',
+            dsc: '优纪版本',
+            event: 'message',
             priority: 0,
             rule: [
                 {
-                    reg: "^(#|\/)(yuki|优纪)版本$",
-                    fnc: "yukiVersion",
-                },
+                    reg: '^(#|/)(yuki|优纪)版本$',
+                    fnc: 'yukiVersion'
+                }
             ]
         });
     }
-    ;
     async yukiVersion() {
-        const version = new VersionData;
+        const version = new VersionData();
         const versionData = await version.getChangelogContent();
         const renderData = {
             data: versionData.map((item) => ({
@@ -30,12 +29,12 @@ class YukiVersion extends plugin {
         const ScreenshotOptionsData = {
             SOptions: {
                 type: 'webp',
-                quality: 90,
+                quality: 90
             },
             isSplit: false,
-            modelName: 'yukiVersion',
+            modelName: 'yukiVersion'
         };
-        const helpImg = await renderPage("version", "Version", renderData, ScreenshotOptionsData);
+        const helpImg = await renderPage('version', 'Version', renderData, ScreenshotOptionsData);
         let imgRes;
         if (helpImg !== false) {
             const { img } = helpImg;
@@ -48,7 +47,6 @@ class YukiVersion extends plugin {
         msg.push(segment.image(imgRes.img[0]));
         await this.e.reply(msg);
     }
-    ;
 }
 
 export { YukiVersion as default };

@@ -10,13 +10,13 @@ class WeiboTask {
     privateKey;
     e;
     constructor(e) {
-        this.taskName = "weiboTask";
-        this.groupKey = "Yz:yuki:weibo:upPush:group:";
-        this.privateKey = "Yz:yuki:weibo:upPush:private:";
+        this.taskName = 'weiboTask';
+        this.groupKey = 'Yz:yuki:weibo:upPush:group:';
+        this.privateKey = 'Yz:yuki:weibo:upPush:private:';
     }
     async runTask() {
-        let weiboConfigData = await Config.getUserConfig("weibo", "config");
-        let weiboPushData = await Config.getUserConfig("weibo", "push");
+        let weiboConfigData = await Config.getUserConfig('weibo', 'config');
+        let weiboPushData = await Config.getUserConfig('weibo', 'push');
         let interval = weiboConfigData.interval || 7200;
         const uidMap = new Map();
         const dynamicList = {};
@@ -71,11 +71,11 @@ class WeiboTask {
                     }
                     if (!raw_post?.mblog?.created_at)
                         continue;
-                    if (Number(now - (WeiboQuery.getDynamicCreatetDate(raw_post) / 1000)) > interval) {
+                    if (Number(now - WeiboQuery.getDynamicCreatetDate(raw_post) / 1000) > interval) {
                         logger.debug(`超过间隔，跳过   [ ${user?.screen_name} : ${user?.id} ] ${raw_post?.mblog?.created_at} 的动态`);
                         continue;
                     }
-                    if (dynamicItem.type === "DYNAMIC_TYPE_FORWARD" && !weiboConfigData.pushTransmit)
+                    if (dynamicItem.type === 'DYNAMIC_TYPE_FORWARD' && !weiboConfigData.pushTransmit)
                         continue;
                     willPushDynamicList.push(dynamicItem);
                 }
@@ -98,11 +98,11 @@ class WeiboTask {
     async sendDynamic(chatId, bot_id, upName, pushDynamicData, weiboConfigData, chatType) {
         const id_str = WeiboQuery.getDynamicId(pushDynamicData);
         let sended, markKey;
-        if (chatType === "group") {
+        if (chatType === 'group') {
             markKey = this.groupKey;
             sended = await redis.get(`${markKey}${chatId}:${id_str}`);
         }
-        else if (chatType === "private") {
+        else if (chatType === 'private') {
             markKey = this.privateKey;
             sended = await redis.get(`${markKey}${chatId}:${id_str}`);
         }
@@ -111,9 +111,9 @@ class WeiboTask {
         if (!!weiboConfigData.pushMsgMode) {
             const { data, uid } = await WeiboQuery.formatDynamicData(pushDynamicData);
             const eval2 = eval;
-            let banWords = eval2(`/${weiboConfigData.banWords.join("|")}/g`);
+            let banWords = eval2(`/${weiboConfigData.banWords.join('|')}/g`);
             if (new RegExp(banWords).test(`${data?.title}${data?.content}`)) {
-                return "return";
+                return 'return';
             }
             let boxGrid = !!weiboConfigData.boxGrid === false ? false : true;
             let isSplit = !!weiboConfigData.isSplit === false ? false : true;
@@ -124,49 +124,49 @@ class WeiboTask {
             let renderData = this.buildRenderData(extentData, urlQrcodeData, boxGrid);
             const ScreenshotOptionsData = {
                 addStyle: style,
-                header: { 'Referer': 'https://weibo.com' },
+                header: { Referer: 'https://weibo.com' },
                 isSplit: isSplit,
                 modelName: 'weibo',
                 SOptions: {
                     type: 'webp',
-                    quality: 98,
+                    quality: 98
                 },
                 saveHtmlfile: false,
-                pageSplitHeight: splitHeight,
+                pageSplitHeight: splitHeight
             };
             let imgs = await this.renderDynamicCard(uid, renderData, ScreenshotOptionsData);
             if (!imgs)
                 return;
-            redis.set(`${markKey}${chatId}:${id_str}`, "1", { EX: 3600 * 10 });
-            (logger ?? Bot.logger)?.mark("优纪插件：微博动态执行推送");
+            redis.set(`${markKey}${chatId}:${id_str}`, '1', { EX: 3600 * 10 });
+            (logger ?? Bot.logger)?.mark('优纪插件：微博动态执行推送');
             for (let i = 0; i < imgs.length; i++) {
                 const image = imgs[i];
                 await this.sendMessage(chatId, bot_id, chatType, segment.image(image));
                 await this.randomDelay(1000, 2000);
             }
-            await new Promise((resolve) => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
         else {
             const dynamicMsg = await WeiboQuery.formatTextDynamicData(upName, pushDynamicData, false, weiboConfigData);
-            redis.set(`${markKey}${chatId}:${id_str}`, "1", { EX: 3600 * 10 });
-            if (dynamicMsg == "continue" || dynamicMsg == false) {
-                return "return";
+            redis.set(`${markKey}${chatId}:${id_str}`, '1', { EX: 3600 * 10 });
+            if (dynamicMsg == 'continue' || dynamicMsg == false) {
+                return 'return';
             }
             if (weiboConfigData.banWords.length > 0) {
-                const banWords = new RegExp(weiboConfigData.banWords.join("|"), "g");
-                if (banWords.test(dynamicMsg.join(""))) {
-                    return "return";
+                const banWords = new RegExp(weiboConfigData.banWords.join('|'), 'g');
+                if (banWords.test(dynamicMsg.join(''))) {
+                    return 'return';
                 }
             }
             await this.sendMessage(chatId, bot_id, chatType, dynamicMsg);
-            await new Promise((resolve) => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
     }
     buildRenderData(extentData, urlQrcodeData, boxGrid) {
-        if (extentData.orig && (extentData.orig).length !== 0) {
+        if (extentData.orig && extentData.orig.length !== 0) {
             return {
                 data: {
-                    appName: "weibo",
+                    appName: 'weibo',
                     boxGrid: boxGrid,
                     type: extentData?.type,
                     face: extentData?.face,
@@ -189,7 +189,7 @@ class WeiboTask {
                             title: extentData?.orig?.data?.title,
                             content: extentData?.orig?.data?.content,
                             pics: extentData?.orig?.data?.pics,
-                            category: extentData?.orig?.data?.category,
+                            category: extentData?.orig?.data?.category
                         }
                     }
                 }
@@ -198,7 +198,7 @@ class WeiboTask {
         else {
             return {
                 data: {
-                    appName: "weibo",
+                    appName: 'weibo',
                     boxGrid: boxGrid,
                     type: extentData?.type,
                     face: extentData?.face,
@@ -210,13 +210,13 @@ class WeiboTask {
                     urlImgData: urlQrcodeData,
                     created: extentData?.created,
                     pics: extentData?.pics,
-                    category: extentData?.category,
+                    category: extentData?.category
                 }
             };
         }
     }
     async renderDynamicCard(uid, renderData, ScreenshotOptionsData) {
-        const dynamicMsg = await renderPage(uid, "MainPage", renderData, ScreenshotOptionsData);
+        const dynamicMsg = await renderPage(uid, 'MainPage', renderData, ScreenshotOptionsData);
         if (dynamicMsg !== false) {
             return dynamicMsg.img;
         }
@@ -225,21 +225,25 @@ class WeiboTask {
         }
     }
     async sendMessage(chatId, bot_id, chatType, message) {
-        if (chatType === "group") {
-            await (Bot[bot_id] ?? Bot)?.pickGroup(String(chatId)).sendMsg(message)
-                .catch((error) => {
+        if (chatType === 'group') {
+            await (Bot[bot_id] ?? Bot)
+                ?.pickGroup(String(chatId))
+                .sendMsg(message)
+                .catch(error => {
                 (logger ?? Bot.logger)?.error(`群组[${chatId}]推送失败：${JSON.stringify(error)}`);
             });
         }
-        else if (chatType === "private") {
-            await (Bot[bot_id] ?? Bot)?.pickFriend(String(chatId)).sendMsg(message)
-                .catch((error) => {
+        else if (chatType === 'private') {
+            await (Bot[bot_id] ?? Bot)
+                ?.pickFriend(String(chatId))
+                .sendMsg(message)
+                .catch(error => {
                 (logger ?? Bot.logger)?.error(`用户[${chatId}]推送失败：${JSON.stringify(error)}`);
             });
         }
     }
     async randomDelay(min, max) {
-        await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * (max - min + 1) + min)));
+        await new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * (max - min + 1) + min)));
     }
 }
 

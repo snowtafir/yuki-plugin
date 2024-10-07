@@ -5,19 +5,18 @@ import plugin from '../../../lib/plugins/plugin.js';
 class YukiHelp extends plugin {
     constructor() {
         super({
-            name: "yuki-help",
-            des: "优纪帮助",
-            event: "message",
+            name: 'yuki-help',
+            des: '优纪帮助',
+            event: 'message',
             priority: 0,
             rule: [
                 {
-                    reg: "^(#|\/)(yuki|优纪)帮助$",
-                    fnc: "yukiHelp",
-                },
+                    reg: '^(#|/)(yuki|优纪)帮助$',
+                    fnc: 'yukiHelp'
+                }
             ]
         });
     }
-    ;
     async yukiHelp() {
         const helpData = await Help.get();
         const renderData = {
@@ -33,12 +32,12 @@ class YukiHelp extends plugin {
         const ScreenshotOptionsData = {
             SOptions: {
                 type: 'webp',
-                quality: 90,
+                quality: 90
             },
             isSplit: false,
-            modelName: 'yukiHelp',
+            modelName: 'yukiHelp'
         };
-        const helpImg = await renderPage("help", "Help", renderData, ScreenshotOptionsData);
+        const helpImg = await renderPage('help', 'Help', renderData, ScreenshotOptionsData);
         let imgRes;
         if (helpImg !== false) {
             const { img } = helpImg;
@@ -51,7 +50,6 @@ class YukiHelp extends plugin {
         msg.push(segment.image(imgRes.img[0]));
         await this.e.reply(msg);
     }
-    ;
 }
 
 export { YukiHelp as default };

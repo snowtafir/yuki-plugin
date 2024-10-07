@@ -6,7 +6,7 @@ const ContentBoxGrid4Css = require('./../../resources/css/dynamic/Content.box.gr
 const ContentBoxGrid9Css = require('./../../resources/css/dynamic/Content.box.grid.9.css');
 const ContentCss = require('./../../resources/css/dynamic/Content.css');
 const Content = ({ data }) => {
-    const picItems = data.pics && (React.createElement("div", { className: 'pic-content' }, data.pics.map((item, index) => {
+    const picItems = data.pics && (React.createElement("div", { className: "pic-content" }, data.pics.map((item, index) => {
         if (item) {
             return (React.createElement("div", { className: "pic-item", key: `${index}_0` },
                 React.createElement("img", { key: `${index}_1`, src: item?.url, alt: " " })));
@@ -66,7 +66,7 @@ const Content = ({ data }) => {
         }
         return null;
     }
-    const boxGrid = data.boxGrid && (data.pics && getBoxGridStyle(data.pics));
+    const boxGrid = data.boxGrid && data.pics && getBoxGridStyle(data.pics);
     const contentCss = React.createElement("link", { rel: "stylesheet", href: ContentCss });
     switch (data.type) {
         case 'DYNAMIC_TYPE_LIVE_RCMD':

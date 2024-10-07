@@ -10,10 +10,10 @@ async function getBiliTicket(csrf) {
     const hexSign = hmacSha256('XgwSnGZ1p', `ts${ts}`);
     const url = 'https://api.bilibili.com/bapis/bilibili.api.ticket.v1.Ticket/GenWebTicket';
     const params = new URLSearchParams({
-        key_id: 'ec02',
-        hexsign: hexSign,
+        'key_id': 'ec02',
+        'hexsign': hexSign,
         'context[ts]': String(ts),
-        csrf: csrf ?? ''
+        'csrf': csrf ?? ''
     });
     try {
         const response = await fetch(`${url}?${params}`, {

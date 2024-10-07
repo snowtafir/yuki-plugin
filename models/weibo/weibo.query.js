@@ -16,16 +16,16 @@ class WeiboQuery {
     }
     static MakeCategory(raw_post) {
         if (raw_post?.mblog?.retweeted_status) {
-            return "DYNAMIC_TYPE_FORWARD";
+            return 'DYNAMIC_TYPE_FORWARD';
         }
         else if (raw_post?.mblog?.page_info && raw_post?.mblog?.page_info?.type === 'video') {
-            return "DYNAMIC_TYPE_AV";
+            return 'DYNAMIC_TYPE_AV';
         }
         else if (raw_post?.mblog?.pics) {
-            return "DYNAMIC_TYPE_DRAW";
+            return 'DYNAMIC_TYPE_DRAW';
         }
         else {
-            return "DYNAMIC_TYPE_ARTICLE";
+            return 'DYNAMIC_TYPE_ARTICLE';
         }
     }
     static filterText(raw_text) {
@@ -61,54 +61,59 @@ class WeiboQuery {
         formatData.data.face = face_url;
         formatData.data.name = nick_name;
         formatData.data.pendant = '';
-        formatData.data.created = moment().format("YYYY年MM月DD日 HH:mm:ss");
+        formatData.data.created = moment().format('YYYY年MM月DD日 HH:mm:ss');
         formatData.data.type = type;
         switch (type) {
-            case "DYNAMIC_TYPE_AV":
-                formatData.data.title = info?.page_info?.title || "";
+            case 'DYNAMIC_TYPE_AV':
+                formatData.data.title = info?.page_info?.title || '';
                 formatData.data.content = this.parseRichTextNodes(info?.text);
                 formatData.data.url = detail_url;
-                formatData.data.pubTs = moment(created_time).format("YYYY年MM月DD日 HH:mm:ss");
-                formatData.data.category = "视频动态";
+                formatData.data.pubTs = moment(created_time).format('YYYY年MM月DD日 HH:mm:ss');
+                formatData.data.category = '视频动态';
                 formatData.data.pics = info?.page_info?.page_pic?.url ? [{ url: info.page_info.page_pic.url }] : [];
                 break;
-            case "DYNAMIC_TYPE_DRAW":
+            case 'DYNAMIC_TYPE_DRAW':
                 let raw_pics_list = retweeted ? info?.retweeted_status?.pics || [] : info?.pics || [];
-                pics = raw_pics_list.map((img) => { return { url: img?.large?.url, width: Number(img?.large?.geo?.width), height: Number(img?.large?.geo?.height) }; }) || [];
-                formatData.data.title = "";
+                pics =
+                    raw_pics_list.map((img) => {
+                        return { url: img?.large?.url, width: Number(img?.large?.geo?.width), height: Number(img?.large?.geo?.height) };
+                    }) || [];
+                formatData.data.title = '';
                 formatData.data.content = this.parseRichTextNodes(info?.text);
                 formatData.data.url = detail_url;
-                formatData.data.pubTs = moment(created_time).format("YYYY年MM月DD日 HH:mm:ss");
+                formatData.data.pubTs = moment(created_time).format('YYYY年MM月DD日 HH:mm:ss');
                 formatData.data.pics = pics;
-                formatData.data.category = "图文动态";
+                formatData.data.category = '图文动态';
                 break;
-            case "DYNAMIC_TYPE_ARTICLE":
+            case 'DYNAMIC_TYPE_ARTICLE':
                 let raw_pics_list_article = retweeted ? info?.retweeted_status?.pics || [] : info?.pics || [];
-                pics = raw_pics_list_article.map((img) => { return { url: img?.large?.url, width: Number(img?.large?.geo?.width), height: Number(img?.large?.geo?.height) }; }) || [];
-                formatData.data.title = "";
+                pics =
+                    raw_pics_list_article.map((img) => {
+                        return { url: img?.large?.url, width: Number(img?.large?.geo?.width), height: Number(img?.large?.geo?.height) };
+                    }) || [];
+                formatData.data.title = '';
                 formatData.data.content = this.parseRichTextNodes(info?.text);
                 formatData.data.url = detail_url;
-                formatData.data.pubTs = moment(created_time).format("YYYY年MM月DD日 HH:mm:ss");
+                formatData.data.pubTs = moment(created_time).format('YYYY年MM月DD日 HH:mm:ss');
                 formatData.data.pics = pics;
-                formatData.data.category = "文章动态";
+                formatData.data.category = '文章动态';
                 break;
-            case "DYNAMIC_TYPE_FORWARD":
-                formatData.data.title = "";
+            case 'DYNAMIC_TYPE_FORWARD':
+                formatData.data.title = '';
                 formatData.data.content = this.parseRichTextNodes(info?.text);
-                formatData.data.pubTs = moment(created_time).format("YYYY年MM月DD日 HH:mm:ss");
+                formatData.data.pubTs = moment(created_time).format('YYYY年MM月DD日 HH:mm:ss');
                 formatData.data.url = detail_url;
                 formatData.data.pics = [];
                 let origin_post_info = info?.retweeted_status;
                 formatData.data.orig = await this.formatDynamicData(origin_post_info);
-                formatData.data.category = "转发动态";
+                formatData.data.category = '转发动态';
                 break;
         }
         return {
             ...formatData,
-            uid: info?.id,
+            uid: info?.id
         };
     }
-    ;
     static parseRichTextNodes = (nodes) => {
         if (typeof nodes === 'string') {
             let parsedContent = nodes.replace(/\n/g, '<br>');
@@ -155,25 +160,23 @@ class WeiboQuery {
         let title = `微博【${upName}】动态推送：\n`;
         const dynamicPicCountLimit = setData.pushPicCountLimit || 3;
         switch (type) {
-            case "DYNAMIC_TYPE_AV":
+            case 'DYNAMIC_TYPE_AV':
                 if (!info)
                     return;
                 let cover_img_url = info?.page_info?.page_pic?.url;
-                let cover_img = segment.image(cover_img_url, false, 15000, { referer: "https://weibo.com", });
+                let cover_img = segment.image(cover_img_url, false, 15000, { referer: 'https://weibo.com' });
                 title = `微博【${upName}】视频动态推送：\n`;
                 msg = [
                     title,
                     `-----------------------------\n`,
-                    `标题：${info?.page_info?.title || ""}\n`,
+                    `标题：${info?.page_info?.title || ''}\n`,
                     `${this.filterText(info?.text)}\n`,
                     `链接：${detail_url}\n`,
-                    `时间：${created_time
-                        ? moment(created_time).format("YYYY年MM月DD日 HH:mm:ss")
-                        : ""}\n`,
-                    cover_img,
+                    `时间：${created_time ? moment(created_time).format('YYYY年MM月DD日 HH:mm:ss') : ''}\n`,
+                    cover_img
                 ];
                 return msg;
-            case "DYNAMIC_TYPE_DRAW":
+            case 'DYNAMIC_TYPE_DRAW':
                 raw_pics_list = retweeted ? info?.retweeted_status?.pics || [] : info?.pics || [];
                 if (!info && !raw_pics_list)
                     return;
@@ -182,7 +185,7 @@ class WeiboQuery {
                 pic_urls = raw_pics_list.map((img) => img?.large?.url);
                 pics = [];
                 for (let pic_url of pic_urls) {
-                    const temp = segment.image(pic_url, false, 15000, { referer: "https://weibo.com", });
+                    const temp = segment.image(pic_url, false, 15000, { referer: 'https://weibo.com' });
                     pics.push(temp);
                 }
                 title = `微博【${upName}】图文动态推送：\n`;
@@ -191,13 +194,11 @@ class WeiboQuery {
                     `-----------------------------\n`,
                     `${this.dynamicContentLimit(this.filterText(info?.text), setData)}\n`,
                     `链接：${detail_url}\n`,
-                    `时间：${created_time
-                        ? moment(created_time).format("YYYY年MM月DD日 HH:mm:ss")
-                        : ""}\n`,
-                    ...pics,
+                    `时间：${created_time ? moment(created_time).format('YYYY年MM月DD日 HH:mm:ss') : ''}\n`,
+                    ...pics
                 ];
                 return msg;
-            case "DYNAMIC_TYPE_ARTICLE":
+            case 'DYNAMIC_TYPE_ARTICLE':
                 if (!info)
                     return;
                 raw_pics_list = retweeted ? info?.retweeted_status?.pics || [] : info?.pics || [];
@@ -206,7 +207,7 @@ class WeiboQuery {
                 pic_urls = raw_pics_list.map(img => img?.large?.url);
                 pics = [];
                 for (const pic_url of pic_urls) {
-                    const temp = segment.image(pic_url, false, 15000, { referer: "https://weibo.com", });
+                    const temp = segment.image(pic_url, false, 15000, { referer: 'https://weibo.com' });
                     pics.push(temp);
                 }
                 title = `微博【${upName}】文章动态推送：\n`;
@@ -215,13 +216,11 @@ class WeiboQuery {
                     `-----------------------------\n`,
                     `正文：${this.dynamicContentLimit(this.filterText(info?.text), setData)}\n`,
                     `链接：${detail_url}\n`,
-                    `时间：${created_time
-                        ? moment(created_time).format("YYYY年MM月DD日 HH:mm:ss")
-                        : ""}\n`,
-                    ...pics,
+                    `时间：${created_time ? moment(created_time).format('YYYY年MM月DD日 HH:mm:ss') : ''}\n`,
+                    ...pics
                 ];
                 return msg;
-            case "DYNAMIC_TYPE_FORWARD":
+            case 'DYNAMIC_TYPE_FORWARD':
                 if (!info)
                     return;
                 if (!info?.retweeted_status)
@@ -241,20 +240,18 @@ class WeiboQuery {
                     `-----------------------------\n`,
                     `${this.dynamicContentLimit(this.filterText(info?.text), setData)}\n`,
                     `链接：${detail_url}\n`,
-                    `时间：${created_time
-                        ? moment(created_time).format("YYYY年MM月DD日 HH:mm:ss")
-                        : ""}\n`,
-                    "\n---以下为转发内容---\n",
-                    ...orig,
+                    `时间：${created_time ? moment(created_time).format('YYYY年MM月DD日 HH:mm:ss') : ''}\n`,
+                    '\n---以下为转发内容---\n',
+                    ...orig
                 ];
                 return msg;
             default:
                 logger?.mark(`未处理的微博推送【${upName}】：${type}`);
-                return "continue";
+                return 'continue';
         }
     }
     static dynamicContentLimit(content, setData) {
-        const lines = content.split("\n");
+        const lines = content.split('\n');
         const lengthLimit = setData.pushContentLenLimit || 100;
         const lineLimit = setData.pushContentLineLimit || 5;
         if (lines.length > lineLimit) {
@@ -268,25 +265,25 @@ class WeiboQuery {
                 continue;
             }
             if (lines[i].length > remainingLength) {
-                lines[i] = lines[i].slice(0, remainingLength) + "...";
+                lines[i] = lines[i].slice(0, remainingLength) + '...';
                 totalLength = lengthLimit;
             }
             else {
                 totalLength += lines[i].length;
             }
         }
-        return lines.join("\n");
+        return lines.join('\n');
     }
     static formatUrl(url) {
         return 0 == url.indexOf('//') ? `https:${url}` : url;
     }
     static typeHandle(up, msg, type) {
         const typeMap = {
-            "直播": "DYNAMIC_TYPE_LIVE_RCMD",
-            "转发": "DYNAMIC_TYPE_FORWARD",
-            "文章": "DYNAMIC_TYPE_ARTICLE",
-            "图文": ["DYNAMIC_TYPE_DRAW", "DYNAMIC_TYPE_WORD"],
-            "视频": "DYNAMIC_TYPE_AV"
+            直播: 'DYNAMIC_TYPE_LIVE_RCMD',
+            转发: 'DYNAMIC_TYPE_FORWARD',
+            文章: 'DYNAMIC_TYPE_ARTICLE',
+            图文: ['DYNAMIC_TYPE_DRAW', 'DYNAMIC_TYPE_WORD'],
+            视频: 'DYNAMIC_TYPE_AV'
         };
         let newType = new Set(up.type || []);
         const handleType = (action) => {
@@ -294,24 +291,24 @@ class WeiboQuery {
             for (const [key, value] of Object.entries(typeMap)) {
                 if (msg.indexOf(key) !== -1) {
                     if (Array.isArray(value)) {
-                        value.forEach(v => action === "add" ? newType.add(v) : newType.delete(v));
+                        value.forEach(v => (action === 'add' ? newType.add(v) : newType.delete(v)));
                     }
                     else {
-                        action === "add" ? newType.add(value) : newType.delete(value);
+                        action === 'add' ? newType.add(value) : newType.delete(value);
                     }
                     isHandled = true;
                 }
             }
             return isHandled;
         };
-        if (type === "add") {
-            handleType("add");
+        if (type === 'add') {
+            handleType('add');
         }
-        else if (type === "del") {
+        else if (type === 'del') {
             if (!newType.size) {
                 newType = new Set(Object.values(typeMap).flat());
             }
-            if (!handleType("delete")) {
+            if (!handleType('delete')) {
                 newType.clear();
             }
         }

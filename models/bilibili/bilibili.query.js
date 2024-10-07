@@ -6,33 +6,36 @@ import lodash from 'lodash';
 
 class BiliQuery {
     static async formatDynamicData(data) {
-        const BiliDrawDynamicLinkUrl = "https://m.bilibili.com/dynamic/";
+        const BiliDrawDynamicLinkUrl = 'https://m.bilibili.com/dynamic/';
         let desc, pics = [], majorType;
         let formatData = { data: {} };
         const author = data?.modules?.module_author || {};
         formatData.data.face = author.face;
         formatData.data.name = author.name;
         formatData.data.pendant = author?.pendant?.image || data?.pendant?.image;
-        formatData.data.created = moment().format("YYYY年MM月DD日 HH:mm:ss");
+        formatData.data.created = moment().format('YYYY年MM月DD日 HH:mm:ss');
         formatData.data.type = data.type;
         switch (data.type) {
-            case "DYNAMIC_TYPE_AV":
+            case 'DYNAMIC_TYPE_AV':
                 desc = data?.modules?.module_dynamic?.major?.archive || {};
                 formatData.data.title = desc?.title;
                 formatData.data.content = this.parseRichTextNodes(desc?.desc);
                 formatData.data.url = this.formatUrl(desc?.jump_url);
                 formatData.data.pubTime = author.pub_time;
-                formatData.data.pubTs = moment(author.pub_ts * 1000).format("YYYY年MM月DD日 HH:mm:ss");
-                formatData.data.category = "视频动态";
+                formatData.data.pubTs = moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss');
+                formatData.data.category = '视频动态';
                 formatData.data.pics = [{ url: desc?.cover }];
                 break;
-            case "DYNAMIC_TYPE_WORD":
+            case 'DYNAMIC_TYPE_WORD':
                 majorType = data?.modules?.module_dynamic?.major?.type;
-                if (majorType === "MAJOR_TYPE_OPUS") {
+                if (majorType === 'MAJOR_TYPE_OPUS') {
                     desc = data?.modules?.module_dynamic?.major?.opus || {};
                     pics = desc?.pics;
-                    pics = pics.map((item) => { return { url: item?.url, width: item?.width, height: item?.height }; }) || [];
-                    formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || "";
+                    pics =
+                        pics.map((item) => {
+                            return { url: item?.url, width: item?.width, height: item?.height };
+                        }) || [];
+                    formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || '';
                 }
                 else {
                     desc = data?.modules?.module_dynamic?.desc || {};
@@ -40,77 +43,86 @@ class BiliQuery {
                     pics = [];
                     formatData.data.content = this.parseRichTextNodes(desc?.text);
                 }
-                formatData.data.title = "";
+                formatData.data.title = '';
                 formatData.data.url = `${BiliDrawDynamicLinkUrl}${data.id_str}`;
                 formatData.data.pubTime = author.pub_time;
-                formatData.data.pubTs = moment(author.pub_ts * 1000).format("YYYY年MM月DD日 HH:mm:ss");
-                formatData.data.category = "图文动态";
+                formatData.data.pubTs = moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss');
+                formatData.data.category = '图文动态';
                 break;
-            case "DYNAMIC_TYPE_DRAW":
+            case 'DYNAMIC_TYPE_DRAW':
                 majorType = data?.modules?.module_dynamic?.major?.type;
-                if (majorType === "MAJOR_TYPE_OPUS") {
+                if (majorType === 'MAJOR_TYPE_OPUS') {
                     desc = data?.modules?.module_dynamic?.major?.opus || {};
                     pics = desc?.pics;
-                    pics = pics.map((item) => { return { url: item?.url, width: item?.width, height: item?.height }; });
-                    formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || "";
+                    pics = pics.map((item) => {
+                        return { url: item?.url, width: item?.width, height: item?.height };
+                    });
+                    formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || '';
                 }
-                else if (majorType === "MAJOR_TYPE_DRAW") {
+                else if (majorType === 'MAJOR_TYPE_DRAW') {
                     desc = data?.modules?.module_dynamic?.desc;
                     pics = data?.modules?.module_dynamic?.major?.draw?.items;
-                    pics = pics.map((item) => { return { url: item?.url, width: item?.width, height: item?.height }; });
-                    formatData.data.content = this.parseRichTextNodes(desc?.rich_text_nodes || desc?.text) || "";
+                    pics = pics.map((item) => {
+                        return { url: item?.url, width: item?.width, height: item?.height };
+                    });
+                    formatData.data.content = this.parseRichTextNodes(desc?.rich_text_nodes || desc?.text) || '';
                 }
                 else {
                     desc = data?.modules?.module_dynamic?.desc;
                     pics = data?.modules?.module_dynamic?.major?.draw?.items;
-                    pics = pics.map((item) => { return { url: item?.src }; });
+                    pics = pics.map((item) => {
+                        return { url: item?.src };
+                    });
                     formatData.data.content = this.parseRichTextNodes(desc?.text);
                 }
-                formatData.data.title = "";
+                formatData.data.title = '';
                 formatData.data.url = `${BiliDrawDynamicLinkUrl}${data.id_str}`;
                 formatData.data.pubTime = author.pub_time;
-                formatData.data.pubTs = moment(author.pub_ts * 1000).format("YYYY年MM月DD日 HH:mm:ss");
+                formatData.data.pubTs = moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss');
                 formatData.data.pics = pics;
-                formatData.data.category = "图文动态";
+                formatData.data.category = '图文动态';
                 break;
-            case "DYNAMIC_TYPE_ARTICLE":
+            case 'DYNAMIC_TYPE_ARTICLE':
                 majorType = data?.modules?.module_dynamic?.major?.type;
-                if (majorType === "MAJOR_TYPE_OPUS") {
+                if (majorType === 'MAJOR_TYPE_OPUS') {
                     desc = data?.modules?.module_dynamic?.major?.opus || {};
                     pics = desc?.pics;
-                    pics = pics.map((item) => { return { url: item?.url, width: item?.width, height: item?.height }; }) || [];
+                    pics =
+                        pics.map((item) => {
+                            return { url: item?.url, width: item?.width, height: item?.height };
+                        }) || [];
                     formatData.data.title = desc?.title;
-                    if ((desc?.summary?.text)?.length >= 480) {
+                    if (desc?.summary?.text?.length >= 480) {
                         const { readInfo, articleType } = await this.getFullArticleContent(this.formatUrl(desc?.jump_url));
-                        if (articleType === "cv") {
+                        if (articleType === 'cv') {
                             formatData.data.content = this.praseFullOldTypeArticleContent(readInfo?.content);
                             if (String(formatData.data.content).length < 100) {
-                                formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || "";
+                                formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || '';
                                 formatData.data.pics = pics;
                             }
                             else {
                                 formatData.data.pics = [];
                             }
                         }
-                        else if (articleType === "opus") {
+                        else if (articleType === 'opus') {
                             const { content, img } = this.praseFullNewTypeArticleContent(readInfo?.paragraphs);
                             formatData.data.content = content;
-                            formatData.data.pics = (img && img.length > 0) ? img : pics;
+                            formatData.data.pics = img && img.length > 0 ? img : pics;
                             if (content && content.length < 100) {
-                                formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || "";
+                                formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || '';
                             }
                         }
                         else {
-                            formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || "";
+                            formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || '';
                             formatData.data.pics = pics;
                         }
                     }
                     else {
-                        formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || "";
+                        formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || '';
                         formatData.data.pics = pics;
                     }
                 }
-                else if (majorType === "MAJOR_TYPE_ARTICLE") {
+                else if (majorType === 'MAJOR_TYPE_ARTICLE') {
                     desc = data?.modules?.module_dynamic?.major?.article || {};
                     pics = desc?.covers;
                     pics = pics.map((item) => ({ url: item }));
@@ -124,25 +136,25 @@ class BiliQuery {
                     }
                     formatData.data.title = desc?.title;
                     formatData.data.pics = pics;
-                    formatData.data.content = "";
+                    formatData.data.content = '';
                 }
                 formatData.data.url = this.formatUrl(desc?.jump_url);
                 formatData.data.pubTime = author.pub_time;
-                formatData.data.pubTs = moment(author.pub_ts * 1000).format("YYYY年MM月DD日 HH:mm:ss");
-                formatData.data.category = "文章动态";
+                formatData.data.pubTs = moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss');
+                formatData.data.category = '文章动态';
                 break;
-            case "DYNAMIC_TYPE_FORWARD":
+            case 'DYNAMIC_TYPE_FORWARD':
                 desc = data?.modules?.module_dynamic?.desc || {};
-                formatData.data.title = "";
+                formatData.data.title = '';
                 formatData.data.content = this.parseRichTextNodes(desc?.rich_text_nodes) || this.parseRichTextNodes(desc?.text);
                 formatData.data.pubTime = author.pub_time;
-                formatData.data.pubTs = moment(author.pub_ts * 1000).format("YYYY年MM月DD日 HH:mm:ss");
+                formatData.data.pubTs = moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss');
                 formatData.data.url = `${BiliDrawDynamicLinkUrl}${data.id_str}`;
                 formatData.data.pics = [data?.cover];
                 formatData.data.orig = await this.formatDynamicData(data.orig);
-                formatData.data.category = "转发动态";
+                formatData.data.category = '转发动态';
                 break;
-            case "DYNAMIC_TYPE_LIVE_RCMD":
+            case 'DYNAMIC_TYPE_LIVE_RCMD':
                 desc = data?.modules?.module_dynamic?.major?.live_rcmd?.content;
                 if (!desc)
                     break;
@@ -151,27 +163,27 @@ class BiliQuery {
                 if (!desc)
                     break;
                 formatData.data.title = desc?.title;
-                formatData.data.content = "";
-                formatData.data.pubTime = "";
-                formatData.data.pubTs = "";
+                formatData.data.content = '';
+                formatData.data.pubTime = '';
+                formatData.data.pubTs = '';
                 formatData.data.url = `https:${desc.link}`;
                 formatData.data.pics = [{ url: desc?.cover }];
-                formatData.data.category = "直播动态";
+                formatData.data.category = '直播动态';
                 break;
         }
         return {
             ...formatData,
-            uid: data?.id_str,
+            uid: data?.id_str
         };
     }
-    ;
     static parseRichTextNodes = (nodes) => {
         if (typeof nodes === 'string') {
             nodes = nodes.replace(/\t/g, '&nbsp;');
             return nodes.replace(/\n/g, '<br>');
         }
         else if (Array.isArray(nodes)) {
-            return nodes.map((node) => {
+            return nodes
+                .map((node) => {
                 switch (node.type) {
                     case 'RICH_TEXT_NODE_TYPE_TOPIC':
                         let jumpUrl = node?.jump_url;
@@ -196,7 +208,8 @@ class BiliQuery {
                     default:
                         return node;
                 }
-            }).join('');
+            })
+                .join('');
         }
         else {
             return nodes;
@@ -207,7 +220,7 @@ class BiliQuery {
         cookie = await cookieWithBiliTicket(cookie);
         try {
             const response = await axios.get(postUrl, {
-                headers: lodash.merge(BiliApi.BILIBILI_ARTICLE_HEADERS, { "Cookie": `${cookie}`, "Host": "www.bilibili.com" }),
+                headers: lodash.merge(BiliApi.BILIBILI_ARTICLE_HEADERS, { Cookie: `${cookie}`, Host: 'www.bilibili.com' }),
                 responseType: 'text'
             });
             const text = response.data;
@@ -248,12 +261,13 @@ class BiliQuery {
     static praseFullNewTypeArticleContent = (paragraphs) => {
         if (Array.isArray(paragraphs)) {
             paragraphs = paragraphs.filter(paragraph => paragraph.para_type === 1 || paragraph.para_type === 2);
-            let content = "";
+            let content = '';
             let img = [];
             paragraphs.forEach((item) => {
                 switch (item.para_type) {
                     case 1:
-                        content += item.text.nodes.map((node) => {
+                        content += item.text.nodes
+                            .map((node) => {
                             let nodeType = node.type;
                             if (nodeType === 'TEXT_NODE_TYPE_RICH') {
                                 let richType = node?.rich?.type;
@@ -282,13 +296,16 @@ class BiliQuery {
                                         return node;
                                 }
                             }
-                            else if (nodeType === "TEXT_NODE_TYPE_WORD") {
+                            else if (nodeType === 'TEXT_NODE_TYPE_WORD') {
                                 return `${node?.word?.words}<br>`;
                             }
-                        }).join('');
+                        })
+                            .join('');
                         break;
                     case 2:
-                        img = img.concat(item?.pic?.pics.map((item) => { return { url: item?.url, width: item?.width, height: item?.height }; }) || []);
+                        img = img.concat(item?.pic?.pics.map((item) => {
+                            return { url: item?.url, width: item?.width, height: item?.height };
+                        }) || []);
                         break;
                 }
             });
@@ -302,11 +319,11 @@ class BiliQuery {
         return 0 == url.indexOf('//') ? `https:${url}` : url;
     }
     static async formatTextDynamicData(upName, data, isForward, setData) {
-        const BiliDrawDynamicLinkUrl = "https://m.bilibili.com/dynamic/";
+        const BiliDrawDynamicLinkUrl = 'https://m.bilibili.com/dynamic/';
         let desc, msg, pics, author, majorType, content, dynamicTitle;
         let title = `B站【${upName}】动态推送：\n`;
         switch (data.type) {
-            case "DYNAMIC_TYPE_AV":
+            case 'DYNAMIC_TYPE_AV':
                 desc = data?.modules?.module_dynamic?.major?.archive;
                 author = data?.modules?.module_author;
                 if (!desc && !author)
@@ -318,18 +335,21 @@ class BiliQuery {
                     `标题：${desc.title}\n`,
                     `${desc.desc}\n`,
                     `链接：${this.formatUrl(desc.jump_url)}\n`,
-                    `时间：${author ? moment(author.pub_ts * 1000).format("YYYY年MM月DD日 HH:mm:ss") : ""}\n`,
-                    segment.image(desc?.cover),
+                    `时间：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}\n`,
+                    segment.image(desc?.cover)
                 ];
                 return msg;
-            case "DYNAMIC_TYPE_WORD":
+            case 'DYNAMIC_TYPE_WORD':
                 author = data?.modules?.module_author;
                 majorType = data?.modules?.module_dynamic?.major?.type;
-                if (majorType === "MAJOR_TYPE_OPUS") {
+                if (majorType === 'MAJOR_TYPE_OPUS') {
                     desc = data?.modules?.module_dynamic?.major?.opus || {};
                     pics = desc?.pics;
-                    pics = pics.map((item) => { return item?.url; }) || [];
-                    content = desc?.summary?.text || "";
+                    pics =
+                        pics.map((item) => {
+                            return item?.url;
+                        }) || [];
+                    content = desc?.summary?.text || '';
                 }
                 else {
                     desc = data?.modules?.module_dynamic?.desc || {};
@@ -345,30 +365,34 @@ class BiliQuery {
                     `-----------------------------\n`,
                     `内容：${this.dynamicContentLimit(content, setData)}\n`,
                     `链接：${BiliDrawDynamicLinkUrl}${data.id_str}\n`,
-                    `时间：${author ? moment(author.pub_ts * 1000).format("YYYY年MM月DD日 HH:mm:ss") : ""}`,
+                    `时间：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}`
                 ];
                 return msg;
-            case "DYNAMIC_TYPE_DRAW":
+            case 'DYNAMIC_TYPE_DRAW':
                 author = data?.modules?.module_author;
                 majorType = data?.modules?.module_dynamic?.major?.type;
-                if (majorType === "MAJOR_TYPE_OPUS") {
+                if (majorType === 'MAJOR_TYPE_OPUS') {
                     desc = data?.modules?.module_dynamic?.major?.opus || {};
                     pics = desc?.pics;
                     pics = pics.map((item) => {
                         return item.url;
                     });
-                    content = desc?.summary?.text || "";
+                    content = desc?.summary?.text || '';
                 }
-                else if (majorType === "MAJOR_TYPE_DRAW") {
+                else if (majorType === 'MAJOR_TYPE_DRAW') {
                     desc = data?.modules?.module_dynamic?.desc;
                     pics = data?.modules?.module_dynamic?.major?.draw?.items;
-                    pics = pics.map((item) => { return item?.src; });
-                    content = desc?.text || "";
+                    pics = pics.map((item) => {
+                        return item?.src;
+                    });
+                    content = desc?.text || '';
                 }
                 else {
                     desc = data?.modules?.module_dynamic?.desc;
                     pics = data?.modules?.module_dynamic?.major?.draw?.items;
-                    pics = pics.map((item) => { return item?.src; });
+                    pics = pics.map((item) => {
+                        return item?.src;
+                    });
                     content = desc?.text;
                 }
                 if (!desc && !pics && !author)
@@ -386,21 +410,24 @@ class BiliQuery {
                     `-----------------------------\n`,
                     `${this.dynamicContentLimit(content, setData)}\n`,
                     `链接：${BiliDrawDynamicLinkUrl}${data.id_str}\n`,
-                    `时间：${author ? moment(author.pub_ts * 1000).format("YYYY年MM月DD日 HH:mm:ss") : ""}\n`,
-                    ...pics,
+                    `时间：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}\n`,
+                    ...pics
                 ];
                 return msg;
-            case "DYNAMIC_TYPE_ARTICLE":
+            case 'DYNAMIC_TYPE_ARTICLE':
                 author = data?.modules?.module_author;
                 majorType = data?.modules?.module_dynamic?.major?.type;
-                if (majorType === "MAJOR_TYPE_OPUS") {
+                if (majorType === 'MAJOR_TYPE_OPUS') {
                     desc = data?.modules?.module_dynamic?.major?.opus || {};
                     pics = desc?.pics;
-                    pics = pics.map((item) => { return item.url; }) || [];
+                    pics =
+                        pics.map((item) => {
+                            return item.url;
+                        }) || [];
                     dynamicTitle = desc?.title;
-                    content = desc?.summary?.text || "";
+                    content = desc?.summary?.text || '';
                 }
-                else if (majorType === "MAJOR_TYPE_ARTICLE") {
+                else if (majorType === 'MAJOR_TYPE_ARTICLE') {
                     desc = data?.modules?.module_dynamic?.major?.article || {};
                     pics = desc?.covers || [];
                     dynamicTitle = desc?.title;
@@ -413,7 +440,7 @@ class BiliQuery {
                     }
                     dynamicTitle = desc?.title;
                     pics = pics;
-                    content = "";
+                    content = '';
                 }
                 if (!desc && !author)
                     return;
@@ -426,11 +453,11 @@ class BiliQuery {
                     `-----------------------------\n`,
                     `标题：${dynamicTitle}\n`,
                     `链接：${this.formatUrl(desc.jump_url)}\n`,
-                    `时间：${author ? moment(author.pub_ts * 1000).format("YYYY年MM月DD日 HH:mm:ss") : ""}\n`,
-                    ...pics,
+                    `时间：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}\n`,
+                    ...pics
                 ];
                 return msg;
-            case "DYNAMIC_TYPE_FORWARD":
+            case 'DYNAMIC_TYPE_FORWARD':
                 author = data?.modules?.module_author;
                 desc = data?.modules?.module_dynamic?.desc || {};
                 content = desc?.text;
@@ -452,12 +479,12 @@ class BiliQuery {
                     `-----------------------------\n`,
                     `${this.dynamicContentLimit(content, setData)}\n`,
                     `链接：${BiliDrawDynamicLinkUrl}${data.id_str}\n`,
-                    `时间：${author ? moment(author.pub_ts * 1000).format("YYYY年MM月DD日 HH:mm:ss") : ""}\n`,
-                    "\n---以下为转发内容---\n",
-                    ...orig,
+                    `时间：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}\n`,
+                    '\n---以下为转发内容---\n',
+                    ...orig
                 ];
                 return msg;
-            case "DYNAMIC_TYPE_LIVE_RCMD":
+            case 'DYNAMIC_TYPE_LIVE_RCMD':
                 desc = data?.modules?.module_dynamic?.major?.live_rcmd?.content;
                 if (!desc)
                     return;
@@ -466,21 +493,15 @@ class BiliQuery {
                 if (!desc)
                     return;
                 title = `B站【${upName}】直播动态推送：\n`;
-                msg = [
-                    title,
-                    `-----------------------------\n`,
-                    `标题：${desc.title}\n`,
-                    `链接：https:${desc.link}\n`,
-                    segment.image(desc.cover),
-                ];
+                msg = [title, `-----------------------------\n`, `标题：${desc.title}\n`, `链接：https:${desc.link}\n`, segment.image(desc.cover)];
                 return msg;
             default:
                 (Bot.logger ?? logger)?.mark(`未处理的B站推送【${upName}】：${data.type}`);
-                return "continue";
+                return 'continue';
         }
     }
     static dynamicContentLimit(content, setData) {
-        const lines = content.split("\n");
+        const lines = content.split('\n');
         const lengthLimit = setData.pushContentLenLimit || 100;
         const lineLimit = setData.pushContentLineLimit || 5;
         if (lines.length > lineLimit) {
@@ -494,22 +515,22 @@ class BiliQuery {
                 continue;
             }
             if (lines[i].length > remainingLength) {
-                lines[i] = lines[i].slice(0, remainingLength) + "...";
+                lines[i] = lines[i].slice(0, remainingLength) + '...';
                 totalLength = lengthLimit;
             }
             else {
                 totalLength += lines[i].length;
             }
         }
-        return lines.join("\n");
+        return lines.join('\n');
     }
     static typeHandle(up, msg, type) {
         const typeMap = {
-            "直播": "DYNAMIC_TYPE_LIVE_RCMD",
-            "转发": "DYNAMIC_TYPE_FORWARD",
-            "文章": "DYNAMIC_TYPE_ARTICLE",
-            "图文": ["DYNAMIC_TYPE_DRAW", "DYNAMIC_TYPE_WORD"],
-            "视频": "DYNAMIC_TYPE_AV"
+            直播: 'DYNAMIC_TYPE_LIVE_RCMD',
+            转发: 'DYNAMIC_TYPE_FORWARD',
+            文章: 'DYNAMIC_TYPE_ARTICLE',
+            图文: ['DYNAMIC_TYPE_DRAW', 'DYNAMIC_TYPE_WORD'],
+            视频: 'DYNAMIC_TYPE_AV'
         };
         let newType = new Set(up.type || []);
         const handleType = (action) => {
@@ -517,24 +538,24 @@ class BiliQuery {
             for (const [key, value] of Object.entries(typeMap)) {
                 if (msg.indexOf(key) !== -1) {
                     if (Array.isArray(value)) {
-                        value.forEach(v => action === "add" ? newType.add(v) : newType.delete(v));
+                        value.forEach(v => (action === 'add' ? newType.add(v) : newType.delete(v)));
                     }
                     else {
-                        action === "add" ? newType.add(value) : newType.delete(value);
+                        action === 'add' ? newType.add(value) : newType.delete(value);
                     }
                     isHandled = true;
                 }
             }
             return isHandled;
         };
-        if (type === "add") {
-            handleType("add");
+        if (type === 'add') {
+            handleType('add');
         }
-        else if (type === "del") {
+        else if (type === 'del') {
             if (!newType.size) {
                 newType = new Set(Object.values(typeMap).flat());
             }
-            if (!handleType("delete")) {
+            if (!handleType('delete')) {
                 newType.clear();
             }
         }

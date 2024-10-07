@@ -15,8 +15,8 @@ function App({ data }) {
                 React.createElement(Account, { data: data }),
                 React.createElement("div", { className: "dynamic-article-page-main unfold" },
                     React.createElement(Content, { data: data }),
-                    data.orig && React.createElement(React.Fragment, null,
-                        React.createElement(ForwardContent, { data: data.orig.data }))),
+                    data.orig && (React.createElement(React.Fragment, null,
+                        React.createElement(ForwardContent, { data: data.orig.data })))),
                 React.createElement(Footer, { data: data })))));
 }
 
