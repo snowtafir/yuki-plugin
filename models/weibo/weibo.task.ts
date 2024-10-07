@@ -175,7 +175,8 @@ export class WeiboTask {
 
       let boxGrid: boolean = !!weiboConfigData.boxGrid === false ? false : true; // 是否启用九宫格样式，默认为 true
       let isSplit: boolean = !!weiboConfigData.isSplit === false ? false : true; // 是否启用分片截图，默认为 true
-      let style: string = isSplit ? '' : '.unfold { height: 7500px; }'; // 不启用分片截图模式的样式
+      let style: string = isSplit ? '' : `.unfold { max-height: ${weiboConfigData?.noSplitHeight ?? 7500}px; }`; // 不启用分片截图模式的样式
+      let splitHeight: number = weiboConfigData?.splitHeight ?? 8000; // 分片截图高度，默认 8000, 单位 px，启用分片截图时生效
 
       const extentData = { ...data };
       const urlQrcodeData: string = await QRCode.toDataURL(extentData?.url);
@@ -191,6 +192,7 @@ export class WeiboTask {
           quality: 98,
         },
         saveHtmlfile: false,
+        pageSplitHeight: splitHeight,
       };
 
       let imgs: Buffer[] | null = await this.renderDynamicCard(uid, renderData, ScreenshotOptionsData);
