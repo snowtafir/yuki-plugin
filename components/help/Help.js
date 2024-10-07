@@ -1,13 +1,14 @@
 import React from 'react';
 import { BOT_NAME, ConfigController } from 'yunzai';
 import Config from '../../utils/config.js';
-import { _paths } from '../../utils/paths.js';
 import path from 'path';
+import { _paths, createRequire } from '../../utils/paths.js';
 
+const require = createRequire(import.meta.url);
 const botVersion = ConfigController.package?.version;
 const yukiPluginVersion = Config.getPackageJsonKey('version', path.join(_paths.pluginPath, 'package.json'));
-const HelpCss = path.join(_paths.pluginResources, 'css/help/help.css');
-const iconPath = (iconName) => path.join(_paths.pluginResources, `img/icon/puplic/${iconName}.png`);
+const HelpCss = require('./../../resources/css/help/help.css');
+const iconPath = (iconName) => require(`./../../resources/img/icon/puplic/${iconName}.png`);
 function App({ data }) {
     return (React.createElement(React.Fragment, null,
         React.createElement("link", { rel: "stylesheet", href: HelpCss }),

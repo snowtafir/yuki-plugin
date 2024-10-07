@@ -1,8 +1,8 @@
 import React from 'react';
-import { _paths } from '../../utils/paths.js';
-import path from 'path';
+import { createRequire } from '../../utils/paths.js';
 
-const LogoTextCss = path.join(_paths.pluginResources, 'css/dynamic/LogoText.css');
+const require = createRequire(import.meta.url);
+const LogoTextCss = require('./../../resources/css/dynamic/LogoText.css');
 const LogoText = ({ data }) => (React.createElement(React.Fragment, null,
     React.createElement("link", { rel: "stylesheet", href: LogoTextCss }),
     data.appName === 'bilibili' && (React.createElement("div", { className: "bilibili-logo-text" }, data.category)),

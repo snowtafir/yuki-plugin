@@ -1,10 +1,10 @@
 import React from 'react';
-import { _paths } from '../../utils/paths.js';
-import path from 'path';
+import { createRequire } from '../../utils/paths.js';
 
-const ContentBoxGrid4Css = path.join(_paths.pluginResources, 'css/dynamic/Content.box.grid.4.css');
-const ContentBoxGrid9Css = path.join(_paths.pluginResources, 'css/dynamic/Content.box.grid.9.css');
-const ContentCss = path.join(_paths.pluginResources, 'css/dynamic/Content.css');
+const require = createRequire(import.meta.url);
+const ContentBoxGrid4Css = require('./../../resources/css/dynamic/Content.box.grid.4.css');
+const ContentBoxGrid9Css = require('./../../resources/css/dynamic/Content.box.grid.9.css');
+const ContentCss = require('./../../resources/css/dynamic/Content.css');
 const Content = ({ data }) => {
     const picItems = data.pics && (React.createElement("div", { className: 'pic-content' }, data.pics.map((item, index) => {
         if (item) {

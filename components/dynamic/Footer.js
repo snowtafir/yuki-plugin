@@ -1,14 +1,15 @@
 import React from 'react';
 import { ConfigController, BOT_NAME } from 'yunzai';
 import Config from '../../utils/config.js';
-import { _paths } from '../../utils/paths.js';
 import path from 'path';
+import { _paths, createRequire } from '../../utils/paths.js';
 
+const require = createRequire(import.meta.url);
 const botVersion = ConfigController.package?.version;
 const yukiPluginVersion = Config.getPackageJsonKey('version', path.join(_paths.pluginPath, 'package.json'));
-const bilibililogo = path.join(_paths.pluginResources, 'img/icon/dynamic/bilibili.svg');
-const weibilogo = path.join(_paths.pluginResources, 'img/icon/dynamic/weibo.svg');
-const FooterCss = path.join(_paths.pluginResources, 'css/dynamic/Footer.css');
+const bilibililogo = require('./../../resources/img/icon/dynamic/bilibili.svg');
+const weibilogo = require('./../../resources/img/icon/dynamic/weibo.svg');
+const FooterCss = require('./../../resources/css/dynamic/Footer.css');
 const Footer = ({ data }) => {
     return (React.createElement(React.Fragment, null,
         React.createElement("link", { rel: "stylesheet", href: FooterCss }),

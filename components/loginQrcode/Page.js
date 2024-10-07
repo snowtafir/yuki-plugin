@@ -1,8 +1,8 @@
 import React from 'react';
-import { _paths } from '../../utils/paths.js';
-import path from 'path';
+import { createRequire } from '../../utils/paths.js';
 
-const LoginQrcodeCss = path.join(_paths.pluginResources, 'css/loginQrcode/Page.css');
+const require = createRequire(import.meta.url);
+const LoginQrcodeCss = require('./../../resources/css/loginQrcode/Page.css');
 function App({ data }) {
     return (React.createElement(React.Fragment, null,
         React.createElement("link", { rel: "stylesheet", href: LoginQrcodeCss }),

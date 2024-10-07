@@ -160,7 +160,8 @@ class BiliTask {
             }
             let boxGrid = !!biliConfigData.boxGrid === false ? false : true;
             let isSplit = !!biliConfigData.isSplit === false ? false : true;
-            let style = isSplit ? '' : '.unfold { height: 7500px; }';
+            let style = isSplit ? '' : `.unfold { max-height: ${biliConfigData?.noSplitHeight ?? 7500}px; }`;
+            let splitHeight = biliConfigData?.splitHeight ?? 8000;
             const urlQrcodeData = await QRCode.toDataURL(extentData?.url);
             let renderData = this.buildRenderData(extentData, urlQrcodeData, boxGrid);
             const ScreenshotOptionsData = {
@@ -173,6 +174,7 @@ class BiliTask {
                     quality: 98,
                 },
                 saveHtmlfile: false,
+                pageSplitHeight: splitHeight,
             };
             let imgs = await this.renderDynamicCard(uid, renderData, ScreenshotOptionsData);
             if (!imgs)
