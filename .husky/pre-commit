@@ -1,0 +1,5 @@
+# 格式化代码
+npm run format
+
+# 检查一致性
+npm run check-format

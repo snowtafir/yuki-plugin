@@ -1,5 +1,5 @@
 // react 热开发 router 配置文件
-import React from "react"
+import React from 'react';
 import QRCode from 'qrcode';
 import { defineConfig } from 'react-puppeteer';
 
@@ -8,24 +8,23 @@ const Page = (await import(`./src/components//dynamic/MainPage.tsx`)).default;
 //const Page = (await import('./src/components/help/Help.tsx')).default;
 //const Page = (await import('./src/components/loginQrcode/Page.tsx')).default;
 
-
 const props = {
   data: {
-    appName: "bilibili",
-    type: "DYNAMIC_TYPE_DRAW",
-    face: "https://i2.hdslb.com/bfs/face/09dd0d38633d567179784ac9a0d95ac1187ea71d.jpg",
-    pendant: "",
-    name: "小白测评",
+    appName: 'bilibili',
+    type: 'DYNAMIC_TYPE_DRAW',
+    face: 'https://i2.hdslb.com/bfs/face/09dd0d38633d567179784ac9a0d95ac1187ea71d.jpg',
+    pendant: '',
+    name: '小白测评',
     pubTs: `${Date.now()}`,
-    content: "关注微信公众号：小白测评 每晚发车不见不散",
-    urlImgData: await (QRCode.toDataURL("https://m.bilibili.com/opus/949167878184108051")),
-    category: "文章动态",
+    content: '关注微信公众号：小白测评 每晚发车不见不散',
+    urlImgData: await QRCode.toDataURL('https://m.bilibili.com/opus/949167878184108051'),
+    category: '文章动态',
     created: `2024-06-29 12:00:00`,
     pics: [
       { url: 'http://i0.hdslb.com/bfs/archive/e74c63cfec570974157be8d1f5e3582b355ad991.jpg' },
       { url: 'http://i0.hdslb.com/bfs/archive/e74c63cfec570974157be8d1f5e3582b355ad991.jpg' },
-      { url: 'http://i0.hdslb.com/bfs/archive/e74c63cfec570974157be8d1f5e3582b355ad991.jpg' },
-    ],
+      { url: 'http://i0.hdslb.com/bfs/archive/e74c63cfec570974157be8d1f5e3582b355ad991.jpg' }
+    ]
     /*         orig: {
               appName: "bilibili",
               type: "DYNAMIC_TYPE_DRAW",
@@ -45,7 +44,7 @@ const props = {
               ]
             } */
   }
-}
+};
 
 /* const props ={
 data:{[
@@ -111,4 +110,4 @@ export default defineConfig([
       html_body: <Page {...props} />
     }
   }
-])
+]);

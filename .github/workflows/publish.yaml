@@ -4,44 +4,44 @@ on:
   push:
     branches:
       - npm
-      
+
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
 
     steps:
-    - name: 🚀 检出代码
-      uses: actions/checkout@v4
+      - name: 🚀 检出代码
+        uses: actions/checkout@v4
 
-    - name: 🏗️ 安装 Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 18
-        registry-url: 'https://registry.npmjs.org'
+      - name: 🏗️ 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          registry-url: 'https://registry.npmjs.org'
 
-    - name: 📦 安装 yarn
-      run: npm install -g yarn
+      - name: 📦 安装 yarn
+        run: npm install -g yarn
 
-    - name: 📦 列出node版本
-      run: |
-        pwd
-        node -v
+      - name: 📦 列出node版本
+        run: |
+          pwd
+          node -v
 
-    - name: 📦 列出npm版本
-      run: npm -v
+      - name: 📦 列出npm版本
+        run: npm -v
 
-    - name: 📦 列出yarn版本
-      run: yarn -v
+      - name: 📦 列出yarn版本
+        run: yarn -v
 
-    - name: 🔧 安装依赖
-      run: yarn install
+      - name: 🔧 安装依赖
+        run: yarn install
 
-    - name: 🛠️ 构建项目
-      run: yarn build
+      - name: 🛠️ 构建项目
+        run: yarn build
 
-    - name: 🚀 发布npm包
-      run: |
-        ls -l
-        yarn publish
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: 🚀 发布npm包
+        run: |
+          ls -l
+          yarn publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

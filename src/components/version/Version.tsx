@@ -9,14 +9,14 @@ const require = createRequire(import.meta.url);
 const botVersion = ConfigController.package?.version;
 const yukiPluginVersion = Config.getPackageJsonKey('version', path.join(_paths.pluginPath, 'package.json'));
 
-const VersionCss: string = require('./../../../resources/css/version/version.css')
+const VersionCss: string = require('./../../../resources/css/version/version.css');
 
 export type VersionProps = {
   data: {
     version: string;
     data: string[];
   }[];
-}
+};
 
 export default function App({ data }: VersionProps) {
   return (
@@ -25,7 +25,10 @@ export default function App({ data }: VersionProps) {
       <div className="container" id="container">
         {data.map((item, idx) => (
           <div key={idx} className="version-card">
-            <div className="title">{item.version}{idx ? '' : ' - 当前版本'}</div>
+            <div className="title">
+              {item.version}
+              {idx ? '' : ' - 当前版本'}
+            </div>
             <div className="content">
               <ul>
                 {item.data.map((sub, subIdx) => (
@@ -42,4 +45,4 @@ export default function App({ data }: VersionProps) {
       </div>
     </>
   );
-};
+}

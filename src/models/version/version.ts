@@ -29,7 +29,7 @@ export default class VersionData {
 
     let content = fs.readFileSync(this.versionPath, 'utf8');
     let lines = content.split('\n');
-    let result: Array<{ version: string, data: string[] }> = [];
+    let result: Array<{ version: string; data: string[] }> = [];
     let currentVersion: string | null = null;
     let currentData: string[] = [];
 
@@ -74,5 +74,3 @@ export default class VersionData {
     return this.cache[key];
   }
 }
-
-

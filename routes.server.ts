@@ -1,2 +1,2 @@
-import { createServer } from 'react-puppeteer'
-createServer()
+import { createServer } from 'react-puppeteer';
+createServer();

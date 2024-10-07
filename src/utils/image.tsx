@@ -37,8 +37,8 @@ class Image extends Picture {
     page: string,
     props: T = {} as T,
     ScreenshotOptions?: ScreenshotOptions,
-    ComponentCreateOpsion?: ComponentCreateOpsionType,
-  ): Promise<false | { img: Buffer[]; }> {
+    ComponentCreateOpsion?: ComponentCreateOpsionType
+  ): Promise<false | { img: Buffer[] }> {
     // 根据组件名称获取对应的 React 组件
     const Page = ReactPages[page];
     // 调用 yukiPuppeteerRender 进行截图操作
@@ -49,7 +49,7 @@ class Image extends Picture {
         html_body: <Page {...props} />,
         ...ComponentCreateOpsion
       }),
-      ScreenshotOptions,
+      ScreenshotOptions
     );
   }
 }
@@ -59,13 +59,13 @@ let instance: Image = null;
 
 // 存储任务队列
 const queue: Array<{
-  uid: number | string,
-  page: string,
-  props: any,
-  ScreenshotOptions?: ScreenshotOptions,
-  ComponentCreateOpsion?: ComponentCreateOpsionType,
-  resolve: (value: false | { img: Buffer[]; }) => void,
-  reject: (reason?: any) => void
+  uid: number | string;
+  page: string;
+  props: any;
+  ScreenshotOptions?: ScreenshotOptions;
+  ComponentCreateOpsion?: ComponentCreateOpsionType;
+  resolve: (value: false | { img: Buffer[] }) => void;
+  reject: (reason?: any) => void;
 }> = [];
 
 // 标记当前是否有任务正在处理
@@ -99,7 +99,7 @@ const processQueue = async () => {
 
   // 处理下一个任务
   processQueue();
-}
+};
 
 /**
  * 渲染列队中的任务
@@ -110,13 +110,13 @@ const processQueue = async () => {
  * @param ScreenshotOptions 截图选项
  * @returns {false | {img: buffer[]}}
  */
-const renderPage = async <T = any>(
+const renderPage = async <T = any,>(
   uid: number | string,
   page: string,
   props: T = {} as T,
   ScreenshotOptions?: ScreenshotOptions,
-  ComponentCreateOpsion?: ComponentCreateOpsionType,
-): Promise<false | { img: Buffer[]; }> => {
+  ComponentCreateOpsion?: ComponentCreateOpsionType
+): Promise<false | { img: Buffer[] }> => {
   if (!instance) {
     instance = new Image();
   }
@@ -128,7 +128,7 @@ const renderPage = async <T = any>(
       processQueue();
     }
   });
-}
+};
 
 // 导出 renderPage 方法，用于生成图片
 export { renderPage };

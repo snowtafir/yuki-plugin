@@ -11,7 +11,7 @@ const message = new Messages('message');
  */
 message.use(
   async e => {
-    const version = new VersionData;
+    const version = new VersionData();
     const versionData = await version.getChangelogContent();
 
     const renderData: VersionProps = {
@@ -23,15 +23,15 @@ message.use(
     const ScreenshotOptionsData: ScreenshotOptions = {
       SOptions: {
         type: 'webp',
-        quality: 90,
+        quality: 90
       },
       isSplit: false,
-      modelName: 'yukiVersion',
+      modelName: 'yukiVersion'
     };
 
-    const helpImg = await renderPage("version", "Version", renderData, ScreenshotOptionsData);
+    const helpImg = await renderPage('version', 'Version', renderData, ScreenshotOptionsData);
 
-    let imgRes: { img: Buffer[]; }
+    let imgRes: { img: Buffer[] };
     if (helpImg !== false) {
       const { img } = helpImg;
       imgRes = { img };
@@ -43,6 +43,6 @@ message.use(
     await e.reply(msg);
   },
   [/^(#|\/)(yuki|优纪)版本$/]
-)
+);
 
-export const YukiVersion = message.ok
+export const YukiVersion = message.ok;

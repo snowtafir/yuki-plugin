@@ -26,15 +26,15 @@ message.use(
     const ScreenshotOptionsData: ScreenshotOptions = {
       SOptions: {
         type: 'webp',
-        quality: 90,
+        quality: 90
       },
       isSplit: false,
-      modelName: 'yukiHelp',
+      modelName: 'yukiHelp'
     };
 
-    const helpImg = await renderPage("help", "Help", renderData, ScreenshotOptionsData);
+    const helpImg = await renderPage('help', 'Help', renderData, ScreenshotOptionsData);
 
-    let imgRes: { img: Buffer[]; }
+    let imgRes: { img: Buffer[] };
     if (helpImg !== false) {
       const { img } = helpImg;
       imgRes = { img };
@@ -46,9 +46,6 @@ message.use(
     await e.reply(msg);
   },
   [/^(#|\/)(yuki|优纪)帮助$/]
-)
+);
 
-export const YukiHelp = message.ok
-
-
-
+export const YukiHelp = message.ok;

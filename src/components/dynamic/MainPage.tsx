@@ -8,40 +8,40 @@ import { _paths, createRequire } from '@/utils/paths';
 
 const require = createRequire(import.meta.url);
 
-const MainPageCss: string = require('./../../../resources/css/dynamic/MainPage.css')
+const MainPageCss: string = require('./../../../resources/css/dynamic/MainPage.css');
 
 export type MainProps = {
   data: {
-    appName: string,
-    boxGrid?: boolean,
-    type?: string,
-    face?: string,
-    pendant?: string,
-    name?: string,
-    pubTs: any,
-    title?: string
-    content?: string,
-    urlImgData?: string,
-    created?: any,
-    pics?: Array<any>
-    category?: string,
+    appName: string;
+    boxGrid?: boolean;
+    type?: string;
+    face?: string;
+    pendant?: string;
+    name?: string;
+    pubTs: any;
+    title?: string;
+    content?: string;
+    urlImgData?: string;
+    created?: any;
+    pics?: Array<any>;
+    category?: string;
     orig?: {
       data?: {
-        type?: string,
-        face?: string,
-        pendant?: string,
-        name?: string,
-        pubTs?: any,
-        title?: string
-        content?: string,
-        urlImgData?: string,
-        created?: any,
-        pics?: string[],
-        category?: string,
-      }
-    },
+        type?: string;
+        face?: string;
+        pendant?: string;
+        name?: string;
+        pubTs?: any;
+        title?: string;
+        content?: string;
+        urlImgData?: string;
+        created?: any;
+        pics?: string[];
+        category?: string;
+      };
+    };
   };
-}
+};
 
 export default function App({ data }: MainProps) {
   return (
@@ -52,13 +52,15 @@ export default function App({ data }: MainProps) {
           <Account data={data} />
           <div className="dynamic-article-page-main unfold">
             <Content data={data} />
-            {data.orig && <><ForwardContent data={data.orig.data} /></>}
+            {data.orig && (
+              <>
+                <ForwardContent data={data.orig.data} />
+              </>
+            )}
           </div>
           <Footer data={data} />
         </div>
       </div>
     </>
   );
-};
-
-
+}

@@ -1,4 +1,4 @@
 /*自适应四宫格控制*/
 .pic-item {
-    flex: 1 0 calc(50% - 10px);
+  flex: 1 0 calc(50% - 10px);
 }
