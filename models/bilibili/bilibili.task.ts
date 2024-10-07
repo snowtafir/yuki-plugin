@@ -1,5 +1,5 @@
 import QRCode from 'qrcode';
-import { MainProps } from "@/components/dynamic/MainPage";
+import { MainProps } from '@/components/dynamic/MainPage';
 import Config from '@/utils/config';
 import { renderPage } from '@/utils/image';
 import { ScreenshotOptions } from '@/utils/puppeteer.render';
@@ -17,9 +17,9 @@ export class BiliTask {
   privateKey: string;
   e?: any;
   constructor(e?: any) {
-    this.taskName = "biliTask";
-    this.groupKey = "Yz:yuki:bili:upPush:group:";
-    this.privateKey = "Yz:yuki:bili:upPush:private:";
+    this.taskName = 'biliTask';
+    this.groupKey = 'Yz:yuki:bili:upPush:group:';
+    this.privateKey = 'Yz:yuki:bili:upPush:private:';
   }
 
   async hendleEventDynamicData(uid: string | number, count: number = 0): Promise<any> {
@@ -44,10 +44,10 @@ export class BiliTask {
   }
 
   async runTask() {
-    let biliConfigData = await Config.getUserConfig("bilibili", "config");
-    let biliPushData = await Config.getUserConfig("bilibili", "push");
+    let biliConfigData = await Config.getUserConfig('bilibili', 'config');
+    let biliPushData = await Config.getUserConfig('bilibili', 'push');
     let interval: number = biliConfigData.interval || 7200;
-    let lastLiveStatus = JSON.parse(await redis.get("yuki:bililive:lastlivestatus")) || {};
+    let lastLiveStatus = JSON.parse(await redis.get('yuki:bililive:lastlivestatus')) || {};
     const uidMap: Map<any, Map<string, any>> = new Map(); // 存放group 和 private 对应所属 uid 与推送信息的映射
     const dynamicList = {}; // 存放获取的所有动态，键为 uid，值为动态数组
 
@@ -64,32 +64,42 @@ export class BiliTask {
    * @param dynamicList 动态列表
    * @param lastLiveStatus 最后直播状态
    */
-  async processBiliData(biliPushData: {
-    group?: {
-      [chatId: string]: {
-        bot_id: string;
-        uid: string;
-        name: string;
-        type: string[];
-      }[];
-    };
-    private?: {
-      [chatId: string]: {
-        bot_id: string;
-        uid: string;
-        name: string;
-        type: string[];
-      }[];
-    };
-  }, uidMap: Map<any, Map<string, any>>, dynamicList: any, lastLiveStatus: any) {
+  async processBiliData(
+    biliPushData: {
+      group?: {
+        [chatId: string]: {
+          bot_id: string;
+          uid: string;
+          name: string;
+          type: string[];
+        }[];
+      };
+      private?: {
+        [chatId: string]: {
+          bot_id: string;
+          uid: string;
+          name: string;
+          type: string[];
+        }[];
+      };
+    },
+    uidMap: Map<any, Map<string, any>>,
+    dynamicList: any,
+    lastLiveStatus: any
+  ) {
     const requestedDataOfUids = new Map<string, any>(); // 存放已请求的 uid 映射
-    for (let chatType in biliPushData) { // 遍历 group 和 private
+    for (let chatType in biliPushData) {
+      // 遍历 group 和 private
 
-      if (!uidMap.has(chatType)) { uidMap.set(chatType, new Map()); }
+      if (!uidMap.has(chatType)) {
+        uidMap.set(chatType, new Map());
+      }
       const chatTypeMap = uidMap.get(chatType); // 建立当前 chatType (group 或 private) 的 uid 映射
 
       for (let chatId in biliPushData[chatType]) {
-        const subUpsOfChat: { uid: string; bot_id: string[]; name: string; type: string[] }[] = Array.prototype.slice.call(biliPushData[chatType][chatId] || []);
+        const subUpsOfChat: { uid: string; bot_id: string[]; name: string; type: string[] }[] = Array.prototype.slice.call(
+          biliPushData[chatType][chatId] || []
+        );
         for (let subInfoOfup of subUpsOfChat) {
           if (!lastLiveStatus[subInfoOfup.uid]) {
             lastLiveStatus[subInfoOfup.uid] = 0;
@@ -157,7 +167,7 @@ export class BiliTask {
             logger.debug(`超过间隔，跳过  [ ${author?.name} : ${author?.mid} ] ${author?.pub_time} 的动态`);
             continue;
           } // 如果超过推送时间间隔，跳过当前循环
-          if (dynamicItem.type === "DYNAMIC_TYPE_FORWARD" && !biliConfigData.pushTransmit) continue; // 如果关闭了转发动态的推送，跳过当前循环
+          if (dynamicItem.type === 'DYNAMIC_TYPE_FORWARD' && !biliConfigData.pushTransmit) continue; // 如果关闭了转发动态的推送，跳过当前循环
           willPushDynamicList.push(dynamicItem);
         }
         printedList.clear();
@@ -185,10 +195,10 @@ export class BiliTask {
     const id_str = pushDynamicData.id_str;
 
     let sended: string | null, markKey: string;
-    if (chatType === "group") {
+    if (chatType === 'group') {
       markKey = this.groupKey;
       sended = await redis.get(`${markKey}${chatId}:${id_str}`);
-    } else if (chatType === "private") {
+    } else if (chatType === 'private') {
       markKey = this.privateKey;
       sended = await redis.get(`${markKey}${chatId}:${id_str}`);
     }
@@ -199,9 +209,9 @@ export class BiliTask {
       const extentData = { ...data };
 
       const eval2 = eval;
-      let banWords: RegExp = eval2(`/${biliConfigData.banWords.join("|")}/g`); // 构建屏蔽关键字正则表达式
+      let banWords: RegExp = eval2(`/${biliConfigData.banWords.join('|')}/g`); // 构建屏蔽关键字正则表达式
       if (new RegExp(banWords).test(`${extentData?.title}${extentData?.content}`)) {
-        return "return"; // 如果动态包含屏蔽关键字，则直接返回
+        return 'return'; // 如果动态包含屏蔽关键字，则直接返回
       }
 
       let boxGrid: boolean = !!biliConfigData.boxGrid === false ? false : true; // 是否启用九宫格样式，默认为 true
@@ -214,23 +224,23 @@ export class BiliTask {
 
       const ScreenshotOptionsData: ScreenshotOptions = {
         addStyle: style,
-        header: { 'Referer': 'https://space.bilibili.com/' },
+        header: { Referer: 'https://space.bilibili.com/' },
         isSplit: isSplit,
         modelName: 'bilibili',
         SOptions: {
           type: 'webp',
-          quality: 98,
+          quality: 98
         },
         saveHtmlfile: false,
-        pageSplitHeight: splitHeight,
+        pageSplitHeight: splitHeight
       };
 
       let imgs: Buffer[] | null = await this.renderDynamicCard(uid, renderData, ScreenshotOptionsData);
       if (!imgs) return;
 
-      redis.set(`${markKey}${chatId}:${id_str}`, "1", { EX: 3600 * 10 }); // 设置已发送标记
+      redis.set(`${markKey}${chatId}:${id_str}`, '1', { EX: 3600 * 10 }); // 设置已发送标记
 
-      (logger ?? Bot.logger)?.mark("优纪插件：B站动态执行推送");
+      (logger ?? Bot.logger)?.mark('优纪插件：B站动态执行推送');
 
       for (let i = 0; i < imgs.length; i++) {
         const image: Buffer = imgs[i];
@@ -238,26 +248,25 @@ export class BiliTask {
         await this.randomDelay(1000, 2000); // 随机延时1-2秒
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // 休眠1秒
-
+      await new Promise(resolve => setTimeout(resolve, 1000)); // 休眠1秒
     } else {
       const dynamicMsg = await BiliQuery.formatTextDynamicData(upName, pushDynamicData, false, biliConfigData); // 构建图文动态消息
 
-      redis.set(`${markKey}${chatId}:${id_str}`, "1", { EX: 3600 * 10 }); // 设置已发送标记
+      redis.set(`${markKey}${chatId}:${id_str}`, '1', { EX: 3600 * 10 }); // 设置已发送标记
 
-      if (dynamicMsg == "continue") {
-        return "return"; // 如果动态消息构建失败，则直接返回
+      if (dynamicMsg == 'continue') {
+        return 'return'; // 如果动态消息构建失败，则直接返回
       }
 
       if (biliConfigData.banWords.length > 0) {
-        const banWords = new RegExp(biliConfigData.banWords.join("|"), "g"); // 构建屏蔽关键字正则表达式
-        if (banWords.test(dynamicMsg.join(""))) {
-          return "return"; // 如果动态消息包含屏蔽关键字，则直接返回
+        const banWords = new RegExp(biliConfigData.banWords.join('|'), 'g'); // 构建屏蔽关键字正则表达式
+        if (banWords.test(dynamicMsg.join(''))) {
+          return 'return'; // 如果动态消息包含屏蔽关键字，则直接返回
         }
       }
 
       await this.sendMessage(chatId, bot_id, chatType, dynamicMsg);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
   }
 
@@ -269,10 +278,10 @@ export class BiliTask {
    * @returns 渲染数据
    */
   buildRenderData(extentData: any, urlQrcodeData: string, boxGrid: boolean): MainProps {
-    if (extentData.orig && (extentData.orig).length !== 0) {
+    if (extentData.orig && extentData.orig.length !== 0) {
       return {
         data: {
-          appName: "bilibili",
+          appName: 'bilibili',
           boxGrid: boxGrid,
           type: extentData?.type,
           face: extentData?.face,
@@ -295,7 +304,7 @@ export class BiliTask {
               title: extentData?.orig?.data?.title,
               content: extentData?.orig?.data?.content,
               pics: extentData?.orig?.data?.pics,
-              category: extentData?.orig?.data?.category,
+              category: extentData?.orig?.data?.category
             }
           }
         }
@@ -303,7 +312,7 @@ export class BiliTask {
     } else {
       return {
         data: {
-          appName: "bilibili",
+          appName: 'bilibili',
           boxGrid: boxGrid,
           type: extentData?.type,
           face: extentData?.face,
@@ -315,7 +324,7 @@ export class BiliTask {
           urlImgData: urlQrcodeData,
           created: extentData?.created,
           pics: extentData?.pics,
-          category: extentData?.category,
+          category: extentData?.category
         }
       };
     }
@@ -329,7 +338,7 @@ export class BiliTask {
    * @returns 图片数据
    */
   async renderDynamicCard(uid: string, renderData: MainProps, ScreenshotOptionsData: ScreenshotOptions): Promise<Buffer[] | null> {
-    const dynamicMsg = await renderPage(uid, "MainPage", renderData, ScreenshotOptionsData); // 渲染动态卡片
+    const dynamicMsg = await renderPage(uid, 'MainPage', renderData, ScreenshotOptionsData); // 渲染动态卡片
     if (dynamicMsg !== false) {
       return dynamicMsg.img; // 缓存图片数据
     } else {
@@ -345,13 +354,17 @@ export class BiliTask {
    * @param message 消息内容
    */
   async sendMessage(chatId: string | number, bot_id: string | number, chatType: string, message: any) {
-    if (chatType === "group") {
-      await (Bot[bot_id] ?? Bot)?.pickGroup(String(chatId)).sendMsg(message)  // 发送群聊
+    if (chatType === 'group') {
+      await (Bot[bot_id] ?? Bot)
+        ?.pickGroup(String(chatId))
+        .sendMsg(message) // 发送群聊
         .catch((error: any) => {
           (logger ?? Bot.logger)?.error(`群组[${chatId}]推送失败：${JSON.stringify(error)}`);
         });
-    } else if (chatType === "private") {
-      await (Bot[bot_id] ?? Bot)?.pickFriend(String(chatId)).sendMsg(message)
+    } else if (chatType === 'private') {
+      await (Bot[bot_id] ?? Bot)
+        ?.pickFriend(String(chatId))
+        .sendMsg(message)
         .catch((error: any) => {
           (logger ?? Bot.logger)?.error(`用户[${chatId}]推送失败：${JSON.stringify(error)}`);
         }); // 发送好友私聊
@@ -364,6 +377,6 @@ export class BiliTask {
    * @param max 最大延时时间
    */
   async randomDelay(min: number, max: number) {
-    await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * (max - min + 1) + min)));
+    await new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * (max - min + 1) + min)));
   }
 }

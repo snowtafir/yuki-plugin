@@ -1,9 +1,9 @@
 class Murmur3 {
   static MOD = 1n << 64n;
-  static C1 = 0x87C37B91114253D5n;
-  static C2 = 0x4CF5AD432745937Fn;
-  static C3 = 0x52DCE729n;
-  static C4 = 0x38495AB5n;
+  static C1 = 0x87c37b91114253d5n;
+  static C2 = 0x4cf5ad432745937fn;
+  static C3 = 0x52dce729n;
+  static C4 = 0x38495ab5n;
   static R1 = 27n;
   static R2 = 31n;
   static R3 = 33n;
@@ -18,11 +18,11 @@ class Murmur3 {
       const chunk = source.slice(i, i + 16);
       processed += chunk.length;
       if (chunk.length === 16) {
-        const k1 = BigInt(chunk.slice(0, 8).reduce((acc, val, idx) => acc | BigInt(val) << BigInt(8 * idx), 0n));
-        const k2 = BigInt(chunk.slice(8).reduce((acc, val, idx) => acc | BigInt(val) << BigInt(8 * idx), 0n));
-        h1 ^= (Murmur3.rotateLeft(k1 * Murmur3.C1 % Murmur3.MOD, Murmur3.R2) * Murmur3.C2) % Murmur3.MOD;
+        const k1 = BigInt(chunk.slice(0, 8).reduce((acc, val, idx) => acc | (BigInt(val) << BigInt(8 * idx)), 0n));
+        const k2 = BigInt(chunk.slice(8).reduce((acc, val, idx) => acc | (BigInt(val) << BigInt(8 * idx)), 0n));
+        h1 ^= (Murmur3.rotateLeft((k1 * Murmur3.C1) % Murmur3.MOD, Murmur3.R2) * Murmur3.C2) % Murmur3.MOD;
         h1 = ((Murmur3.rotateLeft(h1, Murmur3.R1) + h2) * Murmur3.M + Murmur3.C3) % Murmur3.MOD;
-        h2 ^= Murmur3.rotateLeft(k2 * Murmur3.C2 % Murmur3.MOD, Murmur3.R3) * Murmur3.C1 % Murmur3.MOD;
+        h2 ^= (Murmur3.rotateLeft((k2 * Murmur3.C2) % Murmur3.MOD, Murmur3.R3) * Murmur3.C1) % Murmur3.MOD;
         h2 = ((Murmur3.rotateLeft(h2, Murmur3.R2) + h1) * Murmur3.M + Murmur3.C4) % Murmur3.MOD;
       } else {
         let k1 = 0n;
@@ -35,9 +35,9 @@ class Murmur3 {
             k2 |= byteVal << BigInt(8 * (j - 8));
           }
         }
-        k1 = (Murmur3.rotateLeft(k1 * Murmur3.C1 % Murmur3.MOD, Murmur3.R2) * Murmur3.C2) % Murmur3.MOD;
+        k1 = (Murmur3.rotateLeft((k1 * Murmur3.C1) % Murmur3.MOD, Murmur3.R2) * Murmur3.C2) % Murmur3.MOD;
         h1 ^= k1;
-        h2 ^= Murmur3.rotateLeft(k2 * Murmur3.C2 % Murmur3.MOD, Murmur3.R3) * Murmur3.C1 % Murmur3.MOD;
+        h2 ^= (Murmur3.rotateLeft((k2 * Murmur3.C2) % Murmur3.MOD, Murmur3.R3) * Murmur3.C1) % Murmur3.MOD;
       }
     }
 
@@ -55,13 +55,13 @@ class Murmur3 {
 
   static rotateLeft(x, k) {
     const index = Number(k);
-    const binStr = x.toString(2).padStart(64, "0");
+    const binStr = x.toString(2).padStart(64, '0');
     return BigInt(`0b${binStr.slice(index)}${binStr.slice(0, index)}`);
   }
 
   static fmix64(k) {
-    const C1 = 0xFF51AFD7ED558CCDn;
-    const C2 = 0xC4CEB9FE1A85EC53n;
+    const C1 = 0xff51afd7ed558ccdn;
+    const C2 = 0xc4ceb9fe1a85ec53n;
     const R = 33;
     let tmp = k;
     tmp ^= tmp >> BigInt(R);
@@ -79,4 +79,4 @@ function gen_buvid_fp(uuid: any, seed: any) {
   return `${(m & (Murmur3.MOD - 1n)).toString(16)}${(m >> 64n).toString(16)}`;
 }
 
-export { gen_buvid_fp }
+export { gen_buvid_fp };

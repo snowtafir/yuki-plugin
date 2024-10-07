@@ -11,7 +11,7 @@ const ForwardContentCss: string = require('./../../resources/css/dynamic/Forward
 
 type ForwardContentProps = {
   data?: any;
-}
+};
 
 const ForwardContent: React.FC<ForwardContentProps> = ({ data }) => (
   <>

@@ -2,25 +2,25 @@ import { renderPage } from '@/utils/image';
 import { HelpPageProps } from '@/components/help/Help';
 import Help from '@/models/help/help';
 import { ScreenshotOptions } from '@/utils/puppeteer.render';
-import plugin from "../../../lib/plugins/plugin.js";
+import plugin from '../../../lib/plugins/plugin.js';
 
 declare const segment: any;
 
 export default class YukiHelp extends plugin {
   constructor() {
     super({
-      name: "yuki-help",
-      des: "优纪帮助",
-      event: "message",
+      name: 'yuki-help',
+      des: '优纪帮助',
+      event: 'message',
       priority: 0,
       rule: [
         {
-          reg: "^(#|\/)(yuki|优纪)帮助$",
-          fnc: "yukiHelp",
-        },
+          reg: '^(#|/)(yuki|优纪)帮助$',
+          fnc: 'yukiHelp'
+        }
       ]
     });
-  };
+  }
 
   /**
    * 优纪帮助
@@ -41,15 +41,15 @@ export default class YukiHelp extends plugin {
     const ScreenshotOptionsData: ScreenshotOptions = {
       SOptions: {
         type: 'webp',
-        quality: 90,
+        quality: 90
       },
       isSplit: false,
-      modelName: 'yukiHelp',
+      modelName: 'yukiHelp'
     };
 
-    const helpImg = await renderPage("help", "Help", renderData, ScreenshotOptionsData);
+    const helpImg = await renderPage('help', 'Help', renderData, ScreenshotOptionsData);
 
-    let imgRes: { img: Buffer[]; }
+    let imgRes: { img: Buffer[] };
     if (helpImg !== false) {
       const { img } = helpImg;
       imgRes = { img };
@@ -59,8 +59,5 @@ export default class YukiHelp extends plugin {
     let msg = [];
     msg.push(segment.image(imgRes.img[0]));
     await this.e.reply(msg);
-  };
+  }
 }
-
-
-

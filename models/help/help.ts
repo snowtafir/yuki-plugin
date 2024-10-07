@@ -5,8 +5,8 @@ export default class Help {
   e?: any;
   model: string;
   constructor(e?: any) {
-    this.model = "help";
-    this.e = e
+    this.model = 'help';
+    this.e = e;
   }
 
   static async get(e?: any) {
@@ -15,7 +15,7 @@ export default class Help {
   }
 
   async getData() {
-    let helpData: Array<any> = Config.getDefaultConfig("help", "help");
+    let helpData: Array<any> = Config.getDefaultConfig('help', 'help');
     return helpData;
   }
 }

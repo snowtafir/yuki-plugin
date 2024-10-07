@@ -7,12 +7,12 @@ import { _paths, createRequire } from '@/utils/paths';
 const require = createRequire(import.meta.url);
 
 const botPackageJsonPath = path.join(_paths.root, 'package.json');
-const BOT_NAME = Config.getPackageJsonKey('name', botPackageJsonPath)
-const botVersion = Config.getPackageJsonKey('version', botPackageJsonPath)
+const BOT_NAME = Config.getPackageJsonKey('name', botPackageJsonPath);
+const botVersion = Config.getPackageJsonKey('version', botPackageJsonPath);
 const yukiPluginVersion = Config.getPackageJsonKey('version', path.join(_paths.pluginPath, 'package.json'));
 
-const HelpCss: string = require('./../../resources/css/help/help.css')
-const iconPath = (iconName: string) => require(`./../../resources/img/icon/puplic/${iconName}.png`)
+const HelpCss: string = require('./../../resources/css/help/help.css');
+const iconPath = (iconName: string) => require(`./../../resources/img/icon/puplic/${iconName}.png`);
 
 export type HelpPageProps = {
   data: {
@@ -23,7 +23,7 @@ export type HelpPageProps = {
       desc: string;
     }[];
   }[];
-}
+};
 
 export default function App({ data }: HelpPageProps) {
   return (
@@ -36,9 +36,7 @@ export default function App({ data }: HelpPageProps) {
         </div>
         {data.map((val, index) => (
           <div className="data_box" key={index}>
-            <div className="tab_lable">
-              {val.group}
-            </div>
+            <div className="tab_lable">{val.group}</div>
             <div className="list">
               {val.list.map((item, itemIndex) => (
                 <div className="item" key={itemIndex}>
@@ -59,5 +57,4 @@ export default function App({ data }: HelpPageProps) {
       </div>
     </>
   );
-};
-
+}

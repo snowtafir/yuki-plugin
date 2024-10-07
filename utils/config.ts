@@ -1,9 +1,9 @@
 import * as fs from 'fs';
 import YAML from 'yaml';
-import chokidar from "chokidar";
-import lodash from "lodash";
+import chokidar from 'chokidar';
+import lodash from 'lodash';
 import path from 'path';
-import { _paths } from "@/utils/paths";
+import { _paths } from '@/utils/paths';
 
 // 声明 logger 为全局变量
 declare const logger: any;
@@ -78,7 +78,7 @@ class Config {
 
     if (this[key]) return this[key];
 
-    this[key] = YAML.parse(fs.readFileSync(configFilePath, "utf8"));
+    this[key] = YAML.parse(fs.readFileSync(configFilePath, 'utf8'));
 
     this.watch(configFilePath, typeDir, appDir, functionName);
 
@@ -93,7 +93,7 @@ class Config {
    * @returns {string} 配置文件路径
    */
   getConfigFilePath(typeDir: string, appDir: string, functionName: string): string {
-    if (typeDir === "defaultConfig") {
+    if (typeDir === 'defaultConfig') {
       return path.join(_paths.pluginPath, `${typeDir}`, `${appDir}`, `${functionName}.yaml`);
     } else {
       return path.join(_paths.botYukiData, `${typeDir}`, `${appDir}`, `${functionName}.yaml`);
@@ -113,7 +113,7 @@ class Config {
     if (this.watcher[key]) return;
 
     const watcher = chokidar.watch(configFilePath);
-    watcher.on("change", () => {
+    watcher.on('change', () => {
       delete this[key];
       logger.mark(`[修改配置文件][${typeDir}][${appDir}][${functionName}]`);
       if (this[`change_${appDir}${functionName}`]) {
@@ -130,7 +130,7 @@ class Config {
    * @param functionName 配置文件名称，不包含.yaml后缀
    */
   getDefaultConfig(appDir: string, functionName: string) {
-    return this.getConfigData("defaultConfig", appDir, functionName);
+    return this.getConfigData('defaultConfig', appDir, functionName);
   }
 
   /**
@@ -139,7 +139,7 @@ class Config {
    * @param functionName 配置文件名称，不包含.yaml后缀
    */
   getUserConfig(appDir: string, functionName: string) {
-    const userConfigData = this.getConfigData("config", appDir, functionName);
+    const userConfigData = this.getConfigData('config', appDir, functionName);
     const defaultConfigData = this.getDefaultConfig(appDir, functionName);
 
     return lodash.merge({}, defaultConfigData, userConfigData);
@@ -158,7 +158,7 @@ class Config {
       fs.existsSync(filePath) && fs.unlinkSync(filePath);
     } else {
       const yamlContent = YAML.stringify(data);
-      fs.writeFileSync(filePath, yamlContent, "utf8");
+      fs.writeFileSync(filePath, yamlContent, 'utf8');
     }
   }
 
@@ -172,13 +172,13 @@ class Config {
   updateConfigItem(appDir: string, functionName: string, key: string, value: any): void {
     const config = this.getUserConfig(appDir, functionName);
     config[key] = value; // 更新配置项
-    this.saveConfig("config", appDir, functionName, config); // 保存更新后的配置
+    this.saveConfig('config', appDir, functionName, config); // 保存更新后的配置
   }
 
-  /** 读取package.json文件，获取指定key的值 
+  /** 读取package.json文件，获取指定key的值
    * @param keyName 要获取的key名称
    * @param path package.json文件路径
-  */
+   */
   getPackageJsonKey(keyName: string, path: string): string | null {
     try {
       const content = fs.readFileSync(path, 'utf-8');
@@ -198,5 +198,3 @@ class Config {
 }
 
 export default new Config();
-
-
