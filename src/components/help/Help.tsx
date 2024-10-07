@@ -2,14 +2,16 @@
 import React from 'react';
 import { BOT_NAME, ConfigController } from 'yunzai';
 import Config from '@/utils/config';
-import { _paths } from '@/utils/paths';
 import path from 'path';
+import { _paths, createRequire } from '@/utils/paths';
+
+const require = createRequire(import.meta.url);
 
 const botVersion = ConfigController.package?.version;
 const yukiPluginVersion = Config.getPackageJsonKey('version', path.join(_paths.pluginPath, 'package.json'));
 
-const HelpCss: string = path.join(_paths.pluginResources, 'css/help/help.css')
-const iconPath = (iconName: string) => path.join(_paths.pluginResources, `img/icon/puplic/${iconName}.png`)
+const HelpCss: string = require('./../../../resources/css/help/help.css')
+const iconPath = (iconName: string) => require(`./../../../resources/img/icon/puplic/${iconName}.png`)
 
 export type HelpPageProps = {
   data: {

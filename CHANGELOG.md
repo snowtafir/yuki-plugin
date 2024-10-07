@@ -1,4 +1,5 @@
 # 2.0.4
+* 增加splitHeight配置项，其他优化
 * 优化B站风控相关，新增bili_tiket参数
 * fix Repeated Instantiation Puppeteer
 * 优化获取B站登录ck

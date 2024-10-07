@@ -1,9 +1,10 @@
 // QrcodeLoginPage.tsx
 import React from 'react';
-import { _paths } from '@/utils/paths';
-import path from 'path';
+import { _paths, createRequire } from '@/utils/paths';
 
-const LoginQrcodeCss: string = path.join(_paths.pluginResources, 'css/loginQrcode/Page.css')
+const require = createRequire(import.meta.url);
+
+const LoginQrcodeCss: string = require('./../../../resources/css/loginQrcode/Page.css')
 
 export type LoginProps = {
   data: {

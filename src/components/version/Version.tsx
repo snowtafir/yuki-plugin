@@ -1,13 +1,15 @@
 import React from 'react';
 import { BOT_NAME, ConfigController } from 'yunzai';
 import Config from '../../utils/config';
-import { _paths } from '@/utils/paths';
 import path from 'path';
+import { _paths, createRequire } from '@/utils/paths';
+
+const require = createRequire(import.meta.url);
 
 const botVersion = ConfigController.package?.version;
 const yukiPluginVersion = Config.getPackageJsonKey('version', path.join(_paths.pluginPath, 'package.json'));
 
-const VersionCss: string = path.join(_paths.pluginResources, 'css/version/version.css')
+const VersionCss: string = require('./../../../resources/css/version/version.css')
 
 export type VersionProps = {
   data: {
