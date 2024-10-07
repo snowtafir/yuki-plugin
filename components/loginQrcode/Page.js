@@ -7,7 +7,7 @@ function App({ data }) {
     return (React.createElement(React.Fragment, null,
         React.createElement("link", { rel: "stylesheet", href: LoginQrcodeCss }),
         React.createElement("div", { className: "main-container" },
-            React.createElement("div", { className: 'container w-96 max-h-96 m-auto text-lg p-5' },
+            React.createElement("div", { className: "container w-96 max-h-96 m-auto text-lg p-5" },
                 React.createElement("div", { className: "txt-0 text-center mt-3 mb-3 p-1 text-blue-500" },
                     "Created By yuki-plugin",
                     React.createElement("br", null),

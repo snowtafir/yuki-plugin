@@ -57,12 +57,12 @@ class Config {
         const key = `${typeDir}_${appDir}_${functionName}`;
         if (this[key])
             return this[key];
-        this[key] = YAML.parse(fs.readFileSync(configFilePath, "utf8"));
+        this[key] = YAML.parse(fs.readFileSync(configFilePath, 'utf8'));
         this.watch(configFilePath, typeDir, appDir, functionName);
         return this[key];
     }
     getConfigFilePath(typeDir, appDir, functionName) {
-        if (typeDir === "defaultConfig") {
+        if (typeDir === 'defaultConfig') {
             return path.join(_paths.pluginPath, `${typeDir}`, `${appDir}`, `${functionName}.yaml`);
         }
         else {
@@ -74,7 +74,7 @@ class Config {
         if (this.watcher[key])
             return;
         const watcher = chokidar.watch(configFilePath);
-        watcher.on("change", () => {
+        watcher.on('change', () => {
             delete this[key];
             logger.mark(`[修改配置文件][${typeDir}][${appDir}][${functionName}]`);
             if (this[`change_${appDir}${functionName}`]) {
@@ -84,10 +84,10 @@ class Config {
         this.watcher[key] = watcher;
     }
     getDefaultConfig(appDir, functionName) {
-        return this.getConfigData("defaultConfig", appDir, functionName);
+        return this.getConfigData('defaultConfig', appDir, functionName);
     }
     getUserConfig(appDir, functionName) {
-        const userConfigData = this.getConfigData("config", appDir, functionName);
+        const userConfigData = this.getConfigData('config', appDir, functionName);
         const defaultConfigData = this.getDefaultConfig(appDir, functionName);
         return lodash.merge({}, defaultConfigData, userConfigData);
     }
@@ -98,13 +98,13 @@ class Config {
         }
         else {
             const yamlContent = YAML.stringify(data);
-            fs.writeFileSync(filePath, yamlContent, "utf8");
+            fs.writeFileSync(filePath, yamlContent, 'utf8');
         }
     }
     updateConfigItem(appDir, functionName, key, value) {
         const config = this.getUserConfig(appDir, functionName);
         config[key] = value;
-        this.saveConfig("config", appDir, functionName, config);
+        this.saveConfig('config', appDir, functionName, config);
     }
     getPackageJsonKey(keyName, path) {
         try {

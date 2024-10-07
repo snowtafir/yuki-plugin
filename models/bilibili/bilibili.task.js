@@ -12,9 +12,9 @@ class BiliTask {
     privateKey;
     e;
     constructor(e) {
-        this.taskName = "biliTask";
-        this.groupKey = "Yz:yuki:bili:upPush:group:";
-        this.privateKey = "Yz:yuki:bili:upPush:private:";
+        this.taskName = 'biliTask';
+        this.groupKey = 'Yz:yuki:bili:upPush:group:';
+        this.privateKey = 'Yz:yuki:bili:upPush:private:';
     }
     async hendleEventDynamicData(uid, count = 0) {
         const resp = await new BiliGetWebData().getBiliDynamicListDataByUid(uid);
@@ -40,10 +40,10 @@ class BiliTask {
         }
     }
     async runTask() {
-        let biliConfigData = await Config.getUserConfig("bilibili", "config");
-        let biliPushData = await Config.getUserConfig("bilibili", "push");
+        let biliConfigData = await Config.getUserConfig('bilibili', 'config');
+        let biliPushData = await Config.getUserConfig('bilibili', 'push');
         let interval = biliConfigData.interval || 7200;
-        let lastLiveStatus = JSON.parse(await Redis.get("yuki:bililive:lastlivestatus")) || {};
+        let lastLiveStatus = JSON.parse(await Redis.get('yuki:bililive:lastlivestatus')) || {};
         const uidMap = new Map();
         const dynamicList = {};
         await this.processBiliData(biliPushData, uidMap, dynamicList, lastLiveStatus);
@@ -117,7 +117,7 @@ class BiliTask {
                         logger.debug(`超过间隔，跳过  [ ${author?.name} : ${author?.mid} ] ${author?.pub_time} 的动态`);
                         continue;
                     }
-                    if (dynamicItem.type === "DYNAMIC_TYPE_FORWARD" && !biliConfigData.pushTransmit)
+                    if (dynamicItem.type === 'DYNAMIC_TYPE_FORWARD' && !biliConfigData.pushTransmit)
                         continue;
                     willPushDynamicList.push(dynamicItem);
                 }
@@ -140,11 +140,11 @@ class BiliTask {
     async sendDynamic(chatId, bot_id, upName, pushDynamicData, biliConfigData, chatType) {
         const id_str = pushDynamicData.id_str;
         let sended, markKey;
-        if (chatType === "group") {
+        if (chatType === 'group') {
             markKey = this.groupKey;
             sended = await Redis.get(`${markKey}${chatId}:${id_str}`);
         }
-        else if (chatType === "private") {
+        else if (chatType === 'private') {
             markKey = this.privateKey;
             sended = await Redis.get(`${markKey}${chatId}:${id_str}`);
         }
@@ -154,9 +154,9 @@ class BiliTask {
             const { data, uid } = await BiliQuery.formatDynamicData(pushDynamicData);
             const extentData = { ...data };
             const eval2 = eval;
-            let banWords = eval2(`/${biliConfigData.banWords.join("|")}/g`);
+            let banWords = eval2(`/${biliConfigData.banWords.join('|')}/g`);
             if (new RegExp(banWords).test(`${extentData?.title}${extentData?.content}`)) {
-                return "return";
+                return 'return';
             }
             let boxGrid = !!biliConfigData.boxGrid === false ? false : true;
             let isSplit = !!biliConfigData.isSplit === false ? false : true;
@@ -166,49 +166,49 @@ class BiliTask {
             let renderData = this.buildRenderData(extentData, urlQrcodeData, boxGrid);
             const ScreenshotOptionsData = {
                 addStyle: style,
-                header: { 'Referer': 'https://space.bilibili.com/' },
+                header: { Referer: 'https://space.bilibili.com/' },
                 isSplit: isSplit,
                 modelName: 'bilibili',
                 SOptions: {
                     type: 'webp',
-                    quality: 98,
+                    quality: 98
                 },
                 saveHtmlfile: false,
-                pageSplitHeight: splitHeight,
+                pageSplitHeight: splitHeight
             };
             let imgs = await this.renderDynamicCard(uid, renderData, ScreenshotOptionsData);
             if (!imgs)
                 return;
-            Redis.set(`${markKey}${chatId}:${id_str}`, "1", { EX: 3600 * 10 });
-            (logger ?? Bot.logger)?.mark("优纪插件：B站动态执行推送");
+            Redis.set(`${markKey}${chatId}:${id_str}`, '1', { EX: 3600 * 10 });
+            (logger ?? Bot.logger)?.mark('优纪插件：B站动态执行推送');
             for (let i = 0; i < imgs.length; i++) {
                 const image = imgs[i];
                 await this.sendMessage(chatId, bot_id, chatType, Segment.image(image));
                 await this.randomDelay(1000, 2000);
             }
-            await new Promise((resolve) => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
         else {
             const dynamicMsg = await BiliQuery.formatTextDynamicData(upName, pushDynamicData, false, biliConfigData);
-            Redis.set(`${markKey}${chatId}:${id_str}`, "1", { EX: 3600 * 10 });
-            if (dynamicMsg == "continue") {
-                return "return";
+            Redis.set(`${markKey}${chatId}:${id_str}`, '1', { EX: 3600 * 10 });
+            if (dynamicMsg == 'continue') {
+                return 'return';
             }
             if (biliConfigData.banWords.length > 0) {
-                const banWords = new RegExp(biliConfigData.banWords.join("|"), "g");
-                if (banWords.test(dynamicMsg.join(""))) {
-                    return "return";
+                const banWords = new RegExp(biliConfigData.banWords.join('|'), 'g');
+                if (banWords.test(dynamicMsg.join(''))) {
+                    return 'return';
                 }
             }
             await this.sendMessage(chatId, bot_id, chatType, dynamicMsg);
-            await new Promise((resolve) => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
     }
     buildRenderData(extentData, urlQrcodeData, boxGrid) {
-        if (extentData.orig && (extentData.orig).length !== 0) {
+        if (extentData.orig && extentData.orig.length !== 0) {
             return {
                 data: {
-                    appName: "bilibili",
+                    appName: 'bilibili',
                     boxGrid: boxGrid,
                     type: extentData?.type,
                     face: extentData?.face,
@@ -231,7 +231,7 @@ class BiliTask {
                             title: extentData?.orig?.data?.title,
                             content: extentData?.orig?.data?.content,
                             pics: extentData?.orig?.data?.pics,
-                            category: extentData?.orig?.data?.category,
+                            category: extentData?.orig?.data?.category
                         }
                     }
                 }
@@ -240,7 +240,7 @@ class BiliTask {
         else {
             return {
                 data: {
-                    appName: "bilibili",
+                    appName: 'bilibili',
                     boxGrid: boxGrid,
                     type: extentData?.type,
                     face: extentData?.face,
@@ -252,13 +252,13 @@ class BiliTask {
                     urlImgData: urlQrcodeData,
                     created: extentData?.created,
                     pics: extentData?.pics,
-                    category: extentData?.category,
+                    category: extentData?.category
                 }
             };
         }
     }
     async renderDynamicCard(uid, renderData, ScreenshotOptionsData) {
-        const dynamicMsg = await renderPage(uid, "MainPage", renderData, ScreenshotOptionsData);
+        const dynamicMsg = await renderPage(uid, 'MainPage', renderData, ScreenshotOptionsData);
         if (dynamicMsg !== false) {
             return dynamicMsg.img;
         }
@@ -267,21 +267,25 @@ class BiliTask {
         }
     }
     async sendMessage(chatId, bot_id, chatType, message) {
-        if (chatType === "group") {
-            await (Bot[bot_id] ?? Bot)?.pickGroup(String(chatId)).sendMsg(message)
+        if (chatType === 'group') {
+            await (Bot[bot_id] ?? Bot)
+                ?.pickGroup(String(chatId))
+                .sendMsg(message)
                 .catch((error) => {
                 (logger ?? Bot.logger)?.error(`群组[${chatId}]推送失败：${JSON.stringify(error)}`);
             });
         }
-        else if (chatType === "private") {
-            await (Bot[bot_id] ?? Bot)?.pickFriend(String(chatId)).sendMsg(message)
+        else if (chatType === 'private') {
+            await (Bot[bot_id] ?? Bot)
+                ?.pickFriend(String(chatId))
+                .sendMsg(message)
                 .catch((error) => {
                 (logger ?? Bot.logger)?.error(`用户[${chatId}]推送失败：${JSON.stringify(error)}`);
             });
         }
     }
     async randomDelay(min, max) {
-        await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * (max - min + 1) + min)));
+        await new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * (max - min + 1) + min)));
     }
 }
 

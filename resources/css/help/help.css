@@ -19,8 +19,8 @@ body::-webkit-scrollbar {
 }
 
 @font-face {
-  font-family: "OPSans";
-  src: url("./../../fonts/OPSans.woff2");
+  font-family: 'OPSans';
+  src: url('./../../fonts/OPSans.woff2');
   font-weight: normal;
   font-style: normal;
 }
@@ -33,14 +33,13 @@ body::-webkit-scrollbar {
 }
 
 body {
-  font-family: "OPSans";
+  font-family: 'OPSans';
   font-size: 16px;
   color: #1e1f20;
   transform: scale(1.5);
   transform-origin: 0 0;
   width: 788px;
 }
-
 
 .container {
   width: 788px;
@@ -50,12 +49,14 @@ body {
 }
 
 .head_box {
-  font-family: "OPSans";
+  font-family: 'OPSans';
   border-radius: 10px;
   padding: 10px 20px;
   position: relative;
   color: #ff69b4;
-  box-shadow: 0 0 1px 0 #ccc, 2px 2px 4px 0 rgb(238 160 236 / 80%);
+  box-shadow:
+    0 0 1px 0 #ccc,
+    2px 2px 4px 0 rgb(238 160 236 / 80%);
   border: 0.5px solid #ff69b4;
   backdrop-filter: blur(10px);
 }
@@ -87,7 +88,9 @@ body {
   padding: 20px 0px 5px 0px;
   background: transparent;
   background-color: rgba(255 241 255 / 35%);
-  box-shadow: 0 0 1px 0 #ccc, 2px 2px 4px 0 rgb(238 160 236 / 80%);
+  box-shadow:
+    0 0 1px 0 #ccc,
+    2px 2px 4px 0 rgb(238 160 236 / 80%);
   border: 0.5px solid #ff69b4;
   position: relative;
 }
@@ -98,7 +101,9 @@ body {
   left: -8px;
   background-color: rgb(187 187 187 / 0%);
   backdrop-filter: blur(15px);
-  box-shadow: 0 0 1px 0 #ccc, 2px 2px 4px 0 rgba(225 166 231 / 80%);
+  box-shadow:
+    0 0 1px 0 #ccc,
+    2px 2px 4px 0 rgba(225 166 231 / 80%);
   color: #ff004c;
   font-size: 14px;
   padding: 3px 10px;
@@ -142,7 +147,9 @@ body {
   align-items: center;
   color: #151215;
   background: transparent;
-  box-shadow: 0 0 1px 0 #ccc, 2px 2px 4px 0 rgb(255 213 254 / 80%);
+  box-shadow:
+    0 0 1px 0 #ccc,
+    2px 2px 4px 0 rgb(255 213 254 / 80%);
   padding: 8px 6px 8px 6px;
   border-radius: 8px;
   margin: 0 0px 10px 10px;
@@ -178,5 +185,5 @@ body {
   text-align: center;
   font-size: 14px;
   color: rgb(0, 0, 0);
-  font-family: "OPSans";
+  font-family: 'OPSans';
 }

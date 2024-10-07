@@ -4,7 +4,7 @@ class Help {
     e;
     model;
     constructor(e) {
-        this.model = "help";
+        this.model = 'help';
         this.e = e;
     }
     static async get(e) {
@@ -12,7 +12,7 @@ class Help {
         return await helpData.getData();
     }
     async getData() {
-        let helpData = Config.getDefaultConfig("help", "help");
+        let helpData = Config.getDefaultConfig('help', 'help');
         return helpData;
     }
 }

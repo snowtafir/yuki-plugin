@@ -19,14 +19,14 @@ body::-webkit-scrollbar {
 }
 
 @font-face {
-  font-family: "OPSans";
-  src: url("./../../fonts/OPSans.woff2");
+  font-family: 'OPSans';
+  src: url('./../../fonts/OPSans.woff2');
   font-weight: normal;
   font-style: normal;
 }
 
 body {
-  font-family: "OPSans", Arial, sans-serif;
+  font-family: 'OPSans', Arial, sans-serif;
   background-color: #f9f9f9;
   margin: 0;
   padding: 0;
@@ -36,7 +36,6 @@ body {
   width: 828px !important;
   width: 100%;
 }
-
 
 .outside-border {
   /*限制页面内收缩*/

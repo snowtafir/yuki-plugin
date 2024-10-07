@@ -12,7 +12,7 @@ const _paths = {
     botTempPath: join(_path, 'temp'),
     pluginPath,
     pluginResources: join(pluginPath, 'resources'),
-    pluginName,
+    pluginName
 };
 const createRequire = (basePath) => {
     return (path) => {

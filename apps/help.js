@@ -7,12 +7,11 @@ class YukiHelp extends Plugin {
         super();
         this.rule = [
             {
-                reg: "^(#|\/)(yuki|优纪)帮助$",
-                fnc: this.yukiHelp.name,
-            },
+                reg: '^(#|/)(yuki|优纪)帮助$',
+                fnc: this.yukiHelp.name
+            }
         ];
     }
-    ;
     async yukiHelp() {
         const helpData = await Help.get();
         const renderData = {
@@ -28,12 +27,12 @@ class YukiHelp extends Plugin {
         const ScreenshotOptionsData = {
             SOptions: {
                 type: 'webp',
-                quality: 90,
+                quality: 90
             },
             isSplit: false,
-            modelName: 'yukiHelp',
+            modelName: 'yukiHelp'
         };
-        const helpImg = await renderPage("help", "Help", renderData, ScreenshotOptionsData);
+        const helpImg = await renderPage('help', 'Help', renderData, ScreenshotOptionsData);
         let imgRes;
         if (helpImg !== false) {
             const { img } = helpImg;
@@ -46,7 +45,6 @@ class YukiHelp extends Plugin {
         msg.push(Segment.image(imgRes.img[0]));
         await this.e.reply(msg);
     }
-    ;
 }
 
 export { YukiHelp as default };
