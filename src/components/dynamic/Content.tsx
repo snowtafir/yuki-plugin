@@ -4,9 +4,9 @@ import { _paths, createRequire } from '@/utils/paths';
 
 const require = createRequire(import.meta.url);
 
-const ContentBoxGrid4Css: string = require('./../../resources/css/dynamic/Content.box.grid.4.css')
-const ContentBoxGrid9Css: string = require('./../../resources/css/dynamic/Content.box.grid.9.css')
-const ContentCss: string = require('./../../resources/css/dynamic/Content.css')
+const ContentBoxGrid4Css: string = require('./../../../resources/css/dynamic/Content.box.grid.4.css')
+const ContentBoxGrid9Css: string = require('./../../../resources/css/dynamic/Content.box.grid.9.css')
+const ContentCss: string = require('./../../../resources/css/dynamic/Content.css')
 
 type ContentProps = {
   data: {

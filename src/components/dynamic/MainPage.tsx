@@ -8,7 +8,7 @@ import { _paths, createRequire } from '@/utils/paths';
 
 const require = createRequire(import.meta.url);
 
-const MainPageCss: string = require('./../../resources/css/dynamic/MainPage.css')
+const MainPageCss: string = require('./../../../resources/css/dynamic/MainPage.css')
 
 export type MainProps = {
   data: {
