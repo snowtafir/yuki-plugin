@@ -4,10 +4,11 @@ import Account from '@/components/dynamic/Account.tsx';
 import Content from '@/components/dynamic/Content.tsx';
 import ForwardContent from '@/components/dynamic/ForwardContent';
 import Footer from '@/components/dynamic//Footer';
-import { _paths } from '@/utils/paths';
-import path from 'path';
+import { _paths, createRequire } from '@/utils/paths';
 
-const MainPageCss: string = path.join(_paths.pluginResources, 'css/dynamic/MainPage.css')
+const require = createRequire(import.meta.url);
+
+const MainPageCss: string = require('./../../resources/css/dynamic/MainPage.css')
 
 export type MainProps = {
   data: {

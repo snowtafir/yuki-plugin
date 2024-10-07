@@ -2,12 +2,13 @@
 // up账户组件
 import React from 'react';
 import LogoText from '@/components/dynamic/LogoText';
-import { _paths } from '@/utils/paths';
-import path from 'path';
+import { _paths, createRequire } from '@/utils/paths';
 
-const Bilibililogo: string = path.join(_paths.pluginResources, 'img/icon/dynamic/bilibili.svg')
-const Weibilogo: string = path.join(_paths.pluginResources, 'img/icon/dynamic/weibo.svg')
-const AccountCss: string = path.join(_paths.pluginResources, 'css/dynamic/Account.css')
+const require = createRequire(import.meta.url);
+
+const Bilibililogo: string = require('./../../resources/img/icon/dynamic/bilibili.svg')
+const Weibilogo: string = require('./../../resources/img/icon/dynamic/weibo.svg')
+const AccountCss: string = require('./../../resources/css/dynamic/Account.css')
 
 type AccountProps = {
   data: {

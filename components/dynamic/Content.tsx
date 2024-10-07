@@ -1,11 +1,12 @@
 // DynamicContent.tsx
 import React from 'react';
-import { _paths } from '@/utils/paths';
-import path from 'path';
+import { _paths, createRequire } from '@/utils/paths';
 
-const ContentBoxGrid4Css: string = path.join(_paths.pluginResources, 'css/dynamic/Content.box.grid.4.css')
-const ContentBoxGrid9Css: string = path.join(_paths.pluginResources, 'css/dynamic/Content.box.grid.9.css')
-const ContentCss: string = path.join(_paths.pluginResources, 'css/dynamic/Content.css')
+const require = createRequire(import.meta.url);
+
+const ContentBoxGrid4Css: string = require('./../../resources/css/dynamic/Content.box.grid.4.css')
+const ContentBoxGrid9Css: string = require('./../../resources/css/dynamic/Content.box.grid.9.css')
+const ContentCss: string = require('./../../resources/css/dynamic/Content.css')
 
 type ContentProps = {
   data: {

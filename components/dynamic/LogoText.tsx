@@ -1,10 +1,11 @@
 // LogoText
 // Logo 文本组件
 import React from 'react';
-import { _paths } from '@/utils/paths';
-import path from 'path';
+import { _paths, createRequire } from '@/utils/paths';
 
-const LogoTextCss: string = path.join(_paths.pluginResources, 'css/dynamic/LogoText.css')
+const require = createRequire(import.meta.url);
+
+const LogoTextCss: string = require('./../../resources/css/dynamic/LogoText.css')
 
 type LogoTextProps = {
   data: {
