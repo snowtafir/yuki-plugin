@@ -1,10 +1,10 @@
 import React from 'react';
 import Account from './Account.js';
 import Content from './Content.js';
-import { _paths } from '../../utils/paths.js';
-import path from 'path';
+import { createRequire } from '../../utils/paths.js';
 
-const ForwardContentCss = path.join(_paths.pluginResources, 'css/dynamic/ForwardContent.css');
+const require = createRequire(import.meta.url);
+const ForwardContentCss = require('./../../resources/css/dynamic/ForwardContent.css');
 const ForwardContent = ({ data }) => (React.createElement(React.Fragment, null,
     React.createElement("link", { rel: "stylesheet", href: ForwardContentCss }),
     React.createElement("div", { className: "orig" },

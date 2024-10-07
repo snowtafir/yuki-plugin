@@ -117,7 +117,8 @@ class WeiboTask {
             }
             let boxGrid = !!weiboConfigData.boxGrid === false ? false : true;
             let isSplit = !!weiboConfigData.isSplit === false ? false : true;
-            let style = isSplit ? '' : '.unfold { height: 7500px; }';
+            let style = isSplit ? '' : `.unfold { max-height: ${weiboConfigData?.noSplitHeight ?? 7500}px; }`;
+            let splitHeight = weiboConfigData?.splitHeight ?? 8000;
             const extentData = { ...data };
             const urlQrcodeData = await QRCode.toDataURL(extentData?.url);
             let renderData = this.buildRenderData(extentData, urlQrcodeData, boxGrid);
@@ -131,6 +132,7 @@ class WeiboTask {
                     quality: 98,
                 },
                 saveHtmlfile: false,
+                pageSplitHeight: splitHeight,
             };
             let imgs = await this.renderDynamicCard(uid, renderData, ScreenshotOptionsData);
             if (!imgs)

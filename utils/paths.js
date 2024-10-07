@@ -14,5 +14,15 @@ const _paths = {
     pluginResources: join(pluginPath, 'resources'),
     pluginName,
 };
+const createRequire = (basePath) => {
+    return (path) => {
+        if (process.platform === 'linux' || process.platform === 'android' || process.platform === 'darwin') {
+            return new URL(path, basePath).href.replace(/^file:\/\//, '');
+        }
+        else {
+            return new URL(path, basePath).href.replace(/^file:\/\/\//, '');
+        }
+    };
+};
 
-export { _paths, pluginName };
+export { _paths, createRequire, pluginName };

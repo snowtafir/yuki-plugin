@@ -3,10 +3,10 @@ import Account from './Account.js';
 import Content from './Content.js';
 import ForwardContent from './ForwardContent.js';
 import Footer from './Footer.js';
-import { _paths } from '../../utils/paths.js';
-import path from 'path';
+import { createRequire } from '../../utils/paths.js';
 
-const MainPageCss = path.join(_paths.pluginResources, 'css/dynamic/MainPage.css');
+const require = createRequire(import.meta.url);
+const MainPageCss = require('./../../resources/css/dynamic/MainPage.css');
 function App({ data }) {
     return (React.createElement(React.Fragment, null,
         React.createElement("link", { rel: "stylesheet", href: MainPageCss }),

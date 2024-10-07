@@ -1,11 +1,11 @@
 import React from 'react';
 import LogoText from './LogoText.js';
-import { _paths } from '../../utils/paths.js';
-import path from 'path';
+import { createRequire } from '../../utils/paths.js';
 
-const Bilibililogo = path.join(_paths.pluginResources, 'img/icon/dynamic/bilibili.svg');
-const Weibilogo = path.join(_paths.pluginResources, 'img/icon/dynamic/weibo.svg');
-const AccountCss = path.join(_paths.pluginResources, 'css/dynamic/Account.css');
+const require = createRequire(import.meta.url);
+const Bilibililogo = require('./../../resources/img/icon/dynamic/bilibili.svg');
+const Weibilogo = require('./../../resources/img/icon/dynamic/weibo.svg');
+const AccountCss = require('./../../resources/css/dynamic/Account.css');
 const Account = ({ data }) => {
     const renderLogo = (logoSrc, className) => (React.createElement("img", { src: logoSrc, className: className, alt: "logo" }));
     return (React.createElement(React.Fragment, null,
