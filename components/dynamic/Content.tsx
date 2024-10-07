@@ -4,23 +4,23 @@ import { _paths, createRequire } from '@/utils/paths';
 
 const require = createRequire(import.meta.url);
 
-const ContentBoxGrid4Css: string = require('./../../resources/css/dynamic/Content.box.grid.4.css')
-const ContentBoxGrid9Css: string = require('./../../resources/css/dynamic/Content.box.grid.9.css')
-const ContentCss: string = require('./../../resources/css/dynamic/Content.css')
+const ContentBoxGrid4Css: string = require('./../../resources/css/dynamic/Content.box.grid.4.css');
+const ContentBoxGrid9Css: string = require('./../../resources/css/dynamic/Content.box.grid.9.css');
+const ContentCss: string = require('./../../resources/css/dynamic/Content.css');
 
 type ContentProps = {
   data: {
-    type?: string
-    pics?: Array<any>
-    title?: string
-    content?: string
-    boxGrid?: boolean
-  }
-}
+    type?: string;
+    pics?: Array<any>;
+    title?: string;
+    content?: string;
+    boxGrid?: boolean;
+  };
+};
 
 const Content: React.FC<ContentProps> = ({ data }) => {
   const picItems = data.pics && (
-    <div className='pic-content'>
+    <div className="pic-content">
       {data.pics.map((item: any, index: number) => {
         if (item) {
           return (
@@ -33,8 +33,8 @@ const Content: React.FC<ContentProps> = ({ data }) => {
       })}
     </div>
   );
-  const boxGrid_4 = <link key="0" rel="stylesheet" href={ContentBoxGrid4Css} />
-  const boxGrid_9 = <link key="0" rel="stylesheet" href={ContentBoxGrid9Css} />
+  const boxGrid_4 = <link key="0" rel="stylesheet" href={ContentBoxGrid4Css} />;
+  const boxGrid_9 = <link key="0" rel="stylesheet" href={ContentBoxGrid9Css} />;
   /**动态宫格样式 */
   function getBoxGridStyle(pics: Array<any>) {
     if (!Array.isArray(pics) || pics.length === 0) {
@@ -90,8 +90,8 @@ const Content: React.FC<ContentProps> = ({ data }) => {
 
     return null;
   }
-  const boxGrid = data.boxGrid && (data.pics && getBoxGridStyle(data.pics));
-  const contentCss = <link rel="stylesheet" href={ContentCss} />
+  const boxGrid = data.boxGrid && data.pics && getBoxGridStyle(data.pics);
+  const contentCss = <link rel="stylesheet" href={ContentCss} />;
   switch (data.type) {
     case 'DYNAMIC_TYPE_LIVE_RCMD':
       return (
@@ -103,7 +103,7 @@ const Content: React.FC<ContentProps> = ({ data }) => {
             {data.title && <h1>{data.title}</h1>}
           </div>
         </>
-      )
+      );
     case 'DYNAMIC_TYPE_AV':
       return (
         <>
@@ -117,7 +117,7 @@ const Content: React.FC<ContentProps> = ({ data }) => {
             <div className="content-text" dangerouslySetInnerHTML={{ __html: data.content || '' }} />
           </div>
         </>
-      )
+      );
     case 'DYNAMIC_TYPE_WORD':
       return (
         <>
@@ -128,7 +128,7 @@ const Content: React.FC<ContentProps> = ({ data }) => {
             {picItems}
           </div>
         </>
-      )
+      );
     case 'DYNAMIC_TYPE_DRAW':
       return (
         <>
@@ -139,7 +139,7 @@ const Content: React.FC<ContentProps> = ({ data }) => {
             {picItems}
           </div>
         </>
-      )
+      );
     case 'DYNAMIC_TYPE_ARTICLE':
       return (
         <>
@@ -153,7 +153,7 @@ const Content: React.FC<ContentProps> = ({ data }) => {
             {picItems}
           </div>
         </>
-      )
+      );
     default:
       return (
         <>
@@ -165,8 +165,8 @@ const Content: React.FC<ContentProps> = ({ data }) => {
             {picItems}
           </div>
         </>
-      )
+      );
   }
-}
+};
 
-export default Content
+export default Content;

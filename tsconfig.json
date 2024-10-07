@@ -37,7 +37,7 @@
     "baseUrl": "./",
     "paths": {
       "@/*": ["./*"]
-    },
+    }
   },
   "ts-node": {
     "esm": true,

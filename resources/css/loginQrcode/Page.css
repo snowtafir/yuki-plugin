@@ -1,16 +1,16 @@
 @font-face {
-  font-family: "OPSans";
-  src: url("./../../fonts/OPSans.woff2");
+  font-family: 'OPSans';
+  src: url('./../../fonts/OPSans.woff2');
   font-weight: normal;
   font-style: normal;
 }
 
 body {
   width: 463px !important;
-  font-family: "OPSans";
+  font-family: 'OPSans';
 }
 
-.main-container{
+.main-container {
   width: 463px;
 }
 
@@ -18,12 +18,8 @@ body {
   width: 380px;
   max-height: 40rem;
   margin: auto;
-  font-size: 1.125rem
-    /* 18px */
-  ;
-  line-height: 1.75rem
-    /* 28px */
-  ;
+  font-size: 1.125rem /* 18px */;
+  line-height: 1.75rem /* 28px */;
   padding: 20px;
   background-color: #fff;
   box-shadow: 0px 1px 9px 12px rgb(246 140 224 / 20%);

@@ -1,12 +1,11 @@
-import axios from "axios";
-import lodash from "lodash";
+import axios from 'axios';
+import lodash from 'lodash';
 import { BiliApi } from '@/models/bilibili/bilibili.api';
 import { cookieWithBiliTicket, readSavedCookieItems, readSavedCookieOtherItems, readSyncCookie } from '@/models/bilibili/bilibili.models';
 import { getWbiSign } from '@/models/bilibili/bilibili.wbi';
 
 export class BiliGetWebData {
-  constructor(e?) {
-  }
+  constructor(e?) {}
 
   /**通过uid获取up动态数据表*/
   async getBiliDynamicListDataByUid(uid: any) {
@@ -15,17 +14,17 @@ export class BiliGetWebData {
     cookie = await cookieWithBiliTicket(cookie);
 
     const data = {
-      offset: '',
-      host_mid: uid,
-      timezone_offset: -480,
-      platform: 'web',
-      features: "itemOpusStyle,listOnlyfans,opusBigCover,onlyfansVote",
-      web_location: "333.999",
+      'offset': '',
+      'host_mid': uid,
+      'timezone_offset': -480,
+      'platform': 'web',
+      'features': 'itemOpusStyle,listOnlyfans,opusBigCover,onlyfansVote',
+      'web_location': '333.999',
       //...getDmImg(),
-      "x-bili-device-req-json": { "platform": "web", "device": "pc" },
-      "x-bili-web-req-json": { "spm_id": "333.999" }
-    }
-    let signCookie = await readSavedCookieItems(cookie, ["SESSDATA"], false) || await readSavedCookieOtherItems(cookie, ["SESSDATA"]);
+      'x-bili-device-req-json': { platform: 'web', device: 'pc' },
+      'x-bili-web-req-json': { spm_id: '333.999' }
+    };
+    let signCookie = (await readSavedCookieItems(cookie, ['SESSDATA'], false)) || (await readSavedCookieOtherItems(cookie, ['SESSDATA']));
     const { w_rid, time_stamp } = await getWbiSign(data, BiliApi.BILIBILI_HEADERS, signCookie);
     const params = {
       ...data,
@@ -35,8 +34,13 @@ export class BiliGetWebData {
     const res = await axios.get(url, {
       params,
       timeout: 10000,
-      headers: lodash.merge(BiliApi.BILIBILI_HEADERS, { 'Cookie': `${cookie}`, 'Host': `api.bilibili.com`, 'Origin': 'https://www.bilibili.com', 'Referer': `https://www.bilibili.com/`, }),
-    })
+      headers: lodash.merge(BiliApi.BILIBILI_HEADERS, {
+        Cookie: `${cookie}`,
+        Host: `api.bilibili.com`,
+        Origin: 'https://www.bilibili.com',
+        Referer: `https://www.bilibili.com/`
+      })
+    });
     return res;
   }
 
@@ -48,9 +52,9 @@ export class BiliGetWebData {
 
     const data = {
       mid: uid,
-      jsonp: 'jsonp',
-    }
-    let signCookie = await readSavedCookieItems(cookie, ["SESSDATA"], false) || await readSavedCookieOtherItems(cookie, ["SESSDATA"]);
+      jsonp: 'jsonp'
+    };
+    let signCookie = (await readSavedCookieItems(cookie, ['SESSDATA'], false)) || (await readSavedCookieOtherItems(cookie, ['SESSDATA']));
     const { w_rid, time_stamp } = await getWbiSign(data, BiliApi.BILIBILI_HEADERS, signCookie);
     const params = {
       ...data,
@@ -60,8 +64,13 @@ export class BiliGetWebData {
     const res = await axios.get(url, {
       params,
       timeout: 5000,
-      headers: lodash.merge(BiliApi.BILIBILI_HEADERS, { 'Cookie': `${cookie}`, 'Host': `api.bilibili.com`, 'Origin': 'https://www.bilibili.com', 'Referer': `https://www.bilibili.com/`, }),
-    })
+      headers: lodash.merge(BiliApi.BILIBILI_HEADERS, {
+        Cookie: `${cookie}`,
+        Host: `api.bilibili.com`,
+        Origin: 'https://www.bilibili.com',
+        Referer: `https://www.bilibili.com/`
+      })
+    });
     return res;
   }
 
@@ -75,9 +84,9 @@ export class BiliGetWebData {
       keyword: keyword,
       page: 1,
       search_type: 'bili_user',
-      order: 'totalrank',
-    }
-    let signCookie = await readSavedCookieItems(cookie, ["SESSDATA"], false) || await readSavedCookieOtherItems(cookie, ["SESSDATA"]);
+      order: 'totalrank'
+    };
+    let signCookie = (await readSavedCookieItems(cookie, ['SESSDATA'], false)) || (await readSavedCookieOtherItems(cookie, ['SESSDATA']));
     const { w_rid, time_stamp } = await getWbiSign(data, BiliApi.BILIBILI_HEADERS, signCookie);
     const params = {
       ...data,
@@ -87,8 +96,13 @@ export class BiliGetWebData {
     const res = await axios.get(url, {
       params,
       timeout: 5000,
-      headers: lodash.merge(BiliApi.BILIBILI_HEADERS, { 'Cookie': `${cookie}`, 'Host': `api.bilibili.com`, 'Origin': 'https://www.bilibili.com', 'Referer': `https://www.bilibili.com/`, }),
-    })
+      headers: lodash.merge(BiliApi.BILIBILI_HEADERS, {
+        Cookie: `${cookie}`,
+        Host: `api.bilibili.com`,
+        Origin: 'https://www.bilibili.com',
+        Referer: `https://www.bilibili.com/`
+      })
+    });
     return res;
   }
 }

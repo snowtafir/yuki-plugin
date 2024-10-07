@@ -1,2 +1,2 @@
-import { createServer } from 'react-puppeteer'
-await createServer()
+import { createServer } from 'react-puppeteer';
+await createServer();

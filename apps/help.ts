@@ -9,11 +9,11 @@ export default class YukiHelp extends Plugin {
     super();
     this.rule = [
       {
-        reg: "^(#|\/)(yuki|优纪)帮助$",
-        fnc: this.yukiHelp.name,
-      },
-    ]
-  };
+        reg: '^(#|/)(yuki|优纪)帮助$',
+        fnc: this.yukiHelp.name
+      }
+    ];
+  }
 
   /**
    * 优纪帮助
@@ -34,15 +34,15 @@ export default class YukiHelp extends Plugin {
     const ScreenshotOptionsData: ScreenshotOptions = {
       SOptions: {
         type: 'webp',
-        quality: 90,
+        quality: 90
       },
       isSplit: false,
-      modelName: 'yukiHelp',
+      modelName: 'yukiHelp'
     };
 
-    const helpImg = await renderPage("help", "Help", renderData, ScreenshotOptionsData);
+    const helpImg = await renderPage('help', 'Help', renderData, ScreenshotOptionsData);
 
-    let imgRes: { img: Buffer[]; }
+    let imgRes: { img: Buffer[] };
     if (helpImg !== false) {
       const { img } = helpImg;
       imgRes = { img };
@@ -52,8 +52,5 @@ export default class YukiHelp extends Plugin {
     let msg = [];
     msg.push(Segment.image(imgRes.img[0]));
     await this.e.reply(msg);
-  };
+  }
 }
-
-
-

@@ -1,5 +1,0 @@
-{
-    "exec": "node --no-warnings=ExperimentalWarning --loader ts-node/esm routes.server.ts",
-    "ext": "js,json,ts,jsx,tsx",
-    "watch": ["./**/*"]
-}
