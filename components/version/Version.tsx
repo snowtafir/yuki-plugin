@@ -1,14 +1,16 @@
 import React from 'react';
 import Config from '@/utils/config';
 import path from 'path';
-import { _paths } from '@/utils/paths';
+import { _paths, createRequire } from '@/utils/paths';
+
+const require = createRequire(import.meta.url);
 
 const botPackageJsonPath = path.join(_paths.root, 'package.json');
 const BOT_NAME = Config.getPackageJsonKey('name', botPackageJsonPath)
 const botVersion = Config.getPackageJsonKey('version', botPackageJsonPath)
 const yukiPluginVersion = Config.getPackageJsonKey('version', path.join(_paths.pluginPath, 'package.json'));
 
-const VersionCss: string = path.join(_paths.pluginResources, 'css/version/version.css')
+const VersionCss: string = require('./../../resources/css/version/version.css')
 
 export type VersionProps = {
   data: {

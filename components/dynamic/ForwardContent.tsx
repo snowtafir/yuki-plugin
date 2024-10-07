@@ -3,10 +3,11 @@
 import React from 'react';
 import Account from '@/components/dynamic/Account.tsx';
 import Content from '@/components/dynamic/Content.tsx';
-import { _paths } from '@/utils/paths';
-import path from 'path';
+import { _paths, createRequire } from '@/utils/paths';
 
-const ForwardContentCss: string = path.join(_paths.pluginResources, 'css/dynamic/ForwardContent.css');
+const require = createRequire(import.meta.url);
+
+const ForwardContentCss: string = require('./../../resources/css/dynamic/ForwardContent.css');
 
 type ForwardContentProps = {
   data?: any;
