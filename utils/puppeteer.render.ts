@@ -51,14 +51,9 @@ export class YukiPuppeteerRender {
     try {
       const browser = this.puppeteerInstance.browser as Browser;
       const page = await browser?.newPage().catch(err => {
-        logger.error(err);
+        console.error(err);
       });
       if (!page) return false;
-
-      await page.setViewport({
-        width: Options?.pageWidth ?? 900,
-        height: 7500
-      });
 
       // 设置请求 Header
       if (Options?.header) {
@@ -70,16 +65,16 @@ export class YukiPuppeteerRender {
       const element = await page.$(Options?.tab ?? 'body');
       if (!element) return false;
 
+      // 根据 style 的值来修改 CSS 样式
+      if (Options?.addStyle) {
+        await page.addStyleTag({ content: Options.addStyle });
+      }
+
       const boundingBox = await element.boundingBox(); // 获取内容区域的边界框信息
       const num = Options?.isSplit ? Math.ceil(boundingBox.height / pageHeight) : 1; // 根据是否需要分片，计算分片数量，默认为 1
       pageHeight = Math.round(boundingBox.height / num); //动态调整分片高度，防止过短影响观感。
 
       await page.setViewport({ width: boundingBox.width + 50, height: pageHeight + 100 });
-
-      // 根据 style 的值来修改 CSS 样式
-      if (Options?.addStyle) {
-        await page.addStyleTag({ content: Options.addStyle });
-      }
 
       // 禁止 GIF 动图播放
       await page.addStyleTag({ content: `img[src$=".gif"] {animation-play-state: paused !important;}` });
@@ -94,7 +89,7 @@ export class YukiPuppeteerRender {
         fs.writeFileSync(`${Dir}${Date.now()}.html`, htmlContent);
       }
 
-      logger.info('[puppeteer] success');
+      console.info('[puppeteer] success');
 
       let start = Date.now();
       const ret = new Array<Buffer>();
@@ -119,7 +114,7 @@ export class YukiPuppeteerRender {
         };
 
         const buff: string | false | Uint8Array = await element.screenshot(screenshotOptions).catch(err => {
-          logger.error('[puppeteer]', 'screenshot', err);
+          console.error('[puppeteer]', 'screenshot', err);
           return false;
         }); // 对指定区域进行截图
 
@@ -128,22 +123,22 @@ export class YukiPuppeteerRender {
           /** 计算图片大小 */
           const kb = (imgBuff?.length / 1024).toFixed(2) + 'kb'; // 计算图片大小
 
-          logger.mark(`[图片生成][${name}][${i}次] ${kb} ${logger.green(`${Date.now() - start}ms`)}`); // 记录日志
+          console.warn(`[图片生成][${name}][${i}次] ${kb} ${`${Date.now() - start}ms`}`); // 记录日志
 
           ret.push(imgBuff); // 将截图结果添加到数组中
         } else {
-          logger.error(`[puppeteer]`, '截图失败');
+          console.error(`[puppeteer]`, '截图失败');
         }
       }
       if (ret.length === 0 || !ret[0]) {
-        logger.error(`[图片生成][${name}] 图片生成为空`);
+        console.error(`[图片生成][${name}] 图片生成为空`);
         return false;
       }
       // 关闭页面
-      await page.close().catch(err => logger.error(err));
+      await page.close().catch(err => console.error(err));
       return { img: ret }; // 返回图像数组
     } catch (err) {
-      logger.error('[puppeteer] newPage', err);
+      console.error('[puppeteer] newPage', err);
       return false;
     }
   }
