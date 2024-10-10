@@ -15,14 +15,10 @@ class YukiPuppeteerRender {
         try {
             const browser = this.puppeteerInstance.browser;
             const page = await browser?.newPage().catch(err => {
-                logger.error(err);
+                console.error(err);
             });
             if (!page)
                 return false;
-            await page.setViewport({
-                width: Options?.pageWidth ?? 900,
-                height: 7500
-            });
             if (Options?.header) {
                 await page.setExtraHTTPHeaders(Options.header);
             }
@@ -30,13 +26,13 @@ class YukiPuppeteerRender {
             const element = await page.$(Options?.tab ?? 'body');
             if (!element)
                 return false;
+            if (Options?.addStyle) {
+                await page.addStyleTag({ content: Options.addStyle });
+            }
             const boundingBox = await element.boundingBox();
             const num = Options?.isSplit ? Math.ceil(boundingBox.height / pageHeight) : 1;
             pageHeight = Math.round(boundingBox.height / num);
             await page.setViewport({ width: boundingBox.width + 50, height: pageHeight + 100 });
-            if (Options?.addStyle) {
-                await page.addStyleTag({ content: Options.addStyle });
-            }
             await page.addStyleTag({ content: `img[src$=".gif"] {animation-play-state: paused !important;}` });
             if (Options?.saveHtmlfile === true) {
                 const htmlContent = await page.content();
@@ -46,7 +42,7 @@ class YukiPuppeteerRender {
                 }
                 fs__default.writeFileSync(`${Dir}${Date.now()}.html`, htmlContent);
             }
-            logger.info('[puppeteer] success');
+            console.info('[puppeteer] success');
             let start = Date.now();
             const ret = new Array();
             for (let i = 1; i <= num; i++) {
@@ -67,28 +63,28 @@ class YukiPuppeteerRender {
                     }
                 };
                 const buff = await element.screenshot(screenshotOptions).catch(err => {
-                    logger.error('[puppeteer]', 'screenshot', err);
+                    console.error('[puppeteer]', 'screenshot', err);
                     return false;
                 });
                 if (buff !== false) {
                     const imgBuff = !Buffer.isBuffer(buff) ? Buffer.from(buff) : buff;
                     const kb = (imgBuff?.length / 1024).toFixed(2) + 'kb';
-                    logger.mark(`[图片生成][${name}][${i}次] ${kb} ${logger.green(`${Date.now() - start}ms`)}`);
+                    console.warn(`[图片生成][${name}][${i}次] ${kb} ${`${Date.now() - start}ms`}`);
                     ret.push(imgBuff);
                 }
                 else {
-                    logger.error(`[puppeteer]`, '截图失败');
+                    console.error(`[puppeteer]`, '截图失败');
                 }
             }
             if (ret.length === 0 || !ret[0]) {
-                logger.error(`[图片生成][${name}] 图片生成为空`);
+                console.error(`[图片生成][${name}] 图片生成为空`);
                 return false;
             }
-            await page.close().catch(err => logger.error(err));
+            await page.close().catch(err => console.error(err));
             return { img: ret };
         }
         catch (err) {
-            logger.error('[puppeteer] newPage', err);
+            console.error('[puppeteer] newPage', err);
             return false;
         }
     }
