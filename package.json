@@ -1,6 +1,6 @@
 {
   "name": "yz-yuki-plugin",
-  "version": "2.0.4-9",
+  "version": "2.0.5-0",
   "description": "优纪插件，yunzaijs 关于 微博推送、B站推送 等功能的拓展插件",
   "author": "snowtafir",
   "type": "module",
@@ -13,6 +13,7 @@
   "scripts": {
     "app": "npx tsx src/main.ts",
     "img-dev": "npx tsx watch --clear-screen=false routes.server.ts",
+    "render-test": "npx tsx ./render.test.ts",
     "build": "npm run css-m && rollup  --config rollup.config.js",
     "css-app": "tailwindcss -i ./src/input.css -o ./public/output.css",
     "css-dev": "tailwindcss -i ./src/input.css -o ./public/output.css --watch",
