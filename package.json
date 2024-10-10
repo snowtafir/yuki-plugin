@@ -1,6 +1,6 @@
 {
   "name": "yuki-plugin",
-  "version": "2.0.4-9",
+  "version": "2.0.5-0",
   "author": "snowtafir",
   "description": "优纪插件，yunzai-V4 关于 微博推送、B站推送 等功能的拓展插件",
   "main": "./index",
@@ -9,6 +9,7 @@
   "scripts": {
     "build": "rollup --config ./rollup.config.js",
     "img-dev": "npx tsx watch --clear-screen=false routes.server.ts",
+    "render-test": "npx tsx ./render.test.ts",
     "css-app": "tailwindcss -i ./input.css -o ./public/output.css",
     "css-dev": "tailwindcss -i ./input.css -o ./public/output.css --watch",
     "css-m": "tailwindcss -i ./input.css -o ./public/output.css -m",
@@ -73,7 +74,7 @@
     "rollup-plugin-copy": "^3.5.0",
     "rollup-plugin-dts": "^6.1.1",
     "rollup-plugin-ignore": "^1.0.10",
-    "typescript": "^5.5.4",
+    "typescript": "^5.6.3",
     "json5": "^2.2.3"
   }
 }
