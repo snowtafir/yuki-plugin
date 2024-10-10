@@ -1,3 +1,6 @@
+# 2.0.5
+* 新增puppeteer渲染图片测试脚本
+
 # 2.0.4
 * 增加splitHeight配置项，其他优化
 * 优化B站风控相关，新增bili_tiket参数
