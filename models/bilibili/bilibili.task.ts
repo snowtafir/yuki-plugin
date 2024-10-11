@@ -46,12 +46,11 @@ export class BiliTask {
   async runTask() {
     let biliConfigData = await Config.getUserConfig('bilibili', 'config');
     let biliPushData = await Config.getUserConfig('bilibili', 'push');
-    let interval: number = biliConfigData.interval || 7200;
-    let lastLiveStatus = JSON.parse(await redis.get('yuki:bililive:lastlivestatus')) || {};
+    let interval: number = biliConfigData?.interval || 7200;
     const uidMap: Map<any, Map<string, any>> = new Map(); // 存放group 和 private 对应所属 uid 与推送信息的映射
     const dynamicList = {}; // 存放获取的所有动态，键为 uid，值为动态数组
 
-    await this.processBiliData(biliPushData, uidMap, dynamicList, lastLiveStatus);
+    await this.processBiliData(biliPushData, biliConfigData, uidMap, dynamicList);
 
     let now: number = Date.now() / 1000; // 时间戳（秒）
     await this.pushDynamicMessages(uidMap, dynamicList, now, interval, biliConfigData);
@@ -83,10 +82,11 @@ export class BiliTask {
         }[];
       };
     },
+    biliConfigData: any,
     uidMap: Map<any, Map<string, any>>,
-    dynamicList: any,
-    lastLiveStatus: any
+    dynamicList: any
   ) {
+    let getDataRandomDelay: number = biliConfigData?.getDataRandomDelay || 8000; // 获取相邻up动态数据的随机延时间隔
     const requestedDataOfUids = new Map<string, any>(); // 存放已请求的 uid 映射
     for (let chatType in biliPushData) {
       // 遍历 group 和 private
@@ -101,10 +101,6 @@ export class BiliTask {
           biliPushData[chatType][chatId] || []
         );
         for (let subInfoOfup of subUpsOfChat) {
-          if (!lastLiveStatus[subInfoOfup.uid]) {
-            lastLiveStatus[subInfoOfup.uid] = 0;
-          }
-
           let resp: any;
           // 检查是否已经请求过该 uid
           if (requestedDataOfUids.has(subInfoOfup.uid)) {
@@ -134,7 +130,7 @@ export class BiliTask {
           const bot_id: string[] | number[] = subInfoOfup.bot_id || [];
           const { name, type } = subInfoOfup;
           chatTypeMap.set(subInfoOfup.uid, { chatIds, bot_id, upName: name, type });
-          await this.randomDelay(1000, 4000); // 随机延时1-4秒
+          await this.randomDelay(2000, getDataRandomDelay); // 随机延时
         }
       }
     }
@@ -217,7 +213,7 @@ export class BiliTask {
       let boxGrid: boolean = !!biliConfigData.boxGrid === false ? false : true; // 是否启用九宫格样式，默认为 true
       let isSplit: boolean = !!biliConfigData.isSplit === false ? false : true; // 是否启用分片截图，默认为 true
       let style: string = isSplit ? '' : `.unfold { max-height: ${biliConfigData?.noSplitHeight ?? 7500}px; }`; // 不启用分片截图模式的样式
-      let splitHeight: number = biliConfigData?.splitHeight ?? 8000; // 分片截图高度，默认 8000, 单位 px，启用分片截图时生效
+      let splitHeight: number = biliConfigData?.splitHeight || 8000; // 分片截图高度，默认 8000, 单位 px，启用分片截图时生效
 
       const urlQrcodeData: string = await QRCode.toDataURL(extentData?.url);
       let renderData: MainProps = this.buildRenderData(extentData, urlQrcodeData, boxGrid);
