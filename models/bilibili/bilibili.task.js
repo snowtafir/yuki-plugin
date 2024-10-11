@@ -41,15 +41,15 @@ class BiliTask {
     async runTask() {
         let biliConfigData = await Config.getUserConfig('bilibili', 'config');
         let biliPushData = await Config.getUserConfig('bilibili', 'push');
-        let interval = biliConfigData.interval || 7200;
-        let lastLiveStatus = JSON.parse(await redis.get('yuki:bililive:lastlivestatus')) || {};
+        let interval = biliConfigData?.interval || 7200;
         const uidMap = new Map();
         const dynamicList = {};
-        await this.processBiliData(biliPushData, uidMap, dynamicList, lastLiveStatus);
+        await this.processBiliData(biliPushData, biliConfigData, uidMap, dynamicList);
         let now = Date.now() / 1000;
         await this.pushDynamicMessages(uidMap, dynamicList, now, interval, biliConfigData);
     }
-    async processBiliData(biliPushData, uidMap, dynamicList, lastLiveStatus) {
+    async processBiliData(biliPushData, biliConfigData, uidMap, dynamicList) {
+        let getDataRandomDelay = biliConfigData?.getDataRandomDelay || 8000;
         const requestedDataOfUids = new Map();
         for (let chatType in biliPushData) {
             if (!uidMap.has(chatType)) {
@@ -59,9 +59,6 @@ class BiliTask {
             for (let chatId in biliPushData[chatType]) {
                 const subUpsOfChat = Array.prototype.slice.call(biliPushData[chatType][chatId] || []);
                 for (let subInfoOfup of subUpsOfChat) {
-                    if (!lastLiveStatus[subInfoOfup.uid]) {
-                        lastLiveStatus[subInfoOfup.uid] = 0;
-                    }
                     let resp;
                     if (requestedDataOfUids.has(subInfoOfup.uid)) {
                         resp = requestedDataOfUids.get(subInfoOfup.uid);
@@ -92,7 +89,7 @@ class BiliTask {
                     const bot_id = subInfoOfup.bot_id || [];
                     const { name, type } = subInfoOfup;
                     chatTypeMap.set(subInfoOfup.uid, { chatIds, bot_id, upName: name, type });
-                    await this.randomDelay(1000, 4000);
+                    await this.randomDelay(2000, getDataRandomDelay);
                 }
             }
         }
@@ -160,7 +157,7 @@ class BiliTask {
             let boxGrid = !!biliConfigData.boxGrid === false ? false : true;
             let isSplit = !!biliConfigData.isSplit === false ? false : true;
             let style = isSplit ? '' : `.unfold { max-height: ${biliConfigData?.noSplitHeight ?? 7500}px; }`;
-            let splitHeight = biliConfigData?.splitHeight ?? 8000;
+            let splitHeight = biliConfigData?.splitHeight || 8000;
             const urlQrcodeData = await QRCode.toDataURL(extentData?.url);
             let renderData = this.buildRenderData(extentData, urlQrcodeData, boxGrid);
             const ScreenshotOptionsData = {
