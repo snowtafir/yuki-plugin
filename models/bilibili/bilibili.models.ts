@@ -179,15 +179,23 @@ export async function exitBiliLogin(e: any) {
     return;
   }
 
-  const postData = new URLSearchParams({ biliCSRF: biliCSRF });
+  const postData = String(biliCSRF)
+    .trim()
+    .replace(/^bili_jct=/g, '')
+    .replace(/;*$/g, '');
   try {
-    const resp = await axios.post(url, postData.toString(), {
-      headers: {
-        'Host': 'passport.bilibili.com',
-        'Cookie': `DedeUserID=${DedeUserID}; bili_jct=${biliCSRF}; SESSDATA=${SESSDATA}`,
-        'Content-Type': 'application/x-www-form-urlencoded'
+    const resp = await axios.post(
+      url,
+      { biliCSRF: postData },
+      {
+        headers: {
+          'Host': 'passport.bilibili.com',
+          'User-Agent': BiliApi.BILIBILI_HEADERS['User-Agent'],
+          'Cookie': `${DedeUserID};${biliCSRF};${SESSDATA}`,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
       }
-    });
+    );
 
     const contentType = resp.headers['Content-Type'];
     if (typeof contentType === 'string' && contentType.includes('text/html')) {
@@ -195,28 +203,27 @@ export async function exitBiliLogin(e: any) {
       return;
     }
 
-    const { code, status, data } = resp.data;
-    logger.mark('Response Data:', data);
+    const res = resp.data;
+    logger?.debug(`exitBiliLogin:  ${JSON.stringify(res)}`);
+    const { code } = res;
 
-    if (status) {
-      switch (code) {
-        case 0:
-          e.reply('当前缓存的B站登录CK已在服务器注销~');
-          await redis.set('Yz:yuki:bili:loginCookie', '', { EX: 3600 * 24 * 180 });
-          e.reply(`登陆的B站ck并已删除~`);
-          break;
-        case 2202:
-          e.reply('csrf 请求非法，退出登录请求出错');
-          break;
-        default:
-          e.reply('当前缓存的B站登录CK早已失效！');
-      }
-    } else {
-      e.reply('服务器响应异常，退出登录请求出错');
+    switch (code) {
+      case 0:
+        e.reply('当前缓存的B站登录CK已在B站服务器退出登录~');
+        break;
+      case 2202:
+        e.reply('csrf 请求非法，退出登录请求出错');
+        break;
+      case -101:
+        e.reply('当前缓存的扫码B站ck未登录！');
+        break;
+      default:
+        e.reply('未知情况！无妨');
+        return;
     }
   } catch (error) {
+    e.reply('退出登录请求出错');
     console.error('Error during Bili login exit:', error);
-    e.reply('退出登录请求出错，请稍后再试');
   }
 }
 
@@ -465,18 +472,18 @@ async function getPayload(cookie: string) {
       '7003': 1, // indexedDb, !!window.indexedDB, html5 api
       '807e': 1, // cookieEnabled, navigator.cookieEnabled
       'b8ce': BiliApi.BILIBILI_HEADERS['User-Agent'], // ua "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:127.0) Gecko/20100101 Firefox/127.0",
-      '641c': 0,
-      '07a4': 'zh-CN',
-      '1c57': 'not available',
-      '0bd0': 16,
-      '748e': [1920, 1200],
-      'd61f': [1920, 1152],
-      'fc9d': -480,
-      '6aa9': 'Asia/Shanghai',
-      '75b8': 1,
-      '3b21': 1,
-      '8a1c': 0,
-      'd52f': 'not available',
+      '641c': 0, // webdriver, navigator.webdriver, like Selenium
+      '07a4': 'zh-CN', // language
+      '1c57': 'not available', // deviceMemory in GB, navigator.deviceMemory
+      '0bd0': 16, // hardwareConcurrency, navigator.hardwareConcurrency
+      '748e': [1920, 1200], // window.screen.width window.screen.height
+      'd61f': [1920, 1152], // window.screen.availWidth window.screen.availHeight
+      'fc9d': -480, // timezoneOffset, (new Date).getTimezoneOffset()
+      '6aa9': 'Asia/Shanghai', //Intl.DateTimeFormat().resolvedOptions().timeZone, // timezone, (new window.Intl.DateTimeFormat).resolvedOptions().timeZone
+      '75b8': 1, // sessionStorage, window.sessionStorage, html5 api
+      '3b21': 1, // localStorage, window.localStorage, html5 api
+      '8a1c': 0, // openDatabase, window.openDatabase, html5 api
+      'd52f': 'not available', // cpuClass, navigator.cpuClass
       'adca': BiliApi.BILIBILI_HEADERS['User-Agent'].includes('Windows') ? 'Win32' : 'Linux', // platform, navigator.platform
       '80c9': [
         [
@@ -519,9 +526,9 @@ async function getPayload(cookie: string) {
             ['text/pdf', 'pdf']
           ]
         ]
-      ],
-      '13ab': 'f3YAAAAASUVORK5CYII=',
-      'bfe9': 'kABYpRAGAVYzWJooB9Bf4P+UortSvxRY0AAAAASUVORK5CYII=',
+      ], // plugins
+      '13ab': 'f3YAAAAASUVORK5CYII=', // canvas fingerprint
+      'bfe9': 'kABYpRAGAVYzWJooB9Bf4P+UortSvxRY0AAAAASUVORK5CYII=', // webgl_str
       'a3c1': [
         'extensions:ANGLE_instanced_arrays;EXT_blend_minmax;EXT_color_buffer_half_float;EXT_float_blend;EXT_frag_depth;EXT_shader_texture_lod;EXT_sRGB;EXT_texture_compression_bptc;EXT_texture_compression_rgtc;EXT_texture_filter_anisotropic;OES_element_index_uint;OES_fbo_render_mipmap;OES_standard_derivatives;OES_texture_float;OES_texture_float_linear;OES_texture_half_float;OES_texture_half_float_linear;OES_vertex_array_object;WEBGL_color_buffer_float;WEBGL_compressed_texture_s3tc;WEBGL_compressed_texture_s3tc_srgb;WEBGL_debug_renderer_info;WEBGL_debug_shaders;WEBGL_depth_texture;WEBGL_draw_buffers;WEBGL_lose_context;WEBGL_provoking_vertex',
         'webgl aliased line width range:[1, 1]',
@@ -587,8 +594,8 @@ async function getPayload(cookie: string) {
         'webgl fragment shader low int precision:0',
         'webgl fragment shader low int precision rangeMin:31',
         'webgl fragment shader low int precision rangeMax:30'
-      ],
-      '6bc5': 'Google Inc. (Intel)~ANGLE (Intel, Intel(R) HD Graphics Direct3D11 vs_5_0 ps_5_0), or similar',
+      ], // webgl_params, cab be set to [] if webgl is not supported
+      '6bc5': 'Google Inc. (Intel)~ANGLE (Intel, Intel(R) HD Graphics Direct3D11 vs_5_0 ps_5_0), or similar', // webglVendorAndRenderer
       'ed31': 0,
       '72bd': 0,
       '097b': 0,
