@@ -261,7 +261,7 @@ message.use(
     if (e.isMaster) {
       await exitBiliLogin(e);
       await Redis.set('Yz:yuki:bili:loginCookie', '', { EX: 3600 * 24 * 180 });
-      e.reply(`登陆的B站ck并已删除~`);
+      e.reply(`扫码登陆的B站cookie已删除~`);
     } else {
       e.reply('未取得bot主人身份，无权限删除B站登录ck');
     }
