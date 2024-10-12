@@ -64,8 +64,8 @@ export default [
         tsconfig: path.join(__dirname, 'tsconfig.json'),
         sourceMap: false,
         inlineSources: true,
-        declaration: false,
-        //declarationDir: path.join(__dirname, 'dist/types/'),
+        declaration: true,
+        declarationDir: path.join(__dirname, 'dist/types/'),
         composite: false,
         outDir: path.join(__dirname, 'dist')
       })
