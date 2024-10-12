@@ -251,7 +251,7 @@ class YukiBili extends plugin {
         if (this.e.isMaster) {
             await exitBiliLogin(this.e);
             await redis.set('Yz:yuki:bili:loginCookie', '', { EX: 3600 * 24 * 180 });
-            this.e.reply(`登陆的B站ck并已删除~`);
+            this.e.reply(`扫码登陆的B站cookie已删除~`);
         }
         else {
             this.e.reply('未取得bot主人身份，无权限删除B站登录ck');

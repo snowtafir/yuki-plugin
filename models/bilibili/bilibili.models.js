@@ -132,12 +132,16 @@ async function exitBiliLogin(e) {
         e.reply('当前无可用的B站登录CK可退出登录');
         return;
     }
-    const postData = new URLSearchParams({ biliCSRF: biliCSRF });
+    const postData = String(biliCSRF)
+        .trim()
+        .replace(/^bili_jct=/g, '')
+        .replace(/;*$/g, '');
     try {
-        const resp = await axios.post(url, postData.toString(), {
+        const resp = await axios.post(url, { biliCSRF: postData }, {
             headers: {
                 'Host': 'passport.bilibili.com',
-                'Cookie': `DedeUserID=${DedeUserID}; bili_jct=${biliCSRF}; SESSDATA=${SESSDATA}`,
+                'User-Agent': BiliApi.BILIBILI_HEADERS['User-Agent'],
+                'Cookie': `${DedeUserID};${biliCSRF};${SESSDATA}`,
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
         });
@@ -146,29 +150,27 @@ async function exitBiliLogin(e) {
             e.reply('当前缓存的B站登录CK早已失效！');
             return;
         }
-        const { code, status, data } = resp.data;
-        logger.mark('Response Data:', data);
-        if (status) {
-            switch (code) {
-                case 0:
-                    e.reply('当前缓存的B站登录CK已在服务器注销~');
-                    await redis.set('Yz:yuki:bili:loginCookie', '', { EX: 3600 * 24 * 180 });
-                    e.reply(`登陆的B站ck并已删除~`);
-                    break;
-                case 2202:
-                    e.reply('csrf 请求非法，退出登录请求出错');
-                    break;
-                default:
-                    e.reply('当前缓存的B站登录CK早已失效！');
-            }
-        }
-        else {
-            e.reply('服务器响应异常，退出登录请求出错');
+        const res = resp.data;
+        logger?.debug(`exitBiliLogin:  ${JSON.stringify(res)}`);
+        const { code } = res;
+        switch (code) {
+            case 0:
+                e.reply('当前缓存的B站登录CK已在B站服务器退出登录~');
+                break;
+            case 2202:
+                e.reply('csrf 请求非法，退出登录请求出错');
+                break;
+            case -101:
+                e.reply('当前缓存的扫码B站ck未登录！');
+                break;
+            default:
+                e.reply('未知情况！无妨');
+                return;
         }
     }
     catch (error) {
+        e.reply('退出登录请求出错');
         console.error('Error during Bili login exit:', error);
-        e.reply('退出登录请求出错，请稍后再试');
     }
 }
 async function saveLoginCookie(e, biliLoginCk) {
