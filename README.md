@@ -11,12 +11,12 @@
 # 🌰一、安装插件
 
 ## 选择安装方式
-按照网络情况以及使用的bot框架是`Yunzai-Next`还是`Yunzai-V3`，选择对应的安装方式。
+按照网络情况以及使用的bot框架是`Yunzaijs`还是`Yunzai-V3`，选择对应的安装方式。
 
-### ***（一）Yunzai-Next***
+### ***（一）YunzaiJS***
 > 选择其中一种方式安装插件：
 
-1. npm包安装到`yunzai-next/node_modules`的方式，仅Yunzai-Next支持：
+1. npm包安装到`yunzaijs/node_modules`的方式，仅Yunzai-Next支持：
 ```
  yarn add yz-yuki-plugin -W
 ```
@@ -25,26 +25,26 @@
 
 * 方式1（推荐）：
 
-手动新建 `yunzai-next/yunzai.config.json` 文件，输入如下内容，`applications`字段添加的 `"yz-yuki-plugin"`即为启用本插件：
+手动新建 `yunzaijs/yunzai.config.json` 文件，输入如下内容，`applications`字段添加的 `"yz-yuki-plugin"`即为启用本插件：
 
 ```json
 {
-  "applications": ["yz-system", "yz-yuki-plugin"],
-  "middlewares": ["yunzai-mys/runtime", "yunzai-mys/mw"]
+  "applications": ["@yunzaijs/system", "yz-yuki-plugin"],
+  "middlewares": ["@yunzaijs/mys/message", "@yunzaijs/mys/runtime"]
 }
 ```
 * 方式2：
 
-修改 `yunzai-next/yunzai.config.js`：
+修改 `yunzaijs/yunzai.config.js`：
 ```js
 import { defineConfig } from 'yunzai'
 export default defineConfig({
-  applications: ['yz-system', 'yz-yuki-plugin'], //该行添加 'yz-yuki-plugin'
-  middlewares: ['yunzai-mys/runtime', 'yunzai-mys/message']
+  applications: ["@yunzaijs/system", "yz-yuki-plugin"], //该行添加 'yz-yuki-plugin'
+  middlewares: ["@yunzaijs/mys/message", "@yunzaijs/mys/runtime"]
 })
 ```
 
-2. 安装到 `yunzai-next/plugins` 的方式：
+2. 安装到 `yunzaijs/plugins` 的方式：
 
 > 仅支持Yunzai-Next的分支，选择仓库：
 
@@ -229,8 +229,8 @@ yarn install
 |                              Nickname                               | Contribution            |
 | :-----------------------------------------------------------------: | ----------------------- |
 |Yunzai-Next||
-| [Yunzai-org文档](https://yunzai-org.github.io/docs/)               | Yunzai Next 文档      |
-| [Yunzai-Next 仓库](https://github.com/yunzai-org/yunzaijs/)           |  Yunzai Next       |
+| [YunzaiJS文档](https://yunzaijs.github.io/docs/)               | YunzaiJS 文档      |
+| [YunzaiJS 仓库](https://github.com/yunzaijs/core)           |  YunzaiJS       |
 |Yunzai-V3||
 | [功能/插件库](https://gitee.com/yhArcadia/Yunzai-Bot-plugins-index) | Yunzai-Bot 相关内容索引 |
 |       [TRSS-Yunzai](https://gitee.com/TimeRainStarSky/Yunzai)       | 时雨🌌星空的 TRSS-Yunzai |

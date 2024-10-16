@@ -13,7 +13,7 @@ if (!global.segment) {
         global.segment = (await import('oicq')).segment;
     }
     catch (err) {
-        global.segment = (await import('icqq')).segment;
+        global.segment = (await import('./node_modules/icqq/lib/index.js').then(function (n) { return n.i; })).segment;
     }
 }
 let apps = { YukiBili, YukiHelp, YukiVersion, YukiWeibo };

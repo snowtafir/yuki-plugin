@@ -1,5 +1,5 @@
 import React from 'react';
-import { Picture } from 'react-puppeteer';
+import { Picture } from 'jsxp';
 import { YukiPuppeteerRender } from './puppeteer.render.js';
 import * as index from '../components/index.js';
 
@@ -12,9 +12,9 @@ class Image extends Picture {
     async _renderPage(uid, page, props = {}, ScreenshotOptions, ComponentCreateOpsion) {
         const Page = index[page];
         return this.yukiPuppeteerRender.yukiScreenshot(this.Com.compile({
-            join_dir: page,
-            html_name: `${uid}.html`,
-            html_body: React.createElement(Page, { ...props }),
+            path: page,
+            name: `${uid}.html`,
+            component: React.createElement(Page, { ...props }),
             ...ComponentCreateOpsion
         }), ScreenshotOptions);
     }
