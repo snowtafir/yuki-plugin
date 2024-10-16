@@ -1,5 +1,5 @@
 import React from 'react';
-import { Picture, ComponentCreateOpsionType } from 'react-puppeteer';
+import { Picture, ComponentCreateOpsionType } from 'jsxp';
 import { YukiPuppeteerRender, ScreenshotOptions } from '@/utils/puppeteer.render';
 import * as ReactPages from '@/components/index';
 
@@ -44,9 +44,9 @@ class Image extends Picture {
     // 调用 yukiPuppeteerRender 进行截图操作
     return this.yukiPuppeteerRender.yukiScreenshot(
       this.Com.compile({
-        join_dir: page,
-        html_name: `${uid}.html`,
-        html_body: <Page {...props} />,
+        path: page,
+        name: `${uid}.html`,
+        component: <Page {...props} />,
         ...ComponentCreateOpsion
       }),
       ScreenshotOptions

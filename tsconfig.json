@@ -54,8 +54,8 @@
     "models/**/*.ts",
     "utils/*",
     "index.ts",
-    "routes.server.ts",
-    "routes.config.tsx"
+    "jsxp.server.ts",
+    "jsxp.config.jsx"
   ],
-  "exclude": ["node_modules", "yunzai", "../../../lib/plugins/plugin.js"]
+  "exclude": ["node_modules", "yunzai", "../../../lib/plugins/plugin.js", "jsxp/tsconfig.json"]
 }
