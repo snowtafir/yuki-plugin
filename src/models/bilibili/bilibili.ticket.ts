@@ -42,7 +42,7 @@ export async function getBiliTicket(csrf: string | null): Promise<{ code?: numbe
       throw new Error(`get bili_jct HTTP error! status: ${response.status}`);
     }
 
-    const data = await response.json();
+    const data: any = await response.json();
 
     if (data.code !== 0) {
       if (data.code === 400) {

@@ -1,4 +1,4 @@
-import { Messages, EventType } from 'yunzai';
+import { Messages, EventType } from 'yunzaijs';
 import { WeiboQuery } from '@/models/weibo/weibo.query';
 import { WeiboTask } from '@/models/weibo/weibo.task';
 import Config from '@/utils/config';

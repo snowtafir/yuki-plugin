@@ -1,13 +1,14 @@
 // react 热开发 router 配置文件
 import React from 'react';
 import QRCode from 'qrcode';
-import { defineConfig } from 'react-puppeteer';
+import { defineConfig } from 'jsxp';
 
-const Page = (await import(`./src/components//dynamic/MainPage.tsx`)).default;
+const Page = (await import(`./src/components/dynamic/MainPage.tsx`)).default;
 //const Page = (await import('./src/components/version/version.tsx')).default;
 //const Page = (await import('./src/components/help/Help.tsx')).default;
 //const Page = (await import('./src/components/loginQrcode/Page.tsx')).default;
 
+//网页在线url图片资源加载不出，需到对应组件img标签添加：referrerPolicy='no-referrer'
 const props = {
   data: {
     appName: 'bilibili',
@@ -103,11 +104,10 @@ data:{[
       }
   } */
 
-export default defineConfig([
-  {
-    url: '/dynamic',
-    options: {
-      html_body: <Page {...props} />
+export default defineConfig({
+  routes: {
+    '/dynamic': {
+      component: <Page {...props} />
     }
   }
-]);
+});

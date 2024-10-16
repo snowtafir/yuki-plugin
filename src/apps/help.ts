@@ -1,4 +1,4 @@
-import { Segment, Messages } from 'yunzai';
+import { Segment, Messages } from 'yunzaijs';
 import { renderPage } from '@/utils/image';
 import { HelpPageProps } from '@/components/help/Help';
 import Help from '@/models/help/help';

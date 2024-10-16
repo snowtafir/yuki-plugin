@@ -6,7 +6,7 @@ import { promisify } from 'node:util';
 import path from 'path';
 import QRCode from 'qrcode';
 import YAML from 'yaml';
-import { Bot, Redis, Segment, EventType } from 'yunzai';
+import { Bot, Redis, Segment, EventType } from 'yunzaijs';
 import { LoginProps } from '@/components/loginQrcode/Page';
 import { renderPage } from '@/utils/image';
 import { _paths } from '@/utils/paths';

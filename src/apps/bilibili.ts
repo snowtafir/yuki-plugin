@@ -1,6 +1,6 @@
 import JSON from 'json5';
 import lodash from 'lodash';
-import { Bot, Messages, Redis, EventType } from 'yunzai';
+import { Bot, Messages, Redis, EventType } from 'yunzaijs';
 import { BiliQuery } from '@/models/bilibili/bilibili.query';
 import { BiliTask } from '@/models/bilibili/bilibili.task';
 import Config from '@/utils/config';

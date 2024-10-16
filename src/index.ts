@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { Application, applicationOptions, EventType, setBotTask, useEvent } from 'yunzai';
+import { Application, applicationOptions, EventType, setBotTask, useEvent } from 'yunzaijs';
 import Config from '@/utils/config';
 import path from 'path';
 import { _paths } from '@/utils/paths';

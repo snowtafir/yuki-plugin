@@ -1,4 +1,4 @@
-import { Messages, Segment } from 'yunzai';
+import { Messages, Segment } from 'yunzaijs';
 import { renderPage } from '@/utils/image';
 import { VersionProps } from '@/components/version/Version';
 import VersionData from '@/models/version/version';

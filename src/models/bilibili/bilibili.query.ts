@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { Bot, Segment } from 'yunzai';
+import { Bot, Segment } from 'yunzaijs';
 import { cookieWithBiliTicket, readSyncCookie } from '@/models/bilibili/bilibili.models';
 import { BiliApi } from '@/models/bilibili/bilibili.api';
 import axios from 'axios';

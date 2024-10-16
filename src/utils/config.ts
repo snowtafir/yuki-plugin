@@ -67,7 +67,7 @@ class Config {
   }
   /**
    * 通用获取配置文件数据方法
-   * @param typeDir 配置文件目录类型对应路径 defaultConfig: defaultConfig 或 config: yunzai/data/yuki-plugin/config
+   * @param typeDir 配置文件目录类型对应路径 defaultConfig: defaultConfig 或 config: yunzaijs/data/yuki-plugin/config
    * @param appDir 配置app目录
    * @param functionName 配置文件名称，不包含.yaml后缀
    * @returns {object} 配置数据
@@ -87,7 +87,7 @@ class Config {
 
   /**
    * 获取配置文件路径
-   * @param typeDir 配置文件目录类型对应路径 defaultConfig: defaultConfig 或 config: yunzai/data/yuki-plugin/config
+   * @param typeDir 配置文件目录类型对应路径 defaultConfig: defaultConfig 或 config: yunzaijs/data/yuki-plugin/config
    * @param appDir 配置app目录
    * @param functionName 配置文件名称，不包含.yaml后缀
    * @returns {string} 配置文件路径
@@ -103,7 +103,7 @@ class Config {
   /**
    * 监听配置文件的变化
    * @param configFilePath 文件路径
-   * @param typeDir 配置文件目录类型对应路径 defaultConfig: defaultConfig 或 config: yunzai/data/yuki-plugin/config
+   * @param typeDir 配置文件目录类型对应路径 defaultConfig: defaultConfig 或 config: yunzaijs/data/yuki-plugin/config
    * @param appDir 配置app目录
    * @param functionName 配置文件名称，不包含.yaml后缀
    */

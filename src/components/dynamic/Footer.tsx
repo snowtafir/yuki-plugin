@@ -1,6 +1,6 @@
 // Footer.tsx
 import React from 'react';
-import { BOT_NAME, ConfigController } from 'yunzai';
+import { BOT_NAME, ConfigController } from 'yunzaijs';
 import Config from '@/utils/config';
 import path from 'path';
 import { _paths, createRequire } from '@/utils/paths';

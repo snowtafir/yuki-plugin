@@ -1,7 +1,7 @@
 import moment from 'moment';
 import fetch from 'node-fetch';
 import { WeiboApi } from '@/models/weibo/weibo.api';
-import { Segment, Bot } from 'yunzai';
+import { Segment, Bot } from 'yunzaijs';
 import { JSDOM } from 'jsdom';
 
 declare const logger: any;
