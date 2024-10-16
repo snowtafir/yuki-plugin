@@ -16,7 +16,7 @@
 ### ***（一）YunzaiJS***
 > 选择其中一种方式安装插件：
 
-1. npm包安装到`yunzaijs/node_modules`的方式，仅Yunzai-Next支持：
+1. npm包安装到`yunzaijs/node_modules`的方式，仅YunzaiJS支持：
 ```
  yarn add yz-yuki-plugin -W
 ```
@@ -37,7 +37,7 @@
 
 修改 `yunzaijs/yunzai.config.js`：
 ```js
-import { defineConfig } from 'yunzai'
+import { defineConfig } from 'yunzaijs'
 export default defineConfig({
   applications: ["@yunzaijs/system", "yz-yuki-plugin"], //该行添加 'yz-yuki-plugin'
   middlewares: ["@yunzaijs/mys/message", "@yunzaijs/mys/runtime"]
