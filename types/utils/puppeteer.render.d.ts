@@ -1,4 +1,4 @@
-import { Puppeteer } from 'react-puppeteer';
+import { Puppeteer } from 'jsxp';
 export type ScreenshotOptions = {
     SOptions?: {
         type: 'jpeg' | 'png' | 'webp';

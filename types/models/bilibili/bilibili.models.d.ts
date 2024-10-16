@@ -1,4 +1,4 @@
-import { EventType } from 'yunzai';
+import { EventType } from 'yunzaijs';
 export declare function applyLoginQRCode(e: EventType): Promise<string>;
 export declare function pollLoginQRCode(e: EventType, qrcodeKey: string): Promise<string>;
 export declare function checkBiliLogin(e: EventType): Promise<void>;

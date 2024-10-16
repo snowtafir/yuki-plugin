@@ -1,5 +1,5 @@
 import QRCode from 'qrcode';
-import { Redis, Bot, Segment } from 'yunzai';
+import { Redis, Bot, Segment } from 'yunzaijs';
 import Config from '../../utils/config.js';
 import { renderPage } from '../../utils/image.js';
 import { BiliGetWebData } from './bilibili.get.web.data.js';

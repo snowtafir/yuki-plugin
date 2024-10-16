@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Bot } from 'yunzai';
+import { Bot } from 'yunzaijs';
 import { WeiboApi } from './weibo.api.js';
 import { WeiboQuery } from './weibo.query.js';
 

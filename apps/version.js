@@ -1,4 +1,4 @@
-import { Plugin, Segment } from 'yunzai';
+import { Plugin, Segment } from 'yunzaijs';
 import { renderPage } from '../utils/image.js';
 import VersionData from '../models/version/version.js';
 

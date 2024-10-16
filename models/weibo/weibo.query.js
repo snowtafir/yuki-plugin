@@ -1,7 +1,7 @@
 import moment from 'moment';
 import fetch from 'node-fetch';
 import { WeiboApi } from './weibo.api.js';
-import { Bot, Segment } from 'yunzai';
+import { Bot, Segment } from 'yunzaijs';
 import { JSDOM } from 'jsdom';
 
 class WeiboQuery {

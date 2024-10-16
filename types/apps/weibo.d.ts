@@ -1,4 +1,4 @@
-import { Plugin } from 'yunzai';
+import { Plugin } from 'yunzaijs';
 export default class YukiWeibo extends Plugin {
     constructor();
     weiboConfigData: any;

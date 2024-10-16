@@ -6,7 +6,7 @@ import { promisify } from 'node:util';
 import path from 'path';
 import QRCode from 'qrcode';
 import YAML from 'yaml';
-import { Segment, Bot, Redis } from 'yunzai';
+import { Segment, Bot, Redis } from 'yunzaijs';
 import { renderPage } from '../../utils/image.js';
 import { _paths } from '../../utils/paths.js';
 import { BiliApi } from './bilibili.api.js';

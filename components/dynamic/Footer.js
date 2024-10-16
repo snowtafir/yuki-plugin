@@ -1,5 +1,5 @@
 import React from 'react';
-import { ConfigController, BOT_NAME } from 'yunzai';
+import { ConfigController, BOT_NAME } from 'yunzaijs';
 import Config from '../../utils/config.js';
 import path from 'path';
 import { _paths, createRequire } from '../../utils/paths.js';

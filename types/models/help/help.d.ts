@@ -1,4 +1,4 @@
-import { EventType } from 'yunzai';
+import { EventType } from 'yunzaijs';
 export default class Help {
     e?: EventType;
     model: string;

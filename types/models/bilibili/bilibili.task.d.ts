@@ -1,4 +1,4 @@
-import { EventType } from 'yunzai';
+import { EventType } from 'yunzaijs';
 import { MainProps } from '@/components/dynamic/MainPage';
 import { ScreenshotOptions } from '@/utils/puppeteer.render';
 export declare class BiliTask {

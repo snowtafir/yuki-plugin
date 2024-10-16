@@ -1,4 +1,4 @@
-import { EventType } from 'yunzai';
+import { EventType } from 'yunzaijs';
 export declare class WeiboGetWebData {
     e?: EventType;
     constructor(e?: EventType);

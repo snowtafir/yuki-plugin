@@ -1,4 +1,4 @@
-import { Plugin } from 'yunzai';
+import { Plugin } from 'yunzaijs';
 import { WeiboQuery } from '../models/weibo/weibo.query.js';
 import { WeiboTask } from '../models/weibo/weibo.task.js';
 import Config from '../utils/config.js';
