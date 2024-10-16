@@ -1,4 +1,4 @@
-import { Plugin } from 'yunzai';
+import { Plugin } from 'yunzaijs';
 import { WeiboQuery } from '@/models/weibo/weibo.query';
 import { WeiboTask } from '@/models/weibo/weibo.task';
 import Config from '@/utils/config';

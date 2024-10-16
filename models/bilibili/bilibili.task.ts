@@ -1,5 +1,5 @@
 import QRCode from 'qrcode';
-import { Bot, Redis, Segment, EventType } from 'yunzai';
+import { Bot, Redis, Segment, EventType } from 'yunzaijs';
 import { MainProps } from '@/components/dynamic/MainPage';
 import Config from '@/utils/config';
 import { renderPage } from '@/utils/image';

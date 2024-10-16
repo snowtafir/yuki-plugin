@@ -73,6 +73,6 @@ export default [
       //image(),
     ],
     onwarn,
-    external: ['fs', 'path', 'chalk', 'module', 'yunzai', 'child_process', 'net', 'lodash']
+    external: ['fs', 'path', 'chalk', 'module', 'yunzaijs', 'child_process', 'net', 'lodash']
   }
 ];

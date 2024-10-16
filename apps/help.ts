@@ -1,4 +1,4 @@
-import { Plugin, Segment } from 'yunzai';
+import { Plugin, Segment } from 'yunzaijs';
 import { renderPage } from '@/utils/image';
 import { HelpPageProps } from '@/components/help/Help';
 import Help from '@/models/help/help';
