@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import { createHmac } from 'crypto';
-import { BiliApi } from '@/models/bilibili/bilibili.api';
+import { BiliApi } from '@src/models/bilibili/bilibili.api';
 
 /**
  * Generate HMAC-SHA256 signature

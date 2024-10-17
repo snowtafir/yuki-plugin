@@ -2,7 +2,7 @@ import React from 'react';
 import { BOT_NAME, ConfigController } from 'yunzaijs';
 import Config from '../../utils/config';
 import path from 'path';
-import { _paths, createRequire } from '@/utils/paths';
+import { _paths, createRequire } from '@src/utils/paths';
 
 const require = createRequire(import.meta.url);
 

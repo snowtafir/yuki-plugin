@@ -1,8 +1,8 @@
 import { Segment, Messages } from 'yunzaijs';
-import { renderPage } from '@/utils/image';
-import { HelpPageProps } from '@/components/help/Help';
-import Help from '@/models/help/help';
-import { ScreenshotOptions } from '@/utils/puppeteer.render';
+import { renderPage } from '@src/utils/image';
+import { HelpPageProps } from '@src/components/help/Help';
+import Help from '@src/models/help/help';
+import { ScreenshotOptions } from '@src/utils/puppeteer.render';
 
 const message = new Messages('message');
 

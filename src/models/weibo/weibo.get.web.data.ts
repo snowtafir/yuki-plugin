@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Bot, EventType } from 'yunzaijs';
-import { WeiboApi } from '@/models/weibo/weibo.api';
-import { WeiboQuery } from '@/models/weibo/weibo.query';
+import { WeiboApi } from '@src/models/weibo/weibo.api';
+import { WeiboQuery } from '@src/models/weibo/weibo.query';
 
 declare const logger: any;
 

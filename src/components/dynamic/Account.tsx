@@ -1,8 +1,8 @@
 // Account
 // up账户组件
 import React from 'react';
-import LogoText from '@/components/dynamic/LogoText';
-import { _paths, createRequire } from '@/utils/paths';
+import LogoText from '@src/components/dynamic/LogoText';
+import { _paths, createRequire } from '@src/utils/paths';
 
 const require = createRequire(import.meta.url);
 

@@ -1,9 +1,9 @@
 // ForwardContent
 // 转发动态内容组件
 import React from 'react';
-import Account from '@/components/dynamic/Account';
-import Content from '@/components/dynamic/Content';
-import { _paths, createRequire } from '@/utils/paths';
+import Account from '@src/components/dynamic/Account';
+import Content from '@src/components/dynamic/Content';
+import { _paths, createRequire } from '@src/utils/paths';
 
 const require = createRequire(import.meta.url);
 

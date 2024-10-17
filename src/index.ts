@@ -1,11 +1,11 @@
 import chalk from 'chalk';
 import { Application, applicationOptions, EventType, setBotTask, useEvent } from 'yunzaijs';
-import Config from '@/utils/config';
+import Config from '@src/utils/config';
 import path from 'path';
-import { _paths } from '@/utils/paths';
-import * as apps from '@/apps/index';
-import { BiliTask } from '@/models/bilibili/bilibili.task';
-import { WeiboTask } from '@/models/weibo/weibo.task';
+import { _paths } from '@src/utils/paths';
+import * as apps from '@src/apps/index';
+import { BiliTask } from '@src/models/bilibili/bilibili.task';
+import { WeiboTask } from '@src/models/weibo/weibo.task';
 declare const logger: any;
 type RulesType = {
   reg: RegExp | string;

@@ -1,10 +1,10 @@
 // MainPage.tsx
 import React from 'react';
-import Account from '@/components/dynamic/Account';
-import Content from '@/components/dynamic/Content';
-import ForwardContent from '@/components/dynamic/ForwardContent';
-import Footer from '@/components/dynamic/Footer';
-import { _paths, createRequire } from '@/utils/paths';
+import Account from '@src/components/dynamic/Account';
+import Content from '@src/components/dynamic/Content';
+import ForwardContent from '@src/components/dynamic/ForwardContent';
+import Footer from '@src/components/dynamic/Footer';
+import { _paths, createRequire } from '@src/utils/paths';
 
 const require = createRequire(import.meta.url);
 

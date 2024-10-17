@@ -1,7 +1,7 @@
 // LogoText
 // Logo 文本组件
 import React from 'react';
-import { _paths, createRequire } from '@/utils/paths';
+import { _paths, createRequire } from '@src/utils/paths';
 
 const require = createRequire(import.meta.url);
 

@@ -1,12 +1,12 @@
 import QRCode from 'qrcode';
 import { Bot, Redis, Segment, EventType } from 'yunzaijs';
-import { MainProps } from '@/components/dynamic/MainPage';
-import Config from '@/utils/config';
-import { renderPage } from '@/utils/image';
-import { ScreenshotOptions } from '@/utils/puppeteer.render';
-import { BiliGetWebData } from '@/models/bilibili/bilibili.get.web.data';
-import { postGateway, readSyncCookie } from '@/models/bilibili/bilibili.models';
-import { BiliQuery } from '@/models/bilibili/bilibili.query';
+import { MainProps } from '@src/components/dynamic/MainPage';
+import Config from '@src/utils/config';
+import { renderPage } from '@src/utils/image';
+import { ScreenshotOptions } from '@src/utils/puppeteer.render';
+import { BiliGetWebData } from '@src/models/bilibili/bilibili.get.web.data';
+import { postGateway, readSyncCookie } from '@src/models/bilibili/bilibili.models';
+import { BiliQuery } from '@src/models/bilibili/bilibili.query';
 
 declare const logger: any;
 

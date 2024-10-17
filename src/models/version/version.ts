@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { _paths } from '@/utils/paths';
+import { _paths } from '@src/utils/paths';
 
 export default class VersionData {
   model: string;

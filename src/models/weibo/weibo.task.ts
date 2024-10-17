@@ -1,11 +1,11 @@
 import QRCode from 'qrcode';
 import { Bot, Redis, Segment, EventType } from 'yunzaijs';
-import { MainProps } from '@/components/dynamic/MainPage';
-import Config from '@/utils/config';
-import { renderPage } from '@/utils/image';
-import { ScreenshotOptions } from '@/utils/puppeteer.render';
-import { WeiboGetWebData } from '@/models/weibo/weibo.get.web.data';
-import { WeiboQuery } from '@/models/weibo/weibo.query';
+import { MainProps } from '@src/components/dynamic/MainPage';
+import Config from '@src/utils/config';
+import { renderPage } from '@src/utils/image';
+import { ScreenshotOptions } from '@src/utils/puppeteer.render';
+import { WeiboGetWebData } from '@src/models/weibo/weibo.get.web.data';
+import { WeiboQuery } from '@src/models/weibo/weibo.query';
 
 declare const logger: any;
 

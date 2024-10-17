@@ -1,7 +1,7 @@
 import React from 'react';
 import { Picture, ComponentCreateOpsionType } from 'jsxp';
-import { YukiPuppeteerRender, ScreenshotOptions } from '@/utils/puppeteer.render';
-import * as ReactPages from '@/components/index';
+import { YukiPuppeteerRender, ScreenshotOptions } from '@src/utils/puppeteer.render';
+import * as ReactPages from '@src/components/index';
 
 // 定义 Image 类，继承自 Picture 类
 class Image extends Picture {

@@ -3,7 +3,7 @@ import { Browser } from 'puppeteer';
 import { Puppeteer } from 'jsxp';
 import fs from 'fs';
 import path from 'path';
-import { _paths } from '@/utils/paths';
+import { _paths } from '@src/utils/paths';
 
 declare const logger: any;
 

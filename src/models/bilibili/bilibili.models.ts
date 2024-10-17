@@ -7,13 +7,13 @@ import path from 'path';
 import QRCode from 'qrcode';
 import YAML from 'yaml';
 import { Bot, Redis, Segment, EventType } from 'yunzaijs';
-import { LoginProps } from '@/components/loginQrcode/Page';
-import { renderPage } from '@/utils/image';
-import { _paths } from '@/utils/paths';
-import { ScreenshotOptions } from '@/utils/puppeteer.render';
-import { BiliApi } from '@/models/bilibili/bilibili.api';
-import { gen_buvid_fp } from '@/models/bilibili/bilibili.buid.fp';
-import { getBiliTicket } from '@/models/bilibili/bilibili.ticket';
+import { LoginProps } from '@src/components/loginQrcode/Page';
+import { renderPage } from '@src/utils/image';
+import { _paths } from '@src/utils/paths';
+import { ScreenshotOptions } from '@src/utils/puppeteer.render';
+import { BiliApi } from '@src/models/bilibili/bilibili.api';
+import { gen_buvid_fp } from '@src/models/bilibili/bilibili.buid.fp';
+import { getBiliTicket } from '@src/models/bilibili/bilibili.ticket';
 
 declare const logger: any;
 

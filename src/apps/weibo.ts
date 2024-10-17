@@ -1,9 +1,9 @@
 import { Messages, EventType } from 'yunzaijs';
-import { WeiboQuery } from '@/models/weibo/weibo.query';
-import { WeiboTask } from '@/models/weibo/weibo.task';
-import Config from '@/utils/config';
-import { _paths } from '@/utils/paths';
-import { WeiboGetWebData } from '@/models/weibo/weibo.get.web.data';
+import { WeiboQuery } from '@src/models/weibo/weibo.query';
+import { WeiboTask } from '@src/models/weibo/weibo.task';
+import Config from '@src/utils/config';
+import { _paths } from '@src/utils/paths';
+import { WeiboGetWebData } from '@src/models/weibo/weibo.get.web.data';
 
 declare const logger: any;
 
