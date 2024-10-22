@@ -62,28 +62,30 @@ class BiliTask {
                     let resp;
                     if (requestedDataOfUids.has(subInfoOfup.uid)) {
                         resp = requestedDataOfUids.get(subInfoOfup.uid);
+                        const dynamicData = resp.data?.items || [];
+                        dynamicList[subInfoOfup.uid] = dynamicData;
                     }
                     else {
                         resp = await this.hendleEventDynamicData(subInfoOfup.uid);
-                        requestedDataOfUids.set(subInfoOfup.uid, resp);
-                    }
-                    if (resp) {
-                        if (resp.code === 0) {
-                            const dynamicData = resp.data?.items || [];
-                            dynamicList[subInfoOfup.uid] = dynamicData;
+                        if (resp) {
+                            if (resp.code === 0) {
+                                requestedDataOfUids.set(subInfoOfup.uid, resp);
+                                const dynamicData = resp.data?.items || [];
+                                dynamicList[subInfoOfup.uid] = dynamicData;
+                            }
+                            else if (resp.code === -352) {
+                                logger.error(`获取 ${subInfoOfup.uid} 动态失败，resCode：-352`);
+                                continue;
+                            }
+                            else if (resp.code !== 0) {
+                                logger.error(`获取 ${subInfoOfup.uid} 动态失败，resCode：${resp.code}`);
+                                return;
+                            }
                         }
-                        else if (resp.code === -352) {
-                            logger.error(`获取 ${subInfoOfup.uid} 动态失败，resCode：-352`);
-                            continue;
-                        }
-                        else if (resp.code !== 0) {
-                            logger.error(`获取 ${subInfoOfup.uid} 动态失败，resCode：${resp.code}`);
+                        else {
+                            logger.error(`获取 ${subInfoOfup.uid} 动态失败，无响应数据，本次任务终止，待下次任务自动重试`);
                             return;
                         }
-                    }
-                    else {
-                        logger.error(`获取 ${subInfoOfup.uid} 动态失败，resp 为空`);
-                        return;
                     }
                     const chatIds = Array.from(new Set([...Object((chatTypeMap.get(subInfoOfup.uid) && chatTypeMap.get(subInfoOfup.uid).chatIds) || []), chatId]));
                     const bot_id = subInfoOfup.bot_id || [];

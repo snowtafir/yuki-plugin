@@ -37,14 +37,16 @@ class WeiboTask {
                     let resp;
                     if (requestedDataOfUids.has(subInfoOfup.uid)) {
                         resp = requestedDataOfUids.get(subInfoOfup.uid);
+                        const dynamicData = resp || [];
+                        dynamicList[subInfoOfup.uid] = dynamicData;
                     }
                     else {
                         resp = await await new WeiboGetWebData().getBloggerDynamicList(subInfoOfup.uid);
-                        requestedDataOfUids.set(subInfoOfup.uid, resp);
-                    }
-                    if (resp) {
-                        const dynamicData = resp || [];
-                        dynamicList[subInfoOfup.uid] = dynamicData;
+                        if (resp) {
+                            requestedDataOfUids.set(subInfoOfup.uid, resp);
+                            const dynamicData = resp || [];
+                            dynamicList[subInfoOfup.uid] = dynamicData;
+                        }
                     }
                     const chatIds = Array.from(new Set([...Object((chatTypeMap.get(subInfoOfup.uid) && chatTypeMap.get(subInfoOfup.uid).chatIds) || []), chatId]));
                     const bot_id = subInfoOfup.bot_id || [];
