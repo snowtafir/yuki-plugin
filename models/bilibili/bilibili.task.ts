@@ -105,25 +105,26 @@ export class BiliTask {
           // 检查是否已经请求过该 uid
           if (requestedDataOfUids.has(subInfoOfup.uid)) {
             resp = requestedDataOfUids.get(subInfoOfup.uid); // 从已请求的映射中获取响应数据
+            const dynamicData = resp.data?.items || [];
+            dynamicList[subInfoOfup.uid] = dynamicData;
           } else {
             resp = await this.hendleEventDynamicData(subInfoOfup.uid);
-            requestedDataOfUids.set(subInfoOfup.uid, resp); // 将响应数据存储到映射中
-          }
-
-          if (resp) {
-            if (resp.code === 0) {
-              const dynamicData = resp.data?.items || [];
-              dynamicList[subInfoOfup.uid] = dynamicData;
-            } else if (resp.code === -352) {
-              logger.error(`获取 ${subInfoOfup.uid} 动态失败，resCode：-352`);
-              continue;
-            } else if (resp.code !== 0) {
-              logger.error(`获取 ${subInfoOfup.uid} 动态失败，resCode：${resp.code}`);
+            if (resp) {
+              if (resp.code === 0) {
+                requestedDataOfUids.set(subInfoOfup.uid, resp); // 将响应数据存储到映射中
+                const dynamicData = resp.data?.items || [];
+                dynamicList[subInfoOfup.uid] = dynamicData;
+              } else if (resp.code === -352) {
+                logger.error(`获取 ${subInfoOfup.uid} 动态失败，resCode：-352`);
+                continue;
+              } else if (resp.code !== 0) {
+                logger.error(`获取 ${subInfoOfup.uid} 动态失败，resCode：${resp.code}`);
+                return;
+              }
+            } else {
+              logger.error(`获取 ${subInfoOfup.uid} 动态失败，无响应数据，本次任务终止，待下次任务自动重试`);
               return;
             }
-          } else {
-            logger.error(`获取 ${subInfoOfup.uid} 动态失败，resp 为空`);
-            return;
           }
 
           const chatIds: any[] = Array.from(new Set([...Object((chatTypeMap.get(subInfoOfup.uid) && chatTypeMap.get(subInfoOfup.uid).chatIds) || []), chatId]));

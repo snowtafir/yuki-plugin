@@ -80,14 +80,15 @@ export class WeiboTask {
           // 检查是否已经请求过该 uid
           if (requestedDataOfUids.has(subInfoOfup.uid)) {
             resp = requestedDataOfUids.get(subInfoOfup.uid); // 从已请求的映射中获取响应数据
-          } else {
-            resp = await await new WeiboGetWebData().getBloggerDynamicList(subInfoOfup.uid); // 获取指定 uid 的动态列表
-            requestedDataOfUids.set(subInfoOfup.uid, resp); // 将响应数据存储到映射中
-          }
-
-          if (resp) {
             const dynamicData = resp || [];
             dynamicList[subInfoOfup.uid] = dynamicData;
+          } else {
+            resp = await await new WeiboGetWebData().getBloggerDynamicList(subInfoOfup.uid); // 获取指定 uid 的动态列表
+            if (resp) {
+              requestedDataOfUids.set(subInfoOfup.uid, resp); // 将响应数据存储到映射中
+              const dynamicData = resp || [];
+              dynamicList[subInfoOfup.uid] = dynamicData;
+            }
           }
 
           const chatIds: any[] = Array.from(new Set([...Object((chatTypeMap.get(subInfoOfup.uid) && chatTypeMap.get(subInfoOfup.uid).chatIds) || []), chatId]));
