@@ -16,13 +16,10 @@ class BiliTask {
         this.privateKey = 'Yz:yuki:bili:upPush:private:';
     }
     async hendleEventDynamicData(uid, count = 0) {
+        let { cookie } = await readSyncCookie();
         const resp = await new BiliGetWebData().getBiliDynamicListDataByUid(uid);
         const resjson = await resp.data;
-        let { cookie } = await readSyncCookie();
-        if (resjson.code === 0) {
-            return resjson;
-        }
-        else if (resjson.code === -352) {
+        if (!resjson || resjson.code !== 0 || resjson.code === -352) {
             await postGateway(cookie);
             if (count < 3) {
                 await this.randomDelay(2000, 8000);
@@ -31,12 +28,9 @@ class BiliTask {
             }
             else {
                 count = 0;
-                return resjson;
             }
         }
-        else if (resjson.code !== 0) {
-            return resjson;
-        }
+        return resjson;
     }
     async runTask() {
         let biliConfigData = await Config.getUserConfig('bilibili', 'config');
@@ -79,12 +73,12 @@ class BiliTask {
                             }
                             else if (resp.code !== 0) {
                                 logger.error(`获取 ${subInfoOfup.uid} 动态失败，resCode：${resp.code}`);
-                                return;
+                                continue;
                             }
                         }
                         else {
-                            logger.error(`获取 ${subInfoOfup.uid} 动态失败，无响应数据，本次任务终止，待下次任务自动重试`);
-                            return;
+                            logger.error(`获取 ${subInfoOfup.uid} 动态失败，无响应数据，请待下次任务自动重试`);
+                            continue;
                         }
                     }
                     const chatIds = Array.from(new Set([...Object((chatTypeMap.get(subInfoOfup.uid) && chatTypeMap.get(subInfoOfup.uid).chatIds) || []), chatId]));
