@@ -3,6 +3,7 @@ import lodash from 'lodash';
 import { BiliApi } from './bilibili.api.js';
 import { readSyncCookie, cookieWithBiliTicket, readSavedCookieItems, readSavedCookieOtherItems } from './bilibili.models.js';
 import { getWbiSign } from './bilibili.wbi.js';
+import { getDmImg } from './bilibili.dm.img.js';
 
 class BiliGetWebData {
     constructor(e) { }
@@ -10,6 +11,7 @@ class BiliGetWebData {
         const url = BiliApi.BILIBIL_API.biliDynamicInfoList;
         let { cookie } = await readSyncCookie();
         cookie = await cookieWithBiliTicket(cookie);
+        const dmImg = await getDmImg();
         const data = {
             'offset': '',
             'host_mid': uid,
@@ -17,6 +19,7 @@ class BiliGetWebData {
             'platform': 'web',
             'features': 'itemOpusStyle,listOnlyfans,opusBigCover,onlyfansVote',
             'web_location': '333.999',
+            ...dmImg,
             'x-bili-device-req-json': { platform: 'web', device: 'pc' },
             'x-bili-web-req-json': { spm_id: '333.999' }
         };
