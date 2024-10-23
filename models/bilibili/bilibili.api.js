@@ -14,9 +14,8 @@ class BiliApi {
     };
     static BILIBILI_HEADERS = {
         'Accept': '*/*',
-        'Accept-Language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Content-type': 'application/json;charset=UTF-8',
+        'Accept-Language': 'zh-CN,en-US;q=0.5',
+        'Accept-Encoding': 'gzip, deflate, br, zstd',
         'Cookie': '',
         'pragma': 'no-cache',
         'Cache-control': 'max-age=0',
@@ -28,14 +27,14 @@ class BiliApi {
         'Sec-Fetch-Mode': 'cors',
         'Sec-Fetch-Site': 'same-site',
         'Sec-Fetch-User': '?0',
+        'Priority': 'u=4',
         'TE': 'trailers',
-        'Upgrade-Insecure-Requests': '1',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:127.0) Gecko/20100101 Firefox/127.0'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:132.0) Gecko/20100101 Firefox/132.0'
     };
     static BIlIBILI_LOGIN_HEADERS = {
         'Accept': '*/*',
-        'Accept-Language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
-        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept-Language': 'zh-CN,en-US;q=0.5',
+        'Accept-Encoding': 'gzip, deflate, br, zstd',
         'DNT': '1',
         'Sec-GPC': '1',
         'Upgrade-Insecure-Requests': '1',
@@ -47,8 +46,8 @@ class BiliApi {
     };
     static BILIBILI_ARTICLE_HEADERS = {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8',
-        'Accept-Language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
-        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept-Language': 'zh-CN,en-US;q=0.5',
+        'Accept-Encoding': 'gzip, deflate, br, zstd',
         'Content-type': 'text/html; charset=utf-8',
         'Cookie': '',
         'pragma': 'no-cache',
@@ -62,7 +61,7 @@ class BiliApi {
         'Sec-Fetch-User': '?1',
         'TE': 'trailers',
         'Upgrade-Insecure-Requests': '1',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:127.0) Gecko/20100101 Firefox/127.0'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:132.0) Gecko/20100101 Firefox/132.0'
     };
 }
 

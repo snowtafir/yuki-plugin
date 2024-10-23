@@ -72,13 +72,13 @@ class BiliTask {
                                 continue;
                             }
                             else if (resp.code !== 0) {
-                                logger.error(`获取 ${subInfoOfup.uid} 动态失败，resCode：${resp.code}`);
-                                continue;
+                                logger.error(`获取 ${subInfoOfup.uid} 动态失败，resCode：${resp.code}，请待下次任务自动重试`);
+                                return;
                             }
                         }
                         else {
                             logger.error(`获取 ${subInfoOfup.uid} 动态失败，无响应数据，请待下次任务自动重试`);
-                            continue;
+                            return;
                         }
                     }
                     const chatIds = Array.from(new Set([...Object((chatTypeMap.get(subInfoOfup.uid) && chatTypeMap.get(subInfoOfup.uid).chatIds) || []), chatId]));

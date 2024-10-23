@@ -16,7 +16,6 @@ export declare class BiliApi {
         Accept: string;
         'Accept-Language': string;
         'Accept-Encoding': string;
-        'Content-type': string;
         Cookie: string;
         pragma: string;
         'Cache-control': string;
@@ -28,8 +27,8 @@ export declare class BiliApi {
         'Sec-Fetch-Mode': string;
         'Sec-Fetch-Site': string;
         'Sec-Fetch-User': string;
+        Priority: string;
         TE: string;
-        'Upgrade-Insecure-Requests': string;
         'User-Agent': string;
     };
     static BIlIBILI_LOGIN_HEADERS: {
