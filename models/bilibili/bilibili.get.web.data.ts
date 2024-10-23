@@ -39,8 +39,8 @@ export class BiliGetWebData {
       headers: lodash.merge(BiliApi.BILIBILI_HEADERS, {
         Cookie: `${cookie}`,
         Host: `api.bilibili.com`,
-        Origin: 'https://www.bilibili.com',
-        Referer: `https://www.bilibili.com/`
+        Origin: 'https://space.bilibili.com',
+        Referer: `https://space.bilibili.com/${uid}/dynamic`
       })
     });
     return res;
