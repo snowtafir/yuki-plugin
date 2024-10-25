@@ -12,9 +12,11 @@ export declare class BiliApi {
         biliLiveUserInfo: string;
         biliOpusDetail: string;
     };
+    static BILIBILI_USER_AGENT: string;
     static BILIBILI_HEADERS: {
         Accept: string;
         'Accept-Language': string;
+        Connection: string;
         'Accept-Encoding': string;
         Cookie: string;
         pragma: string;
@@ -60,6 +62,20 @@ export declare class BiliApi {
         'Sec-Fetch-Site': string;
         'Sec-Fetch-User': string;
         TE: string;
+        'Upgrade-Insecure-Requests': string;
+        'User-Agent': string;
+    };
+    static BILIBILI_DYNAMIC_SPACE_HEADERS: {
+        Accept: string;
+        'Accept-Encoding': string;
+        'Accept-Language': string;
+        Connection: string;
+        Priority: string;
+        'Sec-Fetch-Dest': string;
+        'Sec-Fetch-Mode': string;
+        'Sec-Fetch-Site': string;
+        'Sec-Fetch-User': string;
+        'Sec-GPC': string;
         'Upgrade-Insecure-Requests': string;
         'User-Agent': string;
     };
