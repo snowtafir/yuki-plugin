@@ -29,7 +29,7 @@ export class BiliTask {
 
     if (!resjson || resjson.code !== 0 || resjson.code === -352) {
       await postGateway(cookie);
-      if (count < 3) {
+      if (count < 2) {
         await this.randomDelay(2000, 8000); // 随机延时2-8秒
         await this.hendleEventDynamicData(uid, count + 1);
         logger.error(`获取 ${uid} 动态，Gateway count：${String(count)}`);
@@ -112,8 +112,8 @@ export class BiliTask {
                 const dynamicData = resp.data?.items || [];
                 dynamicList[subInfoOfup.uid] = dynamicData;
               } else if (resp.code === -352) {
-                logger.error(`获取 ${subInfoOfup.uid} 动态失败，resCode：-352`);
-                continue;
+                logger.error(`获取 ${subInfoOfup.uid} 动态失败，resCode：-352，请待下次任务自动重试`);
+                return;
               } else if (resp.code !== 0) {
                 logger.error(`获取 ${subInfoOfup.uid} 动态失败，resCode：${resp.code}，请待下次任务自动重试`);
                 return;
