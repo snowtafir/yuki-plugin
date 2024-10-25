@@ -9,7 +9,7 @@ export class BiliApi {
     //通过uid获取up详情 parama = { mid: uid, jsonp: jsonp }
     biliSpaceUserInfo: `https://api.bilibili.com/x/space/acc/info`,
 
-    //parama = { mid: uid, jsonp: jsonp }
+    //parama = { mid: uid, token: '',platform: 'web', web_location: 1550101, w_webid, w_rid, wts }
     biliSpaceUserInfoWbi: `https://api.bilibili.com/x/space/wbi/acc/info`,
 
     //通过关键词${upKeyword}搜索up主 parama = { keyword: 'upKeyword', page: 1, search_type: 'bili_user', order: 'totalrank', pagesize: 5  }
@@ -24,10 +24,13 @@ export class BiliApi {
     biliOpusDetail: 'https://api.bilibili.com/x/polymer/web-dynamic/v1/opus/detail'
   };
 
+  static BILIBILI_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
+
   /**header */
   static BILIBILI_HEADERS = {
     'Accept': '*/*',
     'Accept-Language': 'zh-CN,en-US;q=0.5',
+    'Connection': 'keep-alive',
     'Accept-Encoding': 'gzip, deflate, br, zstd',
     'Cookie': '',
     'pragma': 'no-cache',
@@ -42,7 +45,7 @@ export class BiliApi {
     'Sec-Fetch-User': '?0',
     'Priority': 'u=4',
     'TE': 'trailers',
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:132.0) Gecko/20100101 Firefox/132.0'
+    'User-Agent': this.BILIBILI_USER_AGENT
   };
   /**Login header */
   static BIlIBILI_LOGIN_HEADERS = {
@@ -76,6 +79,21 @@ export class BiliApi {
     'Sec-Fetch-User': '?1',
     'TE': 'trailers',
     'Upgrade-Insecure-Requests': '1',
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:132.0) Gecko/20100101 Firefox/132.0'
+    'User-Agent': this.BILIBILI_USER_AGENT
+  };
+
+  static BILIBILI_DYNAMIC_SPACE_HEADERS = {
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    'Accept-Encoding': 'gzip, deflate, br, zstd',
+    'Accept-Language': 'zh-CN,en-US;q=0.5',
+    'Connection': 'keep-alive',
+    'Priority': 'u=0, i',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'none',
+    'Sec-Fetch-User': '?1',
+    'Sec-GPC': '1',
+    'Upgrade-Insecure-Requests': '1',
+    'User-Agent': this.BILIBILI_USER_AGENT
   };
 }

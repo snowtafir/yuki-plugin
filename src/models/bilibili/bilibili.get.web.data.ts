@@ -4,6 +4,7 @@ import { BiliApi } from '@src/models/bilibili//bilibili.api';
 import { cookieWithBiliTicket, readSavedCookieItems, readSavedCookieOtherItems, readSyncCookie } from '@src/models/bilibili/bilibili.models';
 import { getWbiSign } from '@src/models/bilibili//bilibili.wbi';
 import { getDmImg } from '@src/models/bilibili/bilibili.dm.img';
+import { getWebId } from '@src/models/bilibili/bilibili.w_webid';
 
 export class BiliGetWebData {
   constructor(e?) {}
@@ -20,7 +21,7 @@ export class BiliGetWebData {
       'host_mid': uid,
       'timezone_offset': -480,
       'platform': 'web',
-      'features': 'itemOpusStyle,listOnlyfans,opusBigCover,onlyfansVote',
+      'features': 'itemOpusStyle,listOnlyfans,opusBigCover,onlyfansVote,decorationCard,forwardListHidden,ugcDelete,onlyfansQaCard',
       'web_location': '333.999',
       ...dmImg,
       'x-bili-device-req-json': { platform: 'web', device: 'pc' },
@@ -51,15 +52,21 @@ export class BiliGetWebData {
     const url = BiliApi.BILIBIL_API.biliSpaceUserInfoWbi;
     let { cookie } = await readSyncCookie();
     cookie = await cookieWithBiliTicket(cookie);
+    const dmImg = await getDmImg();
 
     const data = {
       mid: uid,
-      jsonp: 'jsonp'
+      token: '',
+      platform: 'web',
+      web_location: 1550101,
+      ...dmImg
     };
     let signCookie = (await readSavedCookieItems(cookie, ['SESSDATA'], false)) || (await readSavedCookieOtherItems(cookie, ['SESSDATA']));
+    const w_webid = await getWebId(uid);
     const { w_rid, time_stamp } = await getWbiSign(data, BiliApi.BILIBILI_HEADERS, signCookie);
     const params = {
       ...data,
+      w_webid: w_webid,
       w_rid: w_rid,
       wts: time_stamp
     };
@@ -69,8 +76,8 @@ export class BiliGetWebData {
       headers: lodash.merge(BiliApi.BILIBILI_HEADERS, {
         Cookie: `${cookie}`,
         Host: `api.bilibili.com`,
-        Origin: 'https://www.bilibili.com',
-        Referer: `https://www.bilibili.com/`
+        Origin: 'https://space.bilibili.com',
+        Referer: `https://space.bilibili.com/${uid}/dynamic`
       })
     });
     return res;
