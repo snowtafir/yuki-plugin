@@ -1,8 +1,8 @@
 import axios from 'axios';
 import lodash from 'lodash';
 import { Redis } from 'yunzaijs';
-import { BiliApi } from '@src/models/bilibili//bilibili.api';
-import { cookieWithBiliTicket, readSyncCookie } from '@src/models/bilibili/bilibili.models';
+import BiliApi from '@src/models/bilibili/bilibili.main.api';
+import { cookieWithBiliTicket, readSyncCookie } from '@src/models/bilibili/bilibili.main.models';
 
 export async function getWebId(uid?: number) {
   const w_webid_key = 'Yz:yuki:bili:w_webid';

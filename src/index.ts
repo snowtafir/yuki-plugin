@@ -4,7 +4,7 @@ import Config from '@src/utils/config';
 import path from 'path';
 import { _paths } from '@src/utils/paths';
 import * as apps from '@src/apps/index';
-import { BiliTask } from '@src/models/bilibili/bilibili.task';
+import { BiliTask } from '@src/models/bilibili/bilibili.main.task';
 import { WeiboTask } from '@src/models/weibo/weibo.task';
 declare const logger: any;
 type RulesType = {
