@@ -48,19 +48,19 @@ class BiliGetWebData {
         let { cookie } = await readSyncCookie();
         cookie = await cookieWithBiliTicket(cookie);
         const dmImg = await getDmImg();
+        const w_webid = await getWebId(uid);
         const data = {
             mid: uid,
             token: '',
             platform: 'web',
             web_location: 1550101,
-            ...dmImg
+            ...dmImg,
+            w_webid: w_webid
         };
         let signCookie = (await readSavedCookieItems(cookie, ['SESSDATA'], false)) || (await readSavedCookieOtherItems(cookie, ['SESSDATA']));
-        const w_webid = await getWebId(uid);
         const { w_rid, time_stamp } = await getWbiSign(data, BiliApi.BILIBILI_HEADERS, signCookie);
         const params = {
             ...data,
-            w_webid: w_webid,
             w_rid: w_rid,
             wts: time_stamp
         };

@@ -1,1 +1,1 @@
-export declare function getWebId(uid?: number): Promise<any>;
+export declare function getWebId(uid?: number): Promise<string>;
