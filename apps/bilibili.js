@@ -476,7 +476,7 @@ class YukiBili extends plugin {
         }
         const message = [`昵称：${data?.name}`, `\n性别：${data?.sex}`, `\n等级：${data?.level}`];
         if (data.live_room) {
-            message.push(`***********\n---直播信息---`, `\n直播标题：${data?.live_room?.title}`, `\n直播房间：${data?.live_room?.roomid}`, `\n直播状态：${data?.live_room?.liveStatus ? '直播中' : '未开播'}`, `\n观看人数：${data?.live_room?.watched_show?.num}人`);
+            message.push(`\n***********\n---直播信息---`, `\n直播标题：${data?.live_room?.title}`, `\n直播房间：${data?.live_room?.roomid}`, `\n直播状态：${data?.live_room?.liveStatus ? '直播中' : '未开播'}`, `\n观看人数：${data?.live_room?.watched_show?.num}人`);
             this.e.reply(`直播链接：${data?.live_room?.url}`);
         }
         this.e.reply(message);
