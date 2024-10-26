@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import { createHmac } from 'crypto';
-import { BiliApi } from './bilibili.api.js';
+import BiliApi from './bilibili.main.api.js';
 
 function hmacSha256(key, message) {
     return createHmac('sha256', key).update(message).digest('hex');

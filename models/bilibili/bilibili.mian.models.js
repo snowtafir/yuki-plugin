@@ -9,8 +9,8 @@ import YAML from 'yaml';
 import { Segment, Bot, Redis } from 'yunzaijs';
 import { renderPage } from '../../utils/image.js';
 import { _paths } from '../../utils/paths.js';
-import { BiliApi } from './bilibili.api.js';
-import { getBiliTicket } from './bilibili.ticket.js';
+import BiliApi from './bilibili.main.api.js';
+import { getBiliTicket } from './bilibili.risk.ticket.js';
 
 async function applyLoginQRCode(e) {
     const url = 'https://passport.bilibili.com/x/passport-login/web/qrcode/generate?source=main-fe-header';

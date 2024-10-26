@@ -1,5 +1,11 @@
-export declare class BiliApi {
-    static BILIBIL_API: {
+declare class BiliApi {
+    biliConfigData: any;
+    USER_AGENT: string;
+    constructor();
+    static BILIBILI_USER_AGENT: string;
+    initialize(): Promise<void>;
+    initUserAgent(): Promise<void>;
+    get BILIBIL_API(): {
         biliDynamicInfoList: string;
         biliUpFollowFans: string;
         biliSpaceUserInfo: string;
@@ -12,8 +18,7 @@ export declare class BiliApi {
         biliLiveUserInfo: string;
         biliOpusDetail: string;
     };
-    static BILIBILI_USER_AGENT: string;
-    static BILIBILI_HEADERS: {
+    get BILIBILI_HEADERS(): {
         Accept: string;
         'Accept-Language': string;
         Connection: string;
@@ -33,7 +38,7 @@ export declare class BiliApi {
         TE: string;
         'User-Agent': string;
     };
-    static BIlIBILI_LOGIN_HEADERS: {
+    get BIlIBILI_LOGIN_HEADERS(): {
         Accept: string;
         'Accept-Language': string;
         'Accept-Encoding': string;
@@ -46,7 +51,7 @@ export declare class BiliApi {
         'Sec-Fetch-User': string;
         TE: string;
     };
-    static BILIBILI_ARTICLE_HEADERS: {
+    get BILIBILI_ARTICLE_HEADERS(): {
         Accept: string;
         'Accept-Language': string;
         'Accept-Encoding': string;
@@ -65,7 +70,7 @@ export declare class BiliApi {
         'Upgrade-Insecure-Requests': string;
         'User-Agent': string;
     };
-    static BILIBILI_DYNAMIC_SPACE_HEADERS: {
+    get BILIBILI_DYNAMIC_SPACE_HEADERS(): {
         Accept: string;
         'Accept-Encoding': string;
         'Accept-Language': string;
@@ -80,3 +85,5 @@ export declare class BiliApi {
         'User-Agent': string;
     };
 }
+declare const _default: BiliApi;
+export default _default;

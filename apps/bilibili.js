@@ -1,11 +1,11 @@
 import JSON from 'json5';
 import lodash from 'lodash';
 import { Plugin, Bot, Redis } from 'yunzaijs';
-import { BiliQuery } from '../models/bilibili/bilibili.query.js';
-import { BiliTask } from '../models/bilibili/bilibili.task.js';
+import { BiliQuery } from '../models/bilibili/bilibili.main.query.js';
+import { BiliTask } from '../models/bilibili/bilibili.main.task.js';
 import Config from '../utils/config.js';
-import { BiliGetWebData } from '../models/bilibili/bilibili.get.web.data.js';
-import { applyLoginQRCode, pollLoginQRCode, saveLoginCookie, postGateway, exitBiliLogin, checkBiliLogin, readSavedCookieItems, saveLocalBiliCk, readSyncCookie, getNewTempCk, readTempCk } from '../models/bilibili/bilibili.models.js';
+import { BiliGetWebData } from '../models/bilibili/bilibili.main.get.web.data.js';
+import { applyLoginQRCode, pollLoginQRCode, saveLoginCookie, postGateway, exitBiliLogin, checkBiliLogin, readSavedCookieItems, saveLocalBiliCk, readSyncCookie, getNewTempCk, readTempCk } from '../models/bilibili/bilibili.mian.models.js';
 
 class YukiBili extends Plugin {
     constructor() {

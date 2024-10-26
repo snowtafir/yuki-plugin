@@ -1,7 +1,7 @@
 import moment from 'moment';
 import { Bot, Segment } from 'yunzaijs';
-import { readSyncCookie, cookieWithBiliTicket } from './bilibili.models.js';
-import { BiliApi } from './bilibili.api.js';
+import { readSyncCookie, cookieWithBiliTicket } from './bilibili.mian.models.js';
+import BiliApi from './bilibili.main.api.js';
 import axios from 'axios';
 import lodash from 'lodash';
 
