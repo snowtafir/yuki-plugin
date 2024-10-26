@@ -4,9 +4,9 @@ import { MainProps } from '@/components/dynamic/MainPage';
 import Config from '@/utils/config';
 import { renderPage } from '@/utils/image';
 import { ScreenshotOptions } from '@/utils/puppeteer.render';
-import { BiliGetWebData } from '@/models/bilibili/bilibili.get.web.data';
-import { postGateway, readSyncCookie } from '@/models/bilibili/bilibili.models';
-import { BiliQuery } from '@/models/bilibili/bilibili.query';
+import { BiliGetWebData } from '@/models/bilibili/bilibili.main.get.web.data';
+import { postGateway, readSyncCookie } from '@/models/bilibili/bilibili.mian.models';
+import { BiliQuery } from '@/models/bilibili/bilibili.main.query';
 
 declare const logger: any;
 
