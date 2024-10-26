@@ -597,7 +597,7 @@ export default class YukiBili extends plugin {
 
     if (data.live_room) {
       message.push(
-        `***********\n---直播信息---`,
+        `\n***********\n---直播信息---`,
         `\n直播标题：${data?.live_room?.title}`,
         `\n直播房间：${data?.live_room?.roomid}`,
         `\n直播状态：${data?.live_room?.liveStatus ? '直播中' : '未开播'}`,
