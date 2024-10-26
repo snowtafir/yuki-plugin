@@ -10,10 +10,9 @@ import { LoginProps } from '@/components/loginQrcode/Page';
 import { renderPage } from '@/utils/image';
 import { _paths } from '@/utils/paths';
 import { ScreenshotOptions } from '@/utils/puppeteer.render';
-import { BiliApi } from '@/models/bilibili/bilibili.api';
-import { gen_buvid_fp } from '@/models/bilibili/bilibili.buid.fp';
-import { getBiliTicket } from '@/models/bilibili/bilibili.ticket';
-
+import BiliApi from '@/models/bilibili/bilibili.main.api';
+import { gen_buvid_fp } from '@/models/bilibili/bilibili.main.buid.fp';
+import { getBiliTicket } from '@/models/bilibili/bilibili.risk.ticket';
 declare const logger: any, Bot: any, redis: any, segment: any;
 
 /**

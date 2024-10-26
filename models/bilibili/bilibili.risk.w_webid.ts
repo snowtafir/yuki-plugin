@@ -1,7 +1,7 @@
 import axios from 'axios';
 import lodash from 'lodash';
-import { BiliApi } from '@/models/bilibili//bilibili.api';
-import { cookieWithBiliTicket, readSyncCookie } from '@/models/bilibili/bilibili.models';
+import BiliApi from '@/models/bilibili/bilibili.main.api';
+import { cookieWithBiliTicket, readSyncCookie } from '@/models/bilibili/bilibili.main.models';
 
 declare const redis: any;
 

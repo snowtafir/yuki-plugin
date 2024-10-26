@@ -1,10 +1,10 @@
 import JSON from 'json5';
 import lodash from 'lodash';
-import { BiliQuery } from '@/models/bilibili/bilibili.query';
-import { BiliTask } from '@/models/bilibili/bilibili.task';
+import { BiliQuery } from '@/models/bilibili/bilibili.main.query.js';
+import { BiliTask } from '@/models/bilibili/bilibili.main.task.js';
 import Config from '@/utils/config';
 import { _paths } from '@/utils/paths';
-import { BiliGetWebData } from '@/models/bilibili/bilibili.get.web.data';
+import { BiliGetWebData } from '@/models/bilibili/bilibili.main.get.web.data.js';
 import {
   applyLoginQRCode,
   checkBiliLogin,
@@ -17,7 +17,7 @@ import {
   saveLocalBiliCk,
   saveLoginCookie,
   readTempCk
-} from '@/models/bilibili/bilibili.models';
+} from '@/models/bilibili/bilibili.main.models.js';
 import plugin from '../../../lib/plugins/plugin.js';
 
 declare const logger: any;
