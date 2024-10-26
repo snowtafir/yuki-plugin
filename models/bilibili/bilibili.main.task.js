@@ -1,9 +1,9 @@
 import QRCode from 'qrcode';
 import Config from '../../utils/config.js';
 import { renderPage } from '../../utils/image.js';
-import { BiliGetWebData } from './bilibili.get.web.data.js';
-import { readSyncCookie, postGateway } from './bilibili.models.js';
-import { BiliQuery } from './bilibili.query.js';
+import { BiliGetWebData } from './bilibili.main.get.web.data.js';
+import { readSyncCookie, postGateway } from './bilibili.main.models.js';
+import { BiliQuery } from './bilibili.main.query.js';
 
 class BiliTask {
     taskName;

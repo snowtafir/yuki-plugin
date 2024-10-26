@@ -1,10 +1,10 @@
 import axios from 'axios';
 import lodash from 'lodash';
-import { BiliApi } from './bilibili.api.js';
-import { readSyncCookie, cookieWithBiliTicket, readSavedCookieItems, readSavedCookieOtherItems } from './bilibili.models.js';
-import { getWbiSign } from './bilibili.wbi.js';
-import { getDmImg } from './bilibili.dm.img.js';
-import { getWebId } from './bilibili.w_webid.js';
+import BiliApi from './bilibili.main.api.js';
+import { readSyncCookie, cookieWithBiliTicket, readSavedCookieItems, readSavedCookieOtherItems } from './bilibili.main.models.js';
+import { getWbiSign } from './bilibili.risk.wbi.js';
+import { getDmImg } from './bilibili.risk.dm.img.js';
+import { getWebId } from './bilibili.risk.w_webid.js';
 
 class BiliGetWebData {
     constructor(e) { }
