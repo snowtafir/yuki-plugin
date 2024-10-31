@@ -17,7 +17,7 @@ import {
   readSyncCookie,
   saveLocalBiliCk,
   saveLoginCookie,
-  readTempCk
+  saveTempCk
 } from '@src/models/bilibili/bilibili.main.models';
 
 declare const logger: any;
@@ -221,12 +221,6 @@ message.use(
 
         let biliLoginCk = await pollLoginQRCode(e, token);
 
-        //let _uuid = readSavedCookieItems(biliLoginCk, ['_uuid'])
-
-        //const buvid_fp = await get_buvid_fp(_uuid);
-
-        //biliLoginCk = buvid_fp + biliLoginCk;
-
         if (lodash.trim(biliLoginCk).length != 0) {
           await saveLoginCookie(e, biliLoginCk);
           e.reply(`get bilibili LoginCk：成功！`);
@@ -325,13 +319,9 @@ message.use(
         //筛选ck
         localBiliCookie = await readSavedCookieItems(
           localBiliCookie,
-          ['buvid3', 'buvid4', '_uuid', 'SESSDATA', 'DedeUserID', 'DedeUserID__ckMd5', 'bili_jct', 'b_nut', 'b_lsid'],
+          ['buvid3', 'buvid4', '_uuid', 'SESSDATA', 'DedeUserID', 'DedeUserID__ckMd5', 'bili_jct', 'b_nut', 'b_lsid', 'buvid_fp', 'sid'],
           false
         );
-
-        //const buvid_fp = await get_buvid_fp(param._uuid)
-
-        //localBiliCookie = buvid_fp + localBiliCookie; //添加buvid_fp值
 
         await saveLocalBiliCk(localBiliCookie);
 
@@ -406,9 +396,18 @@ message.use(
 message.use(
   async e => {
     try {
-      await getNewTempCk();
-      let newTempCk = await readTempCk();
-      if (newTempCk !== null && newTempCk !== undefined && newTempCk.length !== 0 && newTempCk !== '') {
+      const newTempCk = await getNewTempCk();
+      if (newTempCk) {
+        await saveTempCk(newTempCk);
+        const result = await postGateway(newTempCk);
+
+        const data = await result.data; // 解析校验结果
+
+        if (data?.code !== 0) {
+          logger?.error(`优纪插件：tempCK，Gateway校验失败：${JSON.stringify(data)}`);
+        } else if (data?.code === 0) {
+          logger?.mark(`优纪插件：tempCK，Gateway校验成功：${JSON.stringify(data)}`);
+        }
         e.reply(
           `~yuki-plugin:\n临时b站ck刷新成功~❤~\n接下来如果获取动态失败，请重启bot(手动或发送指令 #重启)刷新状态~\n如果重启续仍不可用，请考虑 #优纪添加b站登录 吧~`
         );

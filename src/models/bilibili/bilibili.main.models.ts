@@ -75,8 +75,8 @@ export async function applyLoginQRCode(e: EventType) {
 
     return qrcodeKey;
   } else {
-    e.reply(`获取B站登录二维码失败: ${res.data?.message}`);
-    throw new Error(`获取B站登录二维码失败: ${res.data?.message}`);
+    e.reply(`获取B站登录二维码失败: ${JSON.stringify(res.data)}`);
+    throw new Error(`获取B站登录二维码失败: ${JSON.stringify(res.data)}`);
   }
 }
 
@@ -110,8 +110,16 @@ export async function pollLoginQRCode(e: EventType, qrcodeKey: string) {
     if (data.data.code === 0) {
       // 登录成功，获取 cookie
       const LoginCookie = response.headers.get('set-cookie');
+      let loginCk: string = '';
+      try {
+        const nomalCk = await getNewTempCk();
+        loginCk = `${nomalCk}${LoginCookie}`;
+      } catch (error) {
+        loginCk = LoginCookie;
+        logger.debug(`优纪插件: 获取B站登录ck缺失部分: ${error}`);
+      }
       e.reply(`~B站登陆成功~`);
-      return LoginCookie;
+      return loginCk;
     } else if (data.data.code === 86101) {
       // 未扫码
       // 继续轮询
@@ -290,7 +298,23 @@ export async function saveLocalBiliCk(data: any) {
 export async function readTempCk() {
   const CK_KEY = 'Yz:yuki:bili:tempCookie';
   const tempCk = await Redis.get(CK_KEY);
-  return tempCk ?? '';
+  if (!tempCk) {
+    const newTempCk = await getNewTempCk();
+    await saveTempCk(newTempCk);
+
+    const result = await postGateway(newTempCk);
+
+    const data = await result.data; // 解析校验结果
+
+    if (data?.code !== 0) {
+      logger?.error(`优纪插件：tempCK，Gateway校验失败：${JSON.stringify(data)}`);
+    } else if (data?.code === 0) {
+      logger?.mark(`优纪插件：tempCK，Gateway校验成功：${JSON.stringify(data)}`);
+    }
+    return newTempCk;
+  } else {
+    return tempCk;
+  }
 }
 
 /**保存tempCK*/
@@ -430,23 +454,12 @@ async function getBuvid3_4(uuid: string): Promise<string> {
 /**获取新的tempCK*/
 export async function getNewTempCk() {
   const uuid = await genUUID();
+  const b_nut = `b_nut=${Date.now() / 1000};`;
   const buvid3_buvid4 = await getBuvid3_4(uuid);
   const b_lsid = await gen_b_lsid();
-  //const buvid_fp = await get_buvid_fp(uuid);
+  const buvid_fp = await get_buvid_fp(uuid);
 
-  let newTempCk = `${uuid}${buvid3_buvid4}${b_lsid}`; //${buvid_fp}`;
-
-  await saveTempCk(newTempCk);
-
-  const result = await postGateway(newTempCk);
-
-  const data = await result.data; // 解析校验结果
-
-  if (data?.code !== 0) {
-    logger?.error(`优纪插件：tempCK，Gateway校验失败：${JSON.stringify(data)}`);
-  } else if (data?.code === 0) {
-    logger?.mark(`优纪插件：tempCK，Gateway校验成功：${JSON.stringify(data)}`);
-  }
+  return `${uuid}${buvid3_buvid4}${b_lsid}${buvid_fp}${b_nut}`;
 }
 
 /**
@@ -454,205 +467,6 @@ export async function getNewTempCk() {
  * 风控相关函数
  * *******************************************************************
  */
-/**获取GatWay payload */
-async function getPayload(cookie: string) {
-  const payloadOriginData = {
-    '3064': 1, // ptype, mobile => 2, others => 1
-    '5062': `${Date.now()}`, // timestamp
-    '03bf': 'https://www.bilibili.com/', // url accessed
-    '39c8': '333.999.fp.risk',
-    '34f1': '', // target_url, default empty now
-    'd402': '', // screenx, default empty
-    '654a': '', // screeny, default empty
-    '6e7c': '878x1066', // browser_resolution, window.innerWidth || document.body && document.body.clientWidth + "x" + window.innerHeight || document.body && document.body.clientHeight
-    '3c43': {
-      // 3c43 => msg
-      '2673': 0, // hasLiedResolution, window.screen.width < window.screen.availWidth || window.screen.height < window.screen.availHeight
-      '5766': 24, // colorDepth, window.screen.colorDepth
-      '6527': 0, // addBehavior, !!window.HTMLElement.prototype.addBehavior, html5 api
-      '7003': 1, // indexedDb, !!window.indexedDB, html5 api
-      '807e': 1, // cookieEnabled, navigator.cookieEnabled
-      'b8ce': BiliApi.BILIBILI_HEADERS['User-Agent'], // ua "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:127.0) Gecko/20100101 Firefox/127.0",
-      '641c': 0, // webdriver, navigator.webdriver, like Selenium
-      '07a4': 'zh-CN', // language
-      '1c57': 'not available', // deviceMemory in GB, navigator.deviceMemory
-      '0bd0': 16, // hardwareConcurrency, navigator.hardwareConcurrency
-      '748e': [1920, 1200], // window.screen.width window.screen.height
-      'd61f': [1920, 1152], // window.screen.availWidth window.screen.availHeight
-      'fc9d': -480, // timezoneOffset, (new Date).getTimezoneOffset()
-      '6aa9': 'Asia/Shanghai', //Intl.DateTimeFormat().resolvedOptions().timeZone, // timezone, (new window.Intl.DateTimeFormat).resolvedOptions().timeZone
-      '75b8': 1, // sessionStorage, window.sessionStorage, html5 api
-      '3b21': 1, // localStorage, window.localStorage, html5 api
-      '8a1c': 0, // openDatabase, window.openDatabase, html5 api
-      'd52f': 'not available', // cpuClass, navigator.cpuClass
-      'adca': BiliApi.BILIBILI_HEADERS['User-Agent'].includes('Windows') ? 'Win32' : 'Linux', // platform, navigator.platform
-      '80c9': [
-        [
-          'PDF Viewer',
-          'Portable Document Format',
-          [
-            ['application/pdf', 'pdf'],
-            ['text/pdf', 'pdf']
-          ]
-        ],
-        [
-          'Chrome PDF Viewer',
-          'Portable Document Format',
-          [
-            ['application/pdf', 'pdf'],
-            ['text/pdf', 'pdf']
-          ]
-        ],
-        [
-          'Chromium PDF Viewer',
-          'Portable Document Format',
-          [
-            ['application/pdf', 'pdf'],
-            ['text/pdf', 'pdf']
-          ]
-        ],
-        [
-          'Microsoft Edge PDF Viewer',
-          'Portable Document Format',
-          [
-            ['application/pdf', 'pdf'],
-            ['text/pdf', 'pdf']
-          ]
-        ],
-        [
-          'WebKit built-in PDF',
-          'Portable Document Format',
-          [
-            ['application/pdf', 'pdf'],
-            ['text/pdf', 'pdf']
-          ]
-        ]
-      ], // plugins
-      '13ab': 'f3YAAAAASUVORK5CYII=', // canvas fingerprint
-      'bfe9': 'kABYpRAGAVYzWJooB9Bf4P+UortSvxRY0AAAAASUVORK5CYII=', // webgl_str
-      'a3c1': [
-        'extensions:ANGLE_instanced_arrays;EXT_blend_minmax;EXT_color_buffer_half_float;EXT_float_blend;EXT_frag_depth;EXT_shader_texture_lod;EXT_sRGB;EXT_texture_compression_bptc;EXT_texture_compression_rgtc;EXT_texture_filter_anisotropic;OES_element_index_uint;OES_fbo_render_mipmap;OES_standard_derivatives;OES_texture_float;OES_texture_float_linear;OES_texture_half_float;OES_texture_half_float_linear;OES_vertex_array_object;WEBGL_color_buffer_float;WEBGL_compressed_texture_s3tc;WEBGL_compressed_texture_s3tc_srgb;WEBGL_debug_renderer_info;WEBGL_debug_shaders;WEBGL_depth_texture;WEBGL_draw_buffers;WEBGL_lose_context;WEBGL_provoking_vertex',
-        'webgl aliased line width range:[1, 1]',
-        'webgl aliased point size range:[1, 1024]',
-        'webgl alpha bits:8',
-        'webgl antialiasing:yes',
-        'webgl blue bits:8',
-        'webgl depth bits:24',
-        'webgl green bits:8',
-        'webgl max anisotropy:16',
-        'webgl max combined texture image units:32',
-        'webgl max cube map texture size:16384',
-        'webgl max fragment uniform vectors:1024',
-        'webgl max render buffer size:16384',
-        'webgl max texture image units:16',
-        'webgl max texture size:16384',
-        'webgl max varying vectors:30',
-        'webgl max vertex attribs:16',
-        'webgl max vertex texture image units:16',
-        'webgl max vertex uniform vectors:4096',
-        'webgl max viewport dims:[32767, 32767]',
-        'webgl red bits:8',
-        'webgl renderer:ANGLE (Intel, Intel(R) HD Graphics Direct3D11 vs_5_0 ps_5_0), or similar',
-        'webgl shading language version:WebGL GLSL ES 1.0',
-        'webgl stencil bits:0',
-        'webgl vendor:Mozilla',
-        'webgl version:WebGL 1.0',
-        'webgl unmasked vendor:Google Inc. (Intel)',
-        'webgl unmasked renderer:ANGLE (Intel, Intel(R) HD Graphics Direct3D11 vs_5_0 ps_5_0), or similar',
-        'webgl vertex shader high float precision:23',
-        'webgl vertex shader high float precision rangeMin:127',
-        'webgl vertex shader high float precision rangeMax:127',
-        'webgl vertex shader medium float precision:23',
-        'webgl vertex shader medium float precision rangeMin:127',
-        'webgl vertex shader medium float precision rangeMax:127',
-        'webgl vertex shader low float precision:23',
-        'webgl vertex shader low float precision rangeMin:127',
-        'webgl vertex shader low float precision rangeMax:127',
-        'webgl fragment shader high float precision:23',
-        'webgl fragment shader high float precision rangeMin:127',
-        'webgl fragment shader high float precision rangeMax:127',
-        'webgl fragment shader medium float precision:23',
-        'webgl fragment shader medium float precision rangeMin:127',
-        'webgl fragment shader medium float precision rangeMax:127',
-        'webgl fragment shader low float precision:23',
-        'webgl fragment shader low float precision rangeMin:127',
-        'webgl fragment shader low float precision rangeMax:127',
-        'webgl vertex shader high int precision:0',
-        'webgl vertex shader high int precision rangeMin:31',
-        'webgl vertex shader high int precision rangeMax:30',
-        'webgl vertex shader medium int precision:0',
-        'webgl vertex shader medium int precision rangeMin:31',
-        'webgl vertex shader medium int precision rangeMax:30',
-        'webgl vertex shader low int precision:0',
-        'webgl vertex shader low int precision rangeMin:31',
-        'webgl vertex shader low int precision rangeMax:30',
-        'webgl fragment shader high int precision:0',
-        'webgl fragment shader high int precision rangeMin:31',
-        'webgl fragment shader high int precision rangeMax:30',
-        'webgl fragment shader medium int precision:0',
-        'webgl fragment shader medium int precision rangeMin:31',
-        'webgl fragment shader medium int precision rangeMax:30',
-        'webgl fragment shader low int precision:0',
-        'webgl fragment shader low int precision rangeMin:31',
-        'webgl fragment shader low int precision rangeMax:30'
-      ], // webgl_params, cab be set to [] if webgl is not supported
-      '6bc5': 'Google Inc. (Intel)~ANGLE (Intel, Intel(R) HD Graphics Direct3D11 vs_5_0 ps_5_0), or similar', // webglVendorAndRenderer
-      'ed31': 0,
-      '72bd': 0,
-      '097b': 0,
-      '52cd': [0, 0, 0],
-      'a658': [
-        'Arial',
-        'Arial Black',
-        'Calibri',
-        'Cambria',
-        'Cambria Math',
-        'Comic Sans MS',
-        'Consolas',
-        'Courier',
-        'Courier New',
-        'Georgia',
-        'Helvetica',
-        'Impact',
-        'Lucida Console',
-        'Lucida Sans Unicode',
-        'Microsoft Sans Serif',
-        'MS Gothic',
-        'MS PGothic',
-        'MS Sans Serif',
-        'MS Serif',
-        'Palatino Linotype',
-        'Segoe Print',
-        'Segoe Script',
-        'Segoe UI',
-        'Segoe UI Light',
-        'Segoe UI Symbol',
-        'Tahoma',
-        'Times',
-        'Times New Roman',
-        'Trebuchet MS',
-        'Verdana',
-        'Wingdings'
-      ],
-      'd02f': '35.749972093850374'
-    },
-    '54ef': {
-      'in_new_ab ': true,
-      'ab_version ': {
-        'waterfall_article ': 'SHOW '
-      },
-      'ab_split_num ': {
-        'waterfall_article ': 0
-      }
-    },
-    '8b94': '',
-    'df35': `${await readSavedCookieItems(cookie, ['_uuid'], false)}`, // _uuid, set from cookie, generated by client side(algorithm remains unknown)
-    '07a4': 'zh-CN',
-    '5f45': null,
-    'db46': 0
-  };
-  return JSON.stringify(payloadOriginData);
-}
 
 /**
  * 请求参数POST接口(ExClimbWuzhi)过校验
@@ -660,7 +474,9 @@ async function getPayload(cookie: string) {
  * @returns 返回POST请求的结果
  */
 export async function postGateway(cookie: string) {
-  const data = { payload: await getPayload(cookie) };
+  const _uuid = await readSavedCookieItems(cookie, ['_uuid'], false);
+  const payloadJsonData = await BiliApi.BILIBILI_BROWSER_DATA(_uuid);
+  const data = { payload: JSON.stringify(payloadJsonData) };
   const requestUrl = 'https://api.bilibili.com/x/internal/gaia-gateway/ExClimbWuzhi';
 
   const config = {
@@ -693,8 +509,8 @@ export async function postGateway(cookie: string) {
  */
 export async function get_buvid_fp(cookie: string) {
   const uuid = await readSavedCookieItems(cookie, ['_uuid'], false);
-  const seedget = Math.floor(Math.random() * (60 - 1 + 1) + 1);
-  let buvidFp = gen_buvid_fp(uuid, seedget);
+  const fingerprintData = BiliApi.BILIBILI_FINGERPRINT_DATA(uuid);
+  const buvidFp = gen_buvid_fp(fingerprintData);
   return `buvid_fp=${buvidFp};`;
 }
 
