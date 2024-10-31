@@ -1,5 +1,6 @@
 import md5 from 'md5';
 import fetch from 'node-fetch';
+import BiliApi from './bilibili.main.api.js';
 
 const mixinKeyEncTab = [
     46, 47, 18, 2, 53, 8, 23, 32, 15, 50, 10, 31, 58, 3, 45, 35, 27, 43, 5, 49, 33, 9, 42, 19, 29, 28, 14, 39, 12, 38, 41, 13, 37, 48, 7, 16, 24, 55, 40, 61, 26,
@@ -27,17 +28,52 @@ function encWbi(params, img_key, sub_key) {
     };
 }
 async function getWbiKeys(headers, cookie) {
-    const res = await fetch('https://api.bilibili.com/x/web-interface/nav', {
+    const IMG_SUB_KEY = 'Yz:yuki:bili:wbi_img_key';
+    const wbi_img_data = await redis.get(IMG_SUB_KEY);
+    if (wbi_img_data) {
+        const wbi_img_data_json = JSON.parse(wbi_img_data);
+        return {
+            img_key: wbi_img_data_json.img_key,
+            sub_key: wbi_img_data_json.sub_key
+        };
+    }
+    else {
+        const res = await fetch('https://api.bilibili.com/x/web-interface/nav', {
+            headers: {
+                'Cookie': cookie,
+                'User-Agent': headers['User-Agent'],
+                'Referer': 'https://www.bilibili.com/'
+            }
+        });
+        const { data: { wbi_img: { img_url, sub_url } } } = (await res.json());
+        const wbi_img_data = {
+            img_key: img_url.slice(img_url.lastIndexOf('/') + 1, img_url.lastIndexOf('.')),
+            sub_key: sub_url.slice(sub_url.lastIndexOf('/') + 1, sub_url.lastIndexOf('.'))
+        };
+        const { microtime } = await getTimeStamp();
+        const current_zh_cn_Time = new Date(microtime);
+        console.log(`当前北京时间: ${current_zh_cn_Time}`);
+        const tomorrow = new Date(current_zh_cn_Time);
+        tomorrow.setHours(0, 0, 0, 0);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const secondsUntilTomorrow = Math.floor((tomorrow.getTime() - current_zh_cn_Time.getTime()) / 1000);
+        console.log(`距离明天还剩: ${secondsUntilTomorrow} 秒`);
+        await redis.set(IMG_SUB_KEY, JSON.stringify(wbi_img_data), { EX: secondsUntilTomorrow - 2 });
+        return wbi_img_data;
+    }
+}
+async function getTimeStamp() {
+    const res = await fetch(BiliApi.BILIBIL_API.biliServerTimeStamp, {
+        method: 'GET',
         headers: {
-            'Cookie': cookie,
-            'User-Agent': headers['User-Agent'],
-            'Referer': 'https://www.bilibili.com/'
+            'Host': 'api.live.bilibili.com',
+            'User-Agent': `${BiliApi.USER_AGENT}`
         }
     });
-    const { data: { wbi_img: { img_url, sub_url } } } = (await res.json());
+    const { data: { timestamp, microtime } } = (await res.json());
     return {
-        img_key: img_url.slice(img_url.lastIndexOf('/') + 1, img_url.lastIndexOf('.')),
-        sub_key: sub_url.slice(sub_url.lastIndexOf('/') + 1, sub_url.lastIndexOf('.'))
+        timestamp: timestamp,
+        microtime: microtime
     };
 }
 async function getWbiSign(params, headers, cookie) {

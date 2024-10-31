@@ -14,7 +14,7 @@ export declare function readSavedCookieItems(mark: string, items: Array<string>,
 export declare function readSavedCookieOtherItems(mark: string, items: Array<string>): Promise<string>;
 export declare function genUUID(): Promise<string>;
 export declare function gen_b_lsid(): Promise<string>;
-export declare function getNewTempCk(): Promise<void>;
+export declare function getNewTempCk(): Promise<string>;
 export declare function postGateway(cookie: string): Promise<import("axios").AxiosResponse<any, any>>;
 export declare function get_buvid_fp(cookie: string): Promise<string>;
 export declare function cookieWithBiliTicket(cookie: string): Promise<string>;

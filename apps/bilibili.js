@@ -4,7 +4,7 @@ import { BiliQuery } from '../models/bilibili/bilibili.main.query.js';
 import { BiliTask } from '../models/bilibili/bilibili.main.task.js';
 import Config from '../utils/config.js';
 import { BiliGetWebData } from '../models/bilibili/bilibili.main.get.web.data.js';
-import { applyLoginQRCode, pollLoginQRCode, saveLoginCookie, postGateway, exitBiliLogin, checkBiliLogin, readSavedCookieItems, saveLocalBiliCk, readSyncCookie, getNewTempCk, readTempCk } from '../models/bilibili/bilibili.main.models.js';
+import { applyLoginQRCode, pollLoginQRCode, saveLoginCookie, postGateway, exitBiliLogin, checkBiliLogin, readSavedCookieItems, saveLocalBiliCk, readSyncCookie, getNewTempCk, saveTempCk } from '../models/bilibili/bilibili.main.models.js';
 import plugin from '../../../lib/plugins/plugin.js';
 
 class YukiBili extends plugin {
@@ -299,7 +299,7 @@ class YukiBili extends plugin {
                     }
                     return;
                 }
-                localBiliCookie = await readSavedCookieItems(localBiliCookie, ['buvid3', 'buvid4', '_uuid', 'SESSDATA', 'DedeUserID', 'DedeUserID__ckMd5', 'bili_jct', 'b_nut', 'b_lsid'], false);
+                localBiliCookie = await readSavedCookieItems(localBiliCookie, ['buvid3', 'buvid4', '_uuid', 'SESSDATA', 'DedeUserID', 'DedeUserID__ckMd5', 'bili_jct', 'b_nut', 'b_lsid', 'buvid_fp', 'sid'], false);
                 await saveLocalBiliCk(localBiliCookie);
                 logger.mark(`${this.e.logFnc} 保存B站cookie成功 [UID:${param.DedeUserID}]`);
                 let uidMsg = [`好耶~绑定B站cookie成功：\n${param.DedeUserID}`];
@@ -359,9 +359,17 @@ class YukiBili extends plugin {
     }
     async reflashTempCk() {
         try {
-            await getNewTempCk();
-            let newTempCk = await readTempCk();
-            if (newTempCk !== null && newTempCk !== undefined && newTempCk.length !== 0 && newTempCk !== '') {
+            const newTempCk = await getNewTempCk();
+            if (newTempCk) {
+                await saveTempCk(newTempCk);
+                const result = await postGateway(newTempCk);
+                const data = await result.data;
+                if (data?.code !== 0) {
+                    logger?.error(`优纪插件：tempCK，Gateway校验失败：${JSON.stringify(data)}`);
+                }
+                else if (data?.code === 0) {
+                    logger?.mark(`优纪插件：tempCK，Gateway校验成功：${JSON.stringify(data)}`);
+                }
                 this.e.reply(`~yuki-plugin:\n临时b站ck刷新成功~❤~\n接下来如果获取动态失败，请重启bot(手动或发送指令 #重启)刷新状态~\n如果重启续仍不可用，请考虑 #优纪添加b站登录 吧~`);
             }
             else {
