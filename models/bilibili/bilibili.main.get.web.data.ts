@@ -67,7 +67,6 @@ export class BiliGetWebData {
     const { w_rid, time_stamp } = await getWbiSign(data, BiliApi.BILIBILI_HEADERS, signCookie);
     const params = {
       ...data,
-      w_webid: w_webid,
       w_rid: w_rid,
       wts: time_stamp
     };
