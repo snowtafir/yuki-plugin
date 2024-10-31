@@ -1,2 +1,2 @@
-declare function gen_buvid_fp(uuid: any, seed: any): string;
+declare function gen_buvid_fp(browserData: any): string;
 export { gen_buvid_fp };
