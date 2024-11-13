@@ -20,7 +20,7 @@ class BiliQuery {
                 desc = data?.modules?.module_dynamic?.major?.archive || {};
                 formatData.data.title = desc?.title;
                 formatData.data.content = this.parseRichTextNodes(desc?.desc);
-                formatData.data.url = this.formatUrl(desc?.jump_url);
+                formatData.data.url = this.formatUrl(desc?.jump_url) || '';
                 formatData.data.pubTime = author.pub_time;
                 formatData.data.pubTs = moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss');
                 formatData.data.category = '视频动态';
@@ -138,7 +138,7 @@ class BiliQuery {
                     formatData.data.pics = pics;
                     formatData.data.content = '';
                 }
-                formatData.data.url = this.formatUrl(desc?.jump_url);
+                formatData.data.url = this.formatUrl(desc?.jump_url) || '';
                 formatData.data.pubTime = author.pub_time;
                 formatData.data.pubTs = moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss');
                 formatData.data.category = '文章动态';
