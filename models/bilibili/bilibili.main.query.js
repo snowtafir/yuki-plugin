@@ -246,7 +246,7 @@ class BiliQuery {
         }
         catch (err) {
             logger?.error(`优纪插件：获取B站完整文章内容失败 [ ${postUrl} ] : ${err}`);
-            return null;
+            return { readInfo: null, articleType: null };
         }
     }
     static praseFullOldTypeArticleContent(content) {
