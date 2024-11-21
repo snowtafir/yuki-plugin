@@ -148,28 +148,34 @@ export async function pollLoginQRCode(e: EventType, qrcodeKey: string) {
 /**查看app扫码登陆获取的ck的有效状态*/
 export async function checkBiliLogin(e: EventType) {
   const LoginCookie = await readLoginCookie();
-  const res = await fetch('https://api.bilibili.com/x/web-interface/nav', {
-    method: 'GET',
-    headers: lodash.merge(BiliApi.BIlIBILI_LOGIN_HEADERS, { 'User-agent': BiliApi.BILIBILI_HEADERS['User-Agent'] }, { Cookie: `${LoginCookie}` }),
-    redirect: 'follow'
-  });
-  const resData: any = await res.json();
-  Bot.logger?.debug(`B站验证登录状态:${JSON.stringify(resData)}`);
-
-  if (resData.code === 0) {
-    let uname = resData.data?.uname;
-    let mid = resData.data?.mid;
-    let money = resData.data?.money;
-    let level_info = resData.data?.level_info;
-    let current_level = level_info?.current_level;
-    let current_exp = level_info?.current_exp;
-    let next_exp = level_info?.next_exp;
-    e.reply(
-      `~B站账号已登陆~\n昵称：${uname}\nuid：${mid}\n硬币：${money}\n经验等级：${current_level}\n当前经验值exp：${current_exp}\n下一等级所需exp：${next_exp}`
-    );
-  } else {
-    // 处理其他情况
+  if (String(LoginCookie).trim().length < 10) {
+    e.reply('啊咧？B站登录CK呢？哦，没 #扫码B站登录# 或失效了啊，那没事了。');
     return;
+  } else {
+    const res = await fetch('https://api.bilibili.com/x/web-interface/nav', {
+      method: 'GET',
+      headers: lodash.merge(BiliApi.BIlIBILI_LOGIN_HEADERS, { 'User-agent': BiliApi.BILIBILI_HEADERS['User-Agent'] }, { Cookie: `${LoginCookie}` }),
+      redirect: 'follow'
+    });
+    const resData: any = await res.json();
+    Bot?.logger?.debug(`B站验证登录状态:${JSON.stringify(resData)}`);
+
+    if (resData.code === 0) {
+      let uname = resData.data?.uname;
+      let mid = resData.data?.mid;
+      let money = resData.data?.money;
+      let level_info = resData.data?.level_info;
+      let current_level = level_info?.current_level;
+      let current_exp = level_info?.current_exp;
+      let next_exp = level_info?.next_exp;
+      e.reply(
+        `~B站账号已登陆~\n昵称：${uname}\nuid：${mid}\n硬币：${money}\n经验等级：${current_level}\n当前经验值exp：${current_exp}\n下一等级所需exp：${next_exp}`
+      );
+    } else {
+      // 处理其他情况
+      e.reply('意外情况，未能成功获取登录ck的有效状态');
+      return;
+    }
   }
 }
 
