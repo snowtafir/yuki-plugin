@@ -320,7 +320,7 @@ class BiliQuery {
     }
     static async formatTextDynamicData(upName, data, isForward, setData) {
         const BiliDrawDynamicLinkUrl = 'https://m.bilibili.com/dynamic/';
-        let desc, msg, pics, author, majorType, content, dynamicTitle;
+        let desc, msg = [], pics = [], author, majorType, content, dynamicTitle;
         let title = `B站【${upName}】动态推送：\n`;
         switch (data.type) {
             case 'DYNAMIC_TYPE_AV':
@@ -335,10 +335,10 @@ class BiliQuery {
                     `标题：${desc.title}\n`,
                     `${desc.desc}\n`,
                     `链接：${this.formatUrl(desc.jump_url)}\n`,
-                    `时间：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}\n`,
-                    segment.image(desc?.cover)
+                    `时间：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}`
                 ];
-                return msg;
+                pics = [segment.image(desc?.cover)];
+                return { msg, pics };
             case 'DYNAMIC_TYPE_WORD':
                 author = data?.modules?.module_author;
                 majorType = data?.modules?.module_dynamic?.major?.type;
@@ -367,7 +367,7 @@ class BiliQuery {
                     `链接：${BiliDrawDynamicLinkUrl}${data.id_str}\n`,
                     `时间：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}`
                 ];
-                return msg;
+                return { msg, pics };
             case 'DYNAMIC_TYPE_DRAW':
                 author = data?.modules?.module_author;
                 majorType = data?.modules?.module_dynamic?.major?.type;
@@ -410,10 +410,9 @@ class BiliQuery {
                     `-----------------------------\n`,
                     `${this.dynamicContentLimit(content, setData)}\n`,
                     `链接：${BiliDrawDynamicLinkUrl}${data.id_str}\n`,
-                    `时间：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}\n`,
-                    ...pics
+                    `时间：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}`
                 ];
-                return msg;
+                return { msg, pics };
             case 'DYNAMIC_TYPE_ARTICLE':
                 author = data?.modules?.module_author;
                 majorType = data?.modules?.module_dynamic?.major?.type;
@@ -453,10 +452,9 @@ class BiliQuery {
                     `-----------------------------\n`,
                     `标题：${dynamicTitle}\n`,
                     `链接：${this.formatUrl(desc.jump_url)}\n`,
-                    `时间：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}\n`,
-                    ...pics
+                    `时间：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}`
                 ];
-                return msg;
+                return { msg, pics };
             case 'DYNAMIC_TYPE_FORWARD':
                 author = data?.modules?.module_author;
                 desc = data?.modules?.module_dynamic?.desc || {};
@@ -467,11 +465,13 @@ class BiliQuery {
                     return;
                 isForward = true;
                 let orig = await this.formatTextDynamicData(upName, data.orig, isForward, setData);
-                if (orig && orig.length) {
-                    orig = orig.slice(2);
+                let origContent = [];
+                if (orig && typeof orig === 'object') {
+                    origContent = orig.msg.slice(2);
+                    pics = orig.pics;
                 }
                 else {
-                    return false;
+                    return 'continue';
                 }
                 title = `B站【${upName}】转发动态推送：\n`;
                 msg = [
@@ -481,9 +481,9 @@ class BiliQuery {
                     `链接：${BiliDrawDynamicLinkUrl}${data.id_str}\n`,
                     `时间：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}\n`,
                     '\n---以下为转发内容---\n',
-                    ...orig
+                    ...origContent
                 ];
-                return msg;
+                return { msg, pics };
             case 'DYNAMIC_TYPE_LIVE_RCMD':
                 desc = data?.modules?.module_dynamic?.major?.live_rcmd?.content;
                 if (!desc)
@@ -493,8 +493,9 @@ class BiliQuery {
                 if (!desc)
                     return;
                 title = `B站【${upName}】直播动态推送：\n`;
-                msg = [title, `-----------------------------\n`, `标题：${desc.title}\n`, `链接：https:${desc.link}\n`, segment.image(desc.cover)];
-                return msg;
+                msg = [title, `-----------------------------\n`, `标题：${desc.title}\n`, `链接：https:${desc.link}`];
+                pics = [segment.image(desc.cover)];
+                return { msg, pics };
             default:
                 (Bot.logger ?? logger)?.mark(`未处理的B站推送【${upName}】：${data.type}`);
                 return 'continue';

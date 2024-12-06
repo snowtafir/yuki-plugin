@@ -171,7 +171,7 @@ class BiliTask {
             let imgs = await this.renderDynamicCard(uid, renderData, ScreenshotOptionsData);
             if (!imgs)
                 return;
-            redis.set(`${markKey}${chatId}:${id_str}`, '1', { EX: 3600 * 10 });
+            redis.set(`${markKey}${chatId}:${id_str}`, '1', { EX: 3600 * 72 });
             (logger ?? Bot.logger)?.mark('优纪插件：B站动态执行推送');
             for (let i = 0; i < imgs.length; i++) {
                 const image = imgs[i];
@@ -182,17 +182,24 @@ class BiliTask {
         }
         else {
             const dynamicMsg = await BiliQuery.formatTextDynamicData(upName, pushDynamicData, false, biliConfigData);
-            redis.set(`${markKey}${chatId}:${id_str}`, '1', { EX: 3600 * 10 });
+            redis.set(`${markKey}${chatId}:${id_str}`, '1', { EX: 3600 * 72 });
             if (dynamicMsg == 'continue') {
                 return 'return';
             }
             if (biliConfigData.banWords.length > 0) {
                 const banWords = new RegExp(biliConfigData.banWords.join('|'), 'g');
-                if (banWords.test(dynamicMsg.join(''))) {
+                if (banWords.test(dynamicMsg.msg.join(''))) {
                     return 'return';
                 }
             }
-            await this.sendMessage(chatId, bot_id, chatType, dynamicMsg);
+            await this.sendMessage(chatId, bot_id, chatType, dynamicMsg.msg);
+            const pics = dynamicMsg.pics;
+            if (pics && pics.length > 0) {
+                for (let i = 0; i < pics.length; i++) {
+                    await this.sendMessage(chatId, bot_id, chatType, pics[i]);
+                    await this.randomDelay(1000, 2000);
+                }
+            }
             await new Promise(resolve => setTimeout(resolve, 1000));
         }
     }

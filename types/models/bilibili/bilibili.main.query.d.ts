@@ -16,7 +16,10 @@ export declare class BiliQuery {
         img: any[];
     };
     static formatUrl(url: string): string;
-    static formatTextDynamicData(upName: string, data: any, isForward: boolean, setData: any): Promise<any>;
+    static formatTextDynamicData(upName: string, data: any, isForward: boolean, setData: any): Promise<"continue" | {
+        msg: any[];
+        pics: any[];
+    }>;
     static dynamicContentLimit(content: string, setData: any): string;
     static typeHandle(up: any, msg: string, type: string): unknown[];
 }
