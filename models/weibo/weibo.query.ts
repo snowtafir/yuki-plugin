@@ -190,11 +190,11 @@ export class WeiboQuery {
   static async formatTextDynamicData(upName: string, raw_post: any, isForward?: boolean, setData?: any) {
     let msg: any[] = [],
       /**全部图片资源链接*/
-      raw_pics_list,
+      raw_pics_list: any[] = [],
       /**图片高清资源链接*/
-      pic_urls: string[],
+      pic_urls: string[] = [],
       /**图片*/
-      pics;
+      pics: any[] = [];
 
     let info = raw_post?.mblog || raw_post;
     let retweeted = info && info.retweeted_status ? true : false; //是否为转发动态
@@ -240,11 +240,12 @@ export class WeiboQuery {
           `标题：${info?.page_info?.title || ''}\n`,
           `${this.filterText(info?.text)}\n`,
           `链接：${detail_url}\n`,
-          `时间：${created_time ? moment(created_time).format('YYYY年MM月DD日 HH:mm:ss') : ''}\n`,
-          cover_img
+          `时间：${created_time ? moment(created_time).format('YYYY年MM月DD日 HH:mm:ss') : ''}`
         ];
 
-        return msg;
+        pics = [cover_img];
+
+        return { msg, pics };
       case 'DYNAMIC_TYPE_DRAW':
         raw_pics_list = retweeted ? info?.retweeted_status?.pics || [] : info?.pics || [];
 
@@ -253,8 +254,6 @@ export class WeiboQuery {
         if (raw_pics_list.length > dynamicPicCountLimit) raw_pics_list.length = dynamicPicCountLimit;
 
         pic_urls = raw_pics_list.map((img: any) => img?.large?.url);
-
-        pics = [];
 
         for (let pic_url of pic_urls) {
           const temp = Segment.image(pic_url, false, 15000, { referer: 'https://weibo.com' });
@@ -267,11 +266,10 @@ export class WeiboQuery {
           `-----------------------------\n`,
           `${this.dynamicContentLimit(this.filterText(info?.text), setData)}\n`,
           `链接：${detail_url}\n`,
-          `时间：${created_time ? moment(created_time).format('YYYY年MM月DD日 HH:mm:ss') : ''}\n`,
-          ...pics
+          `时间：${created_time ? moment(created_time).format('YYYY年MM月DD日 HH:mm:ss') : ''}`
         ];
 
-        return msg;
+        return { msg, pics };
       case 'DYNAMIC_TYPE_ARTICLE':
         if (!info) return;
 
@@ -280,8 +278,6 @@ export class WeiboQuery {
         if (raw_pics_list.length > dynamicPicCountLimit) raw_pics_list.length = dynamicPicCountLimit;
 
         pic_urls = raw_pics_list.map(img => img?.large?.url);
-
-        pics = [];
 
         for (const pic_url of pic_urls) {
           const temp = Segment.image(pic_url, false, 15000, { referer: 'https://weibo.com' });
@@ -294,11 +290,10 @@ export class WeiboQuery {
           `-----------------------------\n`,
           `正文：${this.dynamicContentLimit(this.filterText(info?.text), setData)}\n`,
           `链接：${detail_url}\n`,
-          `时间：${created_time ? moment(created_time).format('YYYY年MM月DD日 HH:mm:ss') : ''}\n`,
-          ...pics
+          `时间：${created_time ? moment(created_time).format('YYYY年MM月DD日 HH:mm:ss') : ''}`
         ];
 
-        return msg;
+        return { msg, pics };
       case 'DYNAMIC_TYPE_FORWARD':
         if (!info) return;
         if (!info?.retweeted_status) return;
@@ -306,11 +301,12 @@ export class WeiboQuery {
         const origin_post_info = info?.retweeted_status;
         isForward = true;
         let orig = await this.formatTextDynamicData(upName, origin_post_info, isForward, setData);
-
-        if (orig && orig.length) {
-          orig = orig.slice(2);
+        let origContent = [];
+        if (orig && typeof orig === 'object') {
+          origContent = orig.msg.slice(2);
+          pics = orig.pics;
         } else {
-          return false;
+          return 'continue';
         }
 
         title = `微博【${upName}】转发动态推送：\n`;
@@ -321,10 +317,10 @@ export class WeiboQuery {
           `链接：${detail_url}\n`,
           `时间：${created_time ? moment(created_time).format('YYYY年MM月DD日 HH:mm:ss') : ''}\n`,
           '\n---以下为转发内容---\n',
-          ...orig
+          ...origContent
         ];
 
-        return msg;
+        return { msg, pics };
       default:
         logger?.mark(`未处理的微博推送【${upName}】：${type}`);
         return 'continue';
