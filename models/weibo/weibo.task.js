@@ -140,7 +140,7 @@ class WeiboTask {
             let imgs = await this.renderDynamicCard(uid, renderData, ScreenshotOptionsData);
             if (!imgs)
                 return;
-            Redis.set(`${markKey}${chatId}:${id_str}`, '1', { EX: 3600 * 10 });
+            Redis.set(`${markKey}${chatId}:${id_str}`, '1', { EX: 3600 * 72 });
             (logger ?? Bot.logger)?.mark('优纪插件：微博动态执行推送');
             for (let i = 0; i < imgs.length; i++) {
                 const image = imgs[i];
@@ -151,17 +151,24 @@ class WeiboTask {
         }
         else {
             const dynamicMsg = await WeiboQuery.formatTextDynamicData(upName, pushDynamicData, false, weiboConfigData);
-            Redis.set(`${markKey}${chatId}:${id_str}`, '1', { EX: 3600 * 10 });
-            if (dynamicMsg == 'continue' || dynamicMsg == false) {
+            Redis.set(`${markKey}${chatId}:${id_str}`, '1', { EX: 3600 * 72 });
+            if (dynamicMsg == 'continue') {
                 return 'return';
             }
             if (weiboConfigData.banWords.length > 0) {
                 const banWords = new RegExp(weiboConfigData.banWords.join('|'), 'g');
-                if (banWords.test(dynamicMsg.join(''))) {
+                if (banWords.test(dynamicMsg.msg.join(''))) {
                     return 'return';
                 }
             }
-            await this.sendMessage(chatId, bot_id, chatType, dynamicMsg);
+            await this.sendMessage(chatId, bot_id, chatType, dynamicMsg.msg);
+            const pics = dynamicMsg.pics;
+            if (pics && pics.length > 0) {
+                for (let i = 0; i < pics.length; i++) {
+                    await this.sendMessage(chatId, bot_id, chatType, pics[i]);
+                    await this.randomDelay(1000, 2000);
+                }
+            }
             await new Promise(resolve => setTimeout(resolve, 1000));
         }
     }

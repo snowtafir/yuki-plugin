@@ -1,4 +1,3 @@
-import chokidar from 'chokidar';
 declare class Config {
     readonly defaultConfigPath: string;
     readonly userConfigPath: string;
