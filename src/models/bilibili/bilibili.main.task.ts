@@ -231,7 +231,7 @@ export class BiliTask {
       let imgs: Buffer[] | null = await this.renderDynamicCard(uid, renderData, ScreenshotOptionsData);
       if (!imgs) return;
 
-      Redis.set(`${markKey}${chatId}:${id_str}`, '1', { EX: 3600 * 10 }); // 设置已发送标记
+      Redis.set(`${markKey}${chatId}:${id_str}`, '1', { EX: 3600 * 72 }); // 设置已发送标记
 
       (logger ?? Bot.logger)?.mark('优纪插件：B站动态执行推送');
 
@@ -245,7 +245,7 @@ export class BiliTask {
     } else {
       const dynamicMsg = await BiliQuery.formatTextDynamicData(upName, pushDynamicData, false, biliConfigData); // 构建图文动态消息
 
-      Redis.set(`${markKey}${chatId}:${id_str}`, '1', { EX: 3600 * 10 }); // 设置已发送标记
+      Redis.set(`${markKey}${chatId}:${id_str}`, '1', { EX: 3600 * 72 }); // 设置已发送标记
 
       if (dynamicMsg == 'continue') {
         return 'return'; // 如果动态消息构建失败，则直接返回
@@ -253,12 +253,19 @@ export class BiliTask {
 
       if (biliConfigData.banWords.length > 0) {
         const banWords = new RegExp(biliConfigData.banWords.join('|'), 'g'); // 构建屏蔽关键字正则表达式
-        if (banWords.test(dynamicMsg.join(''))) {
+        if (banWords.test(dynamicMsg.msg.join(''))) {
           return 'return'; // 如果动态消息包含屏蔽关键字，则直接返回
         }
       }
 
-      await this.sendMessage(chatId, bot_id, chatType, dynamicMsg);
+      await this.sendMessage(chatId, bot_id, chatType, dynamicMsg.msg);
+      const pics = dynamicMsg.pics;
+      if (pics && pics.length > 0) {
+        for (let i = 0; i < pics.length; i++) {
+          await this.sendMessage(chatId, bot_id, chatType, pics[i]);
+          await this.randomDelay(1000, 2000); // 随机延时1-2秒
+        }
+      }
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
   }
