@@ -19,6 +19,7 @@ declare class BiliApi {
         biliLiveUserInfo: string;
         biliOpusDetail: string;
     };
+    /**header */
     get BILIBILI_HEADERS(): {
         Accept: string;
         'Accept-Language': string;
@@ -39,6 +40,7 @@ declare class BiliApi {
         TE: string;
         'User-Agent': string;
     };
+    /**Login header */
     get BIlIBILI_LOGIN_HEADERS(): {
         Accept: string;
         'Accept-Language': string;
@@ -52,6 +54,7 @@ declare class BiliApi {
         'Sec-Fetch-User': string;
         TE: string;
     };
+    /**FullArticle header */
     get BILIBILI_ARTICLE_HEADERS(): {
         Accept: string;
         'Accept-Language': string;
@@ -85,6 +88,7 @@ declare class BiliApi {
         'Upgrade-Insecure-Requests': string;
         'User-Agent': string;
     };
+    /**返回GatWay payload */
     BILIBILI_BROWSER_DATA(_uuid: string): Promise<{
         '3064': number;
         '5062': string;
@@ -141,6 +145,7 @@ declare class BiliApi {
         '5f45': any;
         db46: number;
     }>;
+    /**返回Bilibili Fingerprint data */
     BILIBILI_FINGERPRINT_DATA(_uuid: string): {
         userAgent: string;
         webdriver: boolean;

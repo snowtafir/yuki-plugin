@@ -1,6 +1,7 @@
 import React from 'react';
 import { createRequire } from '../../utils/paths.js';
 
+// DynamicContent.tsx
 const require = createRequire(import.meta.url);
 const ContentBoxGrid4Css = require('./../../resources/css/dynamic/Content.box.grid.4.css');
 const ContentBoxGrid9Css = require('./../../resources/css/dynamic/Content.box.grid.9.css');
@@ -15,6 +16,7 @@ const Content = ({ data }) => {
     })));
     const boxGrid_4 = React.createElement("link", { key: "0", rel: "stylesheet", href: ContentBoxGrid4Css });
     const boxGrid_9 = React.createElement("link", { key: "0", rel: "stylesheet", href: ContentBoxGrid9Css });
+    /**动态宫格样式 */
     function getBoxGridStyle(pics) {
         if (!Array.isArray(pics) || pics.length === 0) {
             return null;

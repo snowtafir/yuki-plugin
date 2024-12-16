@@ -8,6 +8,7 @@ import { getWebId } from './bilibili.risk.w_webid.js';
 
 class BiliGetWebData {
     constructor(e) { }
+    /**通过uid获取up动态数据表*/
     async getBiliDynamicListDataByUid(uid) {
         const url = BiliApi.BILIBIL_API.biliDynamicInfoList;
         let { cookie } = await readSyncCookie();
@@ -43,6 +44,7 @@ class BiliGetWebData {
         });
         return res;
     }
+    /**通过uid获取up详情*/
     async getBilibiUserInfoByUid(uid) {
         const url = BiliApi.BILIBIL_API.biliSpaceUserInfoWbi;
         let { cookie } = await readSyncCookie();
@@ -76,6 +78,7 @@ class BiliGetWebData {
         });
         return res;
     }
+    /**通过关键词搜索up*/
     async searchBiliUserInfoByKeyword(keyword) {
         const url = BiliApi.BILIBIL_API.biliSearchUpWbi;
         let { cookie } = await readSyncCookie();

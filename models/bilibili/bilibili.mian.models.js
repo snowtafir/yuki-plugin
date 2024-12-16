@@ -6,13 +6,19 @@ import { promisify } from 'node:util';
 import path from 'path';
 import QRCode from 'qrcode';
 import YAML from 'yaml';
-import { Segment, Bot, Redis } from 'yunzaijs';
+import { Segment, Redis } from 'yunzaijs';
 import { renderPage } from '../../utils/image.js';
 import { _paths } from '../../utils/paths.js';
 import BiliApi from './bilibili.main.api.js';
 import { gen_buvid_fp } from './bilibili.risk.buid.fp.js';
 import { getBiliTicket } from './bilibili.risk.ticket.js';
 
+/**
+ * *******************************************************************
+ * Login 相关
+ * *******************************************************************
+ */
+/**申请登陆二维码(web端) */
 async function applyLoginQRCode(e) {
     const url = 'https://passport.bilibili.com/x/passport-login/web/qrcode/generate?source=main-fe-header';
     const response = await fetch(url, {
@@ -23,10 +29,10 @@ async function applyLoginQRCode(e) {
     if (!response.ok) {
         throw new Error(`获取B站登录二维码URL网络请求失败，状态码: ${response.status}`);
     }
-    const res = await response.json();
+    const res = (await response.json());
     if (res?.code === 0) {
-        const qrcodeKey = res.data.qrcode_key;
-        const qrcodeUrl = res.data.url;
+        const qrcodeKey = res?.data?.qrcode_key;
+        const qrcodeUrl = res?.data?.url;
         let loginUrlQrcodeData = await QRCode.toDataURL(`${qrcodeUrl}`);
         const LoginPropsData = {
             data: { url: loginUrlQrcodeData }
@@ -59,6 +65,7 @@ async function applyLoginQRCode(e) {
         throw new Error(`获取B站登录二维码失败: ${JSON.stringify(res.data)}`);
     }
 }
+/**处理扫码结果 */
 async function pollLoginQRCode(e, qrcodeKey) {
     const url = `https://passport.bilibili.com/x/passport-login/web/qrcode/poll?qrcode_key=${qrcodeKey}&source=main-fe-header`;
     const response = await fetch(url, {
@@ -69,9 +76,10 @@ async function pollLoginQRCode(e, qrcodeKey) {
     if (!response.ok) {
         throw new Error(`处理B站登录token网络请求失败，状态码: ${response.status}`);
     }
-    const data = await response.json();
+    const data = (await response.json());
     if (data.code === 0) {
-        if (data.data.code === 0) {
+        if (data?.data?.code === 0) {
+            // 登录成功，获取 cookie
             const LoginCookie = response.headers.get('set-cookie');
             let loginCk = '';
             try {
@@ -85,16 +93,21 @@ async function pollLoginQRCode(e, qrcodeKey) {
             e.reply(`~B站登陆成功~`);
             return loginCk;
         }
-        else if (data.data.code === 86101) {
+        else if (data?.data?.code === 86101) {
+            // 未扫码
+            // 继续轮询
             await new Promise(resolve => setTimeout(resolve, 2000));
-            (logger ?? Bot.logger)?.mark(`优纪插件：扫码B站登录：未扫码，轮询中...`);
+            global?.logger?.mark(`优纪插件：扫码B站登录：未扫码，轮询中...`);
             return pollLoginQRCode(e, qrcodeKey);
         }
-        else if (data.data.code === 86090) {
+        else if (data?.data?.code === 86090) {
+            // 已扫码未确认
+            // 继续轮询
             await new Promise(resolve => setTimeout(resolve, 2000));
             return pollLoginQRCode(e, qrcodeKey);
         }
-        else if (data.data.code === 86038) {
+        else if (data?.data?.code === 86038) {
+            // 二维码已失效
             e.reply('B站登陆二维码已失效');
             return null;
         }
@@ -108,6 +121,7 @@ async function pollLoginQRCode(e, qrcodeKey) {
         throw new Error(`处理扫码结果出错: ${data?.message}`);
     }
 }
+/**查看app扫码登陆获取的ck的有效状态*/
 async function checkBiliLogin(e) {
     const LoginCookie = await readLoginCookie();
     if (String(LoginCookie).trim().length < 10) {
@@ -121,7 +135,7 @@ async function checkBiliLogin(e) {
             redirect: 'follow'
         });
         const resData = await res.json();
-        Bot?.logger?.debug(`B站验证登录状态:${JSON.stringify(resData)}`);
+        global?.logger?.debug(`B站验证登录状态:${JSON.stringify(resData)}`);
         if (resData.code === 0) {
             let uname = resData.data?.uname;
             let mid = resData.data?.mid;
@@ -133,11 +147,13 @@ async function checkBiliLogin(e) {
             e.reply(`~B站账号已登陆~\n昵称：${uname}\nuid：${mid}\n硬币：${money}\n经验等级：${current_level}\n当前经验值exp：${current_exp}\n下一等级所需exp：${next_exp}`);
         }
         else {
+            // 处理其他情况
             e.reply('意外情况，未能成功获取登录ck的有效状态');
             return;
         }
     }
 }
+/**退出B站账号登录，将会删除redis缓存的LoginCK，并在服务器注销该登录 Token (SESSDATA)*/
 async function exitBiliLogin(e) {
     const url = 'https://passport.bilibili.com/login/exit/v2';
     const exitCk = await readLoginCookie();
@@ -191,6 +207,12 @@ async function exitBiliLogin(e) {
         console.error('Error during Bili login exit:', error);
     }
 }
+/**
+ * *******************************************************************
+ * cookie相关
+ * *******************************************************************
+ */
+/**保存扫码登录的loginCK*/
 async function saveLoginCookie(e, biliLoginCk) {
     if (biliLoginCk && biliLoginCk.length > 0) {
         const LoginCkKey = 'Yz:yuki:bili:loginCookie';
@@ -200,15 +222,17 @@ async function saveLoginCookie(e, biliLoginCk) {
         e.reply('扫码超时');
     }
 }
+/** 读取扫码登陆后缓存的cookie */
 async function readLoginCookie() {
     const CK_KEY = 'Yz:yuki:bili:loginCookie';
     const tempCk = await Redis.get(CK_KEY);
     return tempCk ? tempCk : '';
 }
+/** 读取手动绑定的B站ck */
 async function readLocalBiliCk() {
     const dir = path.join(_paths.root, 'data/yuki-plugin/');
     if (!fs__default.existsSync(dir)) {
-        fs__default.mkdirSync(dir, { recursive: true });
+        fs__default.mkdirSync(dir, { recursive: true }); // 创建目录，包括父目录
     }
     const files = fs__default.readdirSync(dir).filter((file) => file.endsWith('.yaml'));
     const readFile = promisify(fs__default.readFile);
@@ -217,6 +241,7 @@ async function readLocalBiliCk() {
     const Bck = contents.map((content) => YAML.parse(content));
     return Bck[0];
 }
+/** 覆盖保存手动获取绑定的B站ck */
 async function saveLocalBiliCk(data) {
     const dirPath = path.join(_paths.root, 'data/yuki-plugin/');
     const filePath = path.join(dirPath, 'biliCookie.yaml');
@@ -232,6 +257,7 @@ async function saveLocalBiliCk(data) {
         fs__default.writeFileSync(filePath, yamlContent, 'utf8');
     }
 }
+/** 读取缓存的tempCK */
 async function readTempCk() {
     const CK_KEY = 'Yz:yuki:bili:tempCookie';
     const tempCk = await Redis.get(CK_KEY);
@@ -239,7 +265,7 @@ async function readTempCk() {
         const newTempCk = await getNewTempCk();
         await saveTempCk(newTempCk);
         const result = await postGateway(newTempCk);
-        const data = await result.data;
+        const data = await result.data; // 解析校验结果
         if (data?.code !== 0) {
             logger?.error(`优纪插件：tempCK，Gateway校验失败：${JSON.stringify(data)}`);
         }
@@ -252,10 +278,12 @@ async function readTempCk() {
         return tempCk;
     }
 }
+/**保存tempCK*/
 async function saveTempCk(newTempCk) {
     const CK_KEY = 'Yz:yuki:bili:tempCookie';
     await Redis.set(CK_KEY, newTempCk, { EX: 3600 * 24 * 180 });
 }
+/** 综合获取ck，返回优先级：localCK > loginCK > tempCK */
 async function readSyncCookie() {
     const localCk = await readLocalBiliCk();
     const tempCk = await readTempCk();
@@ -274,6 +302,13 @@ async function readSyncCookie() {
         return { cookie: '', mark: 'ckIsEmpty' };
     }
 }
+/**
+ * 综合读取、筛选 传入的或本地或redis存储的cookie的item
+ * @param {string} mark 读取存储的CK类型，'localCK' 'tempCK' 'loginCK' 或传入值 'xxx'并进行筛选
+ * @param {Array} items 选取获取CK的项 选全部值：items[0] = 'all' ，或选取其中的值 ['buvid3', 'buvid4', '_uuid', 'SESSDATA', 'DedeUserID', 'DedeUserID__ckMd5', 'bili_jct', 'b_nut', 'b_lsid']
+ * @param {boolean} isInverted 控制正取和反取，true为反取，false为正取
+ * @returns {string}
+ **/
 async function readSavedCookieItems(mark, items, isInverted = false) {
     let ckString;
     switch (mark) {
@@ -298,16 +333,18 @@ async function readSavedCookieItems(mark, items, isInverted = false) {
     }
     const cookiePairs = String(Bck)
         .trim()
-        .match(/(\w+)=([^;|,]+)/g)
+        .match(/(\w+)=([^;|,]+)/g) //正则 /(\w+)=([^;]+);/g 匹配 a=b 的内容，并分组为 [^;|,]+ 来匹配值，其中 [^;|,] 表示除了分号和,以外的任意字符
         ?.map(match => match.split('='))
         .filter(([key, value]) => (isInverted ? !items.includes(key) : items.includes(key)) && value !== '')
         .map(([key, value]) => `${key}=${value}`)
         .join(';') || '';
     return cookiePairs;
 }
+// 取反读取ck、筛选 传入的或本地或redis存储的cookie的item
 async function readSavedCookieOtherItems(mark, items) {
     return await readSavedCookieItems(mark, items, true);
 }
+/** 生成 _uuid */
 async function genUUID() {
     const generatePart = (length) => Array.from({ length }, () => Math.floor(16 * Math.random()))
         .map(num => num.toString(16).toUpperCase())
@@ -322,6 +359,7 @@ async function genUUID() {
     const uuid = `_uuid=${e}-${t}-${r}-${n}-${o}${padLeft((i % 1e5).toString(), 5)}infoc;`;
     return uuid;
 }
+/**生成 b_lsid */
 async function gen_b_lsid() {
     function get_random_str(length) {
         return Array.from({ length }, () => Math.floor(Math.random() * 16)
@@ -333,6 +371,7 @@ async function gen_b_lsid() {
     const timestampHex = timestamp.toString(16).toUpperCase();
     return `b_lsid=${randomPart}_${timestampHex};`;
 }
+/** 获取 buvid3 和 buvid4 */
 async function getBuvid3_4(uuid) {
     const url = 'https://api.bilibili.com/x/frontend/finger/spi/';
     const headers = lodash.merge({}, BiliApi.BILIBILI_HEADERS, {
@@ -351,6 +390,7 @@ async function getBuvid3_4(uuid) {
         return '';
     }
 }
+/**获取新的tempCK*/
 async function getNewTempCk() {
     const uuid = await genUUID();
     const b_nut = `b_nut=${Date.now() / 1000};`;
@@ -359,6 +399,16 @@ async function getNewTempCk() {
     const buvid_fp = await get_buvid_fp(uuid);
     return `${uuid}${buvid3_buvid4}${b_lsid}${buvid_fp}${b_nut}`;
 }
+/**
+ * *******************************************************************
+ * 风控相关函数
+ * *******************************************************************
+ */
+/**
+ * 请求参数POST接口(ExClimbWuzhi)过校验
+ * @param cookie 请求所需的cookie
+ * @returns 返回POST请求的结果
+ */
 async function postGateway(cookie) {
     const _uuid = await readSavedCookieItems(cookie, ['_uuid'], false);
     const payloadJsonData = await BiliApi.BILIBILI_BROWSER_DATA(_uuid);
@@ -383,12 +433,20 @@ async function postGateway(cookie) {
         throw error;
     }
 }
+/**生成buvid_fp
+ * @param {string} uuid
+ */
 async function get_buvid_fp(cookie) {
     const uuid = await readSavedCookieItems(cookie, ['_uuid'], false);
     const fingerprintData = BiliApi.BILIBILI_FINGERPRINT_DATA(uuid);
     const buvidFp = gen_buvid_fp(fingerprintData);
     return `buvid_fp=${buvidFp};`;
 }
+/**
+ * 获取有效bili_ticket并添加到cookie
+ * @param {string} cookie
+ * @returns {Promise<{ cookie: string; }>} 返回包含最新有效的bili_ticket的cookie
+ */
 async function cookieWithBiliTicket(cookie) {
     const BiliJctKey = 'Yz:yuki:bili:bili_ticket';
     cookie = await readSavedCookieItems(cookie, ['bili_ticket'], true);
@@ -398,7 +456,13 @@ async function cookieWithBiliTicket(cookie) {
             const csrf = await readSavedCookieItems(cookie, ['bili_jct'], false);
             const { ticket, ttl } = await getBiliTicket(csrf);
             await Redis.set(BiliJctKey, ticket, { EX: ttl });
-            return cookie + `;bili_ticket=${ticket};`;
+            if (ticket && ttl) {
+                await Redis.set(BiliJctKey, ticket, { EX: ttl });
+                return cookie + `;bili_ticket=${ticket};`;
+            }
+            else {
+                return cookie;
+            }
         }
         catch (error) {
             logger?.error(`${error}`);

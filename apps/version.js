@@ -12,6 +12,9 @@ class YukiVersion extends Plugin {
             }
         ];
     }
+    /**
+     * 优纪版本
+     */
     async yukiVersion() {
         const version = new VersionData();
         const versionData = await version.getChangelogContent();

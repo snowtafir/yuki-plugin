@@ -1,6 +1,6 @@
 import JSON from 'json5';
 import lodash from 'lodash';
-import { Plugin, Bot, Redis } from 'yunzaijs';
+import { Plugin, Redis } from 'yunzaijs';
 import { BiliQuery } from '../models/bilibili/bilibili.main.query.js';
 import { BiliTask } from '../models/bilibili/bilibili.main.task.js';
 import Config from '../utils/config.js';
@@ -71,6 +71,7 @@ class YukiBili extends Plugin {
         ];
         this.biliConfigData = Config.getConfigData('config', 'bilibili', 'config');
         this.biliPushData = Config.getConfigData('config', 'bilibili', 'push');
+        /** 定时任务 */
         this.task = {
             cron: !!this.biliConfigData.pushStatus ? this.biliConfigData.pushTime : '',
             name: 'yuki插件---B站动态推送定时任务',
@@ -80,14 +81,17 @@ class YukiBili extends Plugin {
     }
     biliConfigData;
     biliPushData;
+    /** B站动态推送定时任务 */
     async newPushTask() {
         await new BiliTask(this.e).runTask();
     }
+    /** 添加B站动态订阅 */
     async addDynamicSub() {
         if (!this.e.isMaster) {
             this.e.reply('未取得bot主人身份，无权限添加B站动态订阅');
         }
         else {
+            // 从消息中提取UID
             const uid = this.e.msg
                 .replace(/^(#|\/)(yuki|优纪)?(订阅|添加|add|ADD)(b站|B站|bili|bilibili|哔哩|哔哩哔哩)推送\s*(视频\s*|图文\s*|文章\s*|转发\s*|直播\s*)*/g, '')
                 .trim()
@@ -96,20 +100,26 @@ class YukiBili extends Plugin {
                 this.e.reply(`请在指令末尾指定订阅的B站up主的UID！`);
                 return true;
             }
+            // 获取或初始化推送数据
             let subData = this.biliPushData || { group: {}, private: {} };
+            // 根据聊天类型初始化数据
             let chatType = this.e.isGroup ? 'group' : 'private';
             let chatId = this.e.isGroup ? this.e.group_id : this.e.user_id;
+            // 初始化群组或私聊数据
             if (!subData[chatType][chatId]) {
                 subData[chatType][chatId] = [];
             }
+            // 检查该 uid 是否已存在
             const upData = subData[chatType][chatId].find(item => item.uid === uid);
             if (upData) {
+                // 更新推送类型
                 upData.type = BiliQuery.typeHandle(upData, this.e.msg, 'add');
                 this.biliPushData = subData;
                 await Config.saveConfig('config', 'bilibili', 'push', subData);
                 this.e.reply(`修改b站推送动态类型成功~\n${upData.name}：${uid}`);
                 return;
             }
+            // 获取 Bilibili 动态信息
             const res = await new BiliGetWebData(this.e).getBiliDynamicListDataByUid(uid);
             if (res.statusText !== 'OK') {
                 this.e.reply('出了点网络问题，等会再试试吧~');
@@ -121,7 +131,7 @@ class YukiBili extends Plugin {
                 logger.mark(`yuki-plugin addDynamicSub Failed：${JSON.stringify(res.data)}`);
             }
             const { has_more, items } = data || {};
-            let infoName;
+            let infoName = '';
             if (code === 0 && has_more === false) {
                 this.e.reply(`检测到该uid的主页空间动态内容为空，\n执行uid：${uid} 校验...`);
                 const resp = await new BiliGetWebData(this.e).getBilibiUserInfoByUid(uid);
@@ -145,7 +155,7 @@ class YukiBili extends Plugin {
                     this.e.reply(`昵称：${infoName} \nuid：${uid} 校验成功！`);
                 }
             }
-            let name;
+            let name = '';
             if (Array.isArray(items)) {
                 if (items.length > 0) {
                     name = items[0].modules?.module_author?.name || uid;
@@ -157,8 +167,9 @@ class YukiBili extends Plugin {
             else {
                 name = uid;
             }
+            // 添加新的推送数据
             subData[chatType][chatId].push({
-                bot_id: this.e.self_id,
+                bot_id: this.e.self_id, // 使用 bot_id， 对应 e_self_id
                 uid,
                 name: name,
                 type: BiliQuery.typeHandle({ uid, name }, this.e.msg, 'add')
@@ -168,11 +179,13 @@ class YukiBili extends Plugin {
             this.e.reply(`添加b站推送成功~\n${name}：${uid}`);
         }
     }
+    /** 删除B站动态订阅 */
     async delDynamicSub() {
         if (!this.e.isMaster) {
             this.e.reply('未取得bot主人身份，无权限删除B站动态订阅');
         }
         else {
+            // 提取用户输入的UID
             const uid = this.e.msg
                 .replace(/^(#|\/)(yuki|优纪)?(取消|删除|del|DEL)(b站|B站|bili|bilibili|哔哩|哔哩哔哩)推送\s*(视频\s*|图文\s*|文章\s*|转发\s*|直播\s*)*/g, '')
                 .trim()
@@ -181,20 +194,26 @@ class YukiBili extends Plugin {
                 this.e.reply(`请在指令末尾指定订阅的B站up主的UID！`);
                 return;
             }
+            // 获取或初始化B站推送数据
             let subData = this.biliPushData || { group: {}, private: {} };
+            // 根据聊天类型初始化数据
             let chatType = this.e.isGroup ? 'group' : 'private';
             let chatId = this.e.isGroup ? this.e.group_id : this.e.user_id;
+            // 初始化群组或私聊数据
             if (!subData[chatType][chatId]) {
                 subData[chatType][chatId] = [];
             }
+            // 查找指定UID的订阅数据
             const upData = subData[chatType][chatId].find((item) => item.uid == uid);
             if (!upData) {
                 this.e.reply(`订阅列表中没有找到该UID~\n${uid}可能是无效的`);
                 return;
             }
+            // 处理订阅类型
             const newType = BiliQuery.typeHandle(upData, this.e.msg, 'del');
             let isDel = false;
             if (newType.length) {
+                // 更新订阅类型
                 subData[chatType][chatId] = subData[chatType][chatId].map(item => {
                     if (item.uid == uid) {
                         item.type = newType;
@@ -203,45 +222,54 @@ class YukiBili extends Plugin {
                 });
             }
             else {
+                // 删除订阅
                 isDel = true;
                 subData[chatType][chatId] = subData[chatType][chatId].filter(item => item.uid !== uid);
             }
+            // 保存更新后的数据
             this.biliPushData = subData;
             Config.saveConfig('config', 'bilibili', 'push', subData);
+            // 回复用户操作结果
             this.e.reply(`${isDel ? '删除' : '修改'}b站推送成功~\n${uid}`);
         }
     }
+    /** 扫码登录B站 */
     async scanBiliLogin() {
         if (this.e.isMaster) {
             try {
                 const token = await applyLoginQRCode(this.e);
-                let biliLoginCk = await pollLoginQRCode(this.e, token);
-                if (lodash.trim(biliLoginCk).length != 0) {
-                    await saveLoginCookie(this.e, biliLoginCk);
-                    this.e.reply(`get bilibili LoginCk：成功！`);
-                    const result = await postGateway(biliLoginCk);
-                    const { code, data } = await result.data;
-                    switch (code) {
-                        case 0:
-                            (logger ?? Bot.logger)?.mark(`优纪插件：获取biliLoginCK，Gateway校验成功：${JSON.stringify(data)}`);
-                            break;
-                        default:
-                            (logger ?? Bot.logger)?.mark(`优纪插件：获取biliLoginCK，Gateway校验失败：${JSON.stringify(data)}`);
-                            break;
+                if (token) {
+                    let biliLoginCk = await pollLoginQRCode(this.e, token);
+                    if (biliLoginCk) {
+                        if (lodash.trim(biliLoginCk).length != 0) {
+                            await saveLoginCookie(this.e, biliLoginCk);
+                            this.e.reply(`get bilibili LoginCk：成功！`);
+                            const result = await postGateway(biliLoginCk); //激活ck
+                            const { code, data } = await result.data; // 解析校验结果
+                            switch (code) {
+                                case 0:
+                                    global?.logger?.mark(`优纪插件：获取biliLoginCK，Gateway校验成功：${JSON.stringify(data)}`);
+                                    break;
+                                default:
+                                    global?.logger?.mark(`优纪插件：获取biliLoginCK，Gateway校验失败：${JSON.stringify(data)}`);
+                                    break;
+                            }
+                        }
+                        else {
+                            this.e.reply(`get bilibili LoginCk：失败X﹏X`);
+                        }
                     }
-                }
-                else {
-                    this.e.reply(`get bilibili LoginCk：失败X﹏X`);
                 }
             }
             catch (Error) {
-                (logger ?? Bot.logger)?.info(`yuki-plugin Login bilibili Failed：${Error}`);
+                global?.logger?.info(`yuki-plugin Login bilibili Failed：${Error}`);
             }
         }
         else {
             this.e.reply('未取得bot主人身份，无权限配置B站登录ck');
         }
     }
+    /** 删除登陆的B站ck */
     async delBiliLogin() {
         if (this.e.isMaster) {
             await exitBiliLogin(this.e);
@@ -252,6 +280,7 @@ class YukiBili extends Plugin {
             this.e.reply('未取得bot主人身份，无权限删除B站登录ck');
         }
     }
+    /**验证B站登录 */
     async myBiliLoginInfo() {
         if (this.e.isMaster) {
             await checkBiliLogin(this.e);
@@ -260,6 +289,7 @@ class YukiBili extends Plugin {
             this.e.reply('未取得bot主人身份，无权限查看B站登录状态');
         }
     }
+    /** 手动绑定本地获取的B站cookie */
     async addLocalBiliCookie() {
         if (this.e.isMaster) {
             if (this.e.isPrivate) {
@@ -271,6 +301,7 @@ class YukiBili extends Plugin {
                     .trim();
                 let param = {};
                 localBiliCookie.split(';').forEach(v => {
+                    // 处理分割特殊cookie_token
                     let tmp = lodash.trim(v).replace('=', '$').split('$');
                     param[tmp[0]] = tmp[1];
                 });
@@ -294,19 +325,20 @@ class YukiBili extends Plugin {
                     }
                     return;
                 }
+                //筛选ck
                 localBiliCookie = await readSavedCookieItems(localBiliCookie, ['buvid3', 'buvid4', '_uuid', 'SESSDATA', 'DedeUserID', 'DedeUserID__ckMd5', 'bili_jct', 'b_nut', 'b_lsid', 'buvid_fp', 'sid'], false);
                 await saveLocalBiliCk(localBiliCookie);
                 logger.mark(`${this.e.logFnc} 保存B站cookie成功 [UID:${param.DedeUserID}]`);
                 let uidMsg = [`好耶~绑定B站cookie成功：\n${param.DedeUserID}`];
                 await this.e.reply(uidMsg);
-                const result = await postGateway(localBiliCookie);
-                const { code, data } = await result.data;
+                const result = await postGateway(localBiliCookie); //激活ck
+                const { code, data } = await result.data; // 解析校验结果
                 switch (code) {
                     case 0:
-                        (logger ?? Bot.logger)?.mark(`优纪插件：绑定localCK，Gateway校验成功：${JSON.stringify(data)}`);
+                        global?.logger?.mark(`优纪插件：绑定localCK，Gateway校验成功：${JSON.stringify(data)}`);
                         break;
                     default:
-                        (logger ?? Bot.logger)?.mark(`优纪插件：绑定localCK，Gateway校验失败：${JSON.stringify(data)}`);
+                        global?.logger?.mark(`优纪插件：绑定localCK，Gateway校验失败：${JSON.stringify(data)}`);
                         break;
                 }
             }
@@ -315,6 +347,7 @@ class YukiBili extends Plugin {
             this.e.reply('未取得bot主人身份，无权限配置B站登录ck');
         }
     }
+    /** 删除绑定的本地B站ck */
     async delLocalBiliCookie() {
         if (this.e.isMaster) {
             await saveLocalBiliCk('');
@@ -324,6 +357,7 @@ class YukiBili extends Plugin {
             this.e.reply('未取得bot主人身份，无权限删除B站登录ck');
         }
     }
+    /** 当前正在使用的B站ck */
     async myUsingBiliCookie() {
         if (this.e.isGroup) {
             await this.reply('注意账号安全，请私聊查看叭');
@@ -352,18 +386,19 @@ class YukiBili extends Plugin {
             }
         }
     }
+    /** 删除并刷新redis缓存的临时B站ck */
     async reflashTempCk() {
         try {
             const newTempCk = await getNewTempCk();
             if (newTempCk) {
                 await saveTempCk(newTempCk);
                 const result = await postGateway(newTempCk);
-                const data = await result.data;
+                const data = await result.data; // 解析校验结果
                 if (data?.code !== 0) {
-                    logger?.error(`优纪插件：tempCK，Gateway校验失败：${JSON.stringify(data)}`);
+                    global?.logger?.error(`优纪插件：tempCK，Gateway校验失败：${JSON.stringify(data)}`);
                 }
                 else if (data?.code === 0) {
-                    logger?.mark(`优纪插件：tempCK，Gateway校验成功：${JSON.stringify(data)}`);
+                    global?.logger?.mark(`优纪插件：tempCK，Gateway校验成功：${JSON.stringify(data)}`);
                 }
                 this.e.reply(`~yuki-plugin:\n临时b站ck刷新成功~❤~\n接下来如果获取动态失败，请重启bot(手动或发送指令 #重启)刷新状态~\n如果重启续仍不可用，请考虑 #优纪添加b站登录 吧~`);
             }
@@ -373,9 +408,10 @@ class YukiBili extends Plugin {
         }
         catch (error) {
             this.e.reply(`~yuki-plugin:\n临时b站ck刷新失败X﹏X\n请重启bot(手动或发送指令 #重启)后重试`);
-            (logger ?? Bot.logger)?.mark(`优纪插件：B站临时ck刷新error：${error}`);
+            global?.logger?.mark(`优纪插件：B站临时ck刷新error：${error}`);
         }
     }
+    /** 订阅的全部b站推送列表 */
     async allSubDynamicPushList() {
         if (!this.e.isMaster) {
             this.e.reply('未取得bot主人身份，无权限查看Bot的全部B站订阅列表');
@@ -391,6 +427,7 @@ class YukiBili extends Plugin {
                 DYNAMIC_TYPE_FORWARD: '转发',
                 DYNAMIC_TYPE_LIVE_RCMD: '直播'
             };
+            // 处理群组订阅
             if (subData.group && Object.keys(subData.group).length > 0) {
                 messages.push('------群组B站订阅------\n');
                 Object.keys(subData.group).forEach(groupId => {
@@ -408,6 +445,7 @@ class YukiBili extends Plugin {
                     });
                 });
             }
+            // 处理私聊订阅
             if (subData.private && Object.keys(subData.private).length > 0) {
                 messages.push('\n------私聊B站订阅------');
                 Object.keys(subData.private).forEach(userId => {
@@ -428,6 +466,7 @@ class YukiBili extends Plugin {
             this.e.reply(`推送列表如下：\n${messages.join('\n')}`);
         }
     }
+    /** 单独群聊或私聊的订阅的b站推送列表 */
     async singelSubDynamicPushList() {
         let subData = this.biliPushData || { group: {}, private: {} };
         const messages = [];
@@ -439,6 +478,7 @@ class YukiBili extends Plugin {
             DYNAMIC_TYPE_FORWARD: '转发',
             DYNAMIC_TYPE_LIVE_RCMD: '直播'
         };
+        // 根据聊天类型初始化数据
         let chatType = this.e.isGroup ? 'group' : 'private';
         let chatId = this.e.isGroup ? this.e.group_id : this.e.user_id;
         if (!subData[chatType][chatId]) {
@@ -457,6 +497,7 @@ class YukiBili extends Plugin {
         });
         this.e.reply(`推送列表如下：\n${messages.join('\n')}`);
     }
+    /**通过uid获取up主信息 */
     async getBilibiUserInfoByUid() {
         let uid = this.e.msg.replace(/^(#|\/)(yuki|优纪)?(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(up|UP)主/g, '').trim();
         const res = await new BiliGetWebData(this.e).getBilibiUserInfoByUid(uid);
@@ -484,6 +525,7 @@ class YukiBili extends Plugin {
         }
         this.e.reply(message);
     }
+    /** 根据名称搜索up的uid*/
     async searchBiliUserInfoByKeyword() {
         let keyword = this.e.msg.replace(/^(#|\/)(yuki|优纪)?搜索(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(up|UP)主/g, '').trim();
         const res = await new BiliGetWebData(this.e).searchBiliUserInfoByKeyword(keyword);

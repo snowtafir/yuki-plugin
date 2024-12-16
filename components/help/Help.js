@@ -4,6 +4,7 @@ import Config from '../../utils/config.js';
 import path from 'path';
 import { _paths, createRequire } from '../../utils/paths.js';
 
+//help.tsx
 const require = createRequire(import.meta.url);
 const botVersion = ConfigController.package?.version;
 const yukiPluginVersion = Config.getPackageJsonKey('version', path.join(_paths.pluginPath, 'package.json'));

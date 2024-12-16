@@ -1,11 +1,11 @@
 import axios from 'axios';
-import { Bot } from 'yunzaijs';
 import { WeiboApi } from './weibo.api.js';
 import { WeiboQuery } from './weibo.query.js';
 
 class WeiboGetWebData {
     e;
     constructor(e) { }
+    /**通过uid获取博主信息 */
     async getBloggerInfo(target) {
         const param = { containerid: '100505' + target };
         const url = new URL(WeiboApi.WEIBO_API.weiboGetIndex);
@@ -16,6 +16,7 @@ class WeiboGetWebData {
         });
         return resp;
     }
+    /**通过关键词搜索微博大v */
     async searchBloggerInfo(keyword) {
         const url = WeiboApi.WEIBO_API.weiboAjaxSearch;
         const params = {
@@ -28,6 +29,7 @@ class WeiboGetWebData {
         });
         return resp;
     }
+    /**获取主页动态资源相关数组 */
     async getBloggerDynamicList(target) {
         const params = { containerid: '107603' + target };
         const url = new URL(WeiboApi.WEIBO_API.weiboGetIndex);
@@ -45,7 +47,7 @@ class WeiboGetWebData {
             return data.cards.filter(WeiboQuery.filterCardTypeCustom);
         }
         catch (error) {
-            (logger ?? Bot.logger)?.mark('微博推送：Error fetching sub list:', error);
+            global?.logger?.mark('微博推送：Error fetching sub list:', error);
             return [];
         }
     }

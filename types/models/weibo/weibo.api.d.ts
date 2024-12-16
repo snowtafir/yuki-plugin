@@ -3,6 +3,7 @@ export declare class WeiboApi {
         weiboGetIndex: string;
         weiboAjaxSearch: string;
     };
+    /**统一设置header */
     static WEIBO_HEADERS: {
         Accept: string;
         'Accept-language': string;

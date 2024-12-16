@@ -3,6 +3,8 @@ import Account from './Account.js';
 import Content from './Content.js';
 import { createRequire } from '../../utils/paths.js';
 
+// ForwardContent
+// 转发动态内容组件
 const require = createRequire(import.meta.url);
 const ForwardContentCss = require('./../../resources/css/dynamic/ForwardContent.css');
 const ForwardContent = ({ data }) => (React.createElement(React.Fragment, null,
