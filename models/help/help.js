@@ -1,5 +1,6 @@
 import Config from '../../utils/config.js';
 
+//import { EventType } from 'yunzai';
 class Help {
     e;
     model;

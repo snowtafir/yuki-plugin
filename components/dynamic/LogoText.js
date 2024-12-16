@@ -1,6 +1,8 @@
 import React from 'react';
 import { createRequire } from '../../utils/paths.js';
 
+// LogoText
+// Logo 文本组件
 const require = createRequire(import.meta.url);
 const LogoTextCss = require('./../../resources/css/dynamic/LogoText.css');
 const LogoText = ({ data }) => (React.createElement(React.Fragment, null,

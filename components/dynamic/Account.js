@@ -2,6 +2,8 @@ import React from 'react';
 import LogoText from './LogoText.js';
 import { createRequire } from '../../utils/paths.js';
 
+// Account
+// up账户组件
 const require = createRequire(import.meta.url);
 const Bilibililogo = require('./../../resources/img/icon/dynamic/bilibili.svg');
 const Weibilogo = require('./../../resources/img/icon/dynamic/weibo.svg');

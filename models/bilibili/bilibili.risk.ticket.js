@@ -2,9 +2,21 @@ import fetch from 'node-fetch';
 import { createHmac } from 'crypto';
 import BiliApi from './bilibili.main.api.js';
 
+/**
+ * Generate HMAC-SHA256 signature
+ * @param {string} key     The key string to use for the HMAC-SHA256 hash
+ * @param {string} message The message string to hash
+ * @returns {string} The HMAC-SHA256 signature as a hex string
+ */
 function hmacSha256(key, message) {
     return createHmac('sha256', key).update(message).digest('hex');
 }
+/**
+ * Get Bilibili web ticket
+ * @param {string | null} csrf CSRF token, can be empty or null, or the cookie's bili_jct value
+ * @returns {Promise<{ code: number, ticket: string, created_at: number, ttl: number }>}
+ * Promise that resolves to an object containing code, ticket, created_at, and ttl values
+ */
 async function getBiliTicket(csrf) {
     const ts = Math.floor(Date.now() / 1000);
     const hexSign = hmacSha256('XgwSnGZ1p', `ts${ts}`);
@@ -13,7 +25,7 @@ async function getBiliTicket(csrf) {
         'key_id': 'ec02',
         'hexsign': hexSign,
         'context[ts]': String(ts),
-        'csrf': csrf ?? ''
+        'csrf': csrf ?? '' // 使用空字符串代替null
     });
     try {
         const response = await fetch(`${url}?${params}`, {
@@ -32,6 +44,7 @@ async function getBiliTicket(csrf) {
             }
             throw new Error(`Failed to retrieve bili ticket: ${data.message}`);
         }
+        // 返回所需的对象结构
         return {
             code: data.code,
             ticket: data.data?.ticket,

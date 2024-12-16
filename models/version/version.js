@@ -11,6 +11,16 @@ class VersionData {
         this.cache = {};
         this.versionPath = path.resolve(_paths.pluginPath, 'CHANGELOG.md');
     }
+    /**
+     * CHANGELOG.md内容支持示例：
+     * # 1.0.0
+     * * 新增功能3
+     * * 新增功能4
+     *
+     * # 0.1.0
+     * * 新增功能1
+     * * 新增功能2
+     */
     async getChangelogContent() {
         let key = this.model;
         if (this.cache[key])
@@ -42,6 +52,7 @@ class VersionData {
                 data: currentData
             });
         }
+        // 对版本进行排序并截取最新的5个版本
         result.sort((a, b) => {
             let aParts = a.version.split('.').map(Number);
             let bParts = b.version.split('.').map(Number);

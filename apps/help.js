@@ -17,6 +17,9 @@ class YukiHelp extends plugin {
             ]
         });
     }
+    /**
+     * 优纪帮助
+     */
     async yukiHelp() {
         const helpData = await Help.get();
         const renderData = {

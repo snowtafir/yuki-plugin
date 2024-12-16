@@ -5,6 +5,7 @@ import ForwardContent from './ForwardContent.js';
 import Footer from './Footer.js';
 import { createRequire } from '../../utils/paths.js';
 
+// MainPage.tsx
 const require = createRequire(import.meta.url);
 const MainPageCss = require('./../../resources/css/dynamic/MainPage.css');
 function App({ data }) {

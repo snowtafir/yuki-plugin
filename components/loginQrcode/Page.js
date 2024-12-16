@@ -1,6 +1,7 @@
 import React from 'react';
 import { createRequire } from '../../utils/paths.js';
 
+// QrcodeLoginPage.tsx
 const require = createRequire(import.meta.url);
 const LoginQrcodeCss = require('./../../resources/css/loginQrcode/Page.css');
 function App({ data }) {

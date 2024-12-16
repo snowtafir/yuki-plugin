@@ -17,33 +17,43 @@ class WeiboTask {
     async runTask() {
         let weiboConfigData = await Config.getUserConfig('weibo', 'config');
         let weiboPushData = await Config.getUserConfig('weibo', 'push');
-        let interval = weiboConfigData.interval || 7200;
-        const uidMap = new Map();
-        const dynamicList = {};
+        let interval = weiboConfigData.interval || 7200; // 推送间隔时间，单位为秒，默认2小时
+        const uidMap = new Map(); // 存放group 和 private 对应所属 uid 与推送信息的映射
+        const dynamicList = {}; // 存放获取的所有动态，键为 uid，值为动态数组
         await this.processWeiboData(weiboPushData, uidMap, dynamicList);
-        let now = Date.now() / 1000;
+        let now = Date.now() / 1000; // 当前时间戳（秒）
         await this.pushDynamicMessages(uidMap, dynamicList, now, interval, weiboConfigData);
     }
+    /**
+     * 处理微博数据，获取动态列表并构建 uid 映射
+     * @param weiboPushData 微博推送数据
+     * @param uidMap uid 映射
+     * @param dynamicList 动态列表
+     */
     async processWeiboData(weiboPushData, uidMap, dynamicList) {
-        const requestedDataOfUids = new Map();
+        const requestedDataOfUids = new Map(); // 存放已请求的 uid 映射
         for (let chatType in weiboPushData) {
+            // 遍历 group 和 private
             if (!uidMap.has(chatType)) {
                 uidMap.set(chatType, new Map());
             }
-            const chatTypeMap = uidMap.get(chatType);
+            const chatTypeMap = uidMap.get(chatType); // 建立当前 chatType (group 或 private) 的 uid 映射
+            if (chatTypeMap === undefined)
+                continue; // 如果 chatTypeMap 未定义，跳过此次循环
             for (let chatId in weiboPushData[chatType]) {
                 const subUpsOfChat = Array.prototype.slice.call(weiboPushData[chatType][chatId] || []);
                 for (let subInfoOfup of subUpsOfChat) {
                     let resp;
+                    // 检查是否已经请求过该 uid
                     if (requestedDataOfUids.has(subInfoOfup.uid)) {
-                        resp = requestedDataOfUids.get(subInfoOfup.uid);
+                        resp = requestedDataOfUids.get(subInfoOfup.uid); // 从已请求的映射中获取响应数据
                         const dynamicData = resp || [];
                         dynamicList[subInfoOfup.uid] = dynamicData;
                     }
                     else {
-                        resp = await await new WeiboGetWebData().getBloggerDynamicList(subInfoOfup.uid);
+                        resp = await await new WeiboGetWebData().getBloggerDynamicList(subInfoOfup.uid); // 获取指定 uid 的动态列表
                         if (resp) {
-                            requestedDataOfUids.set(subInfoOfup.uid, resp);
+                            requestedDataOfUids.set(subInfoOfup.uid, resp); // 将响应数据存储到映射中
                             const dynamicData = resp || [];
                             dynamicList[subInfoOfup.uid] = dynamicData;
                         }
@@ -52,18 +62,26 @@ class WeiboTask {
                     const bot_id = subInfoOfup.bot_id || [];
                     const { name, type } = subInfoOfup;
                     chatTypeMap.set(subInfoOfup.uid, { chatIds, bot_id, upName: name, type });
-                    await this.randomDelay(1000, 4000);
+                    await this.randomDelay(1000, 4000); // 随机延时1-4秒
                 }
             }
         }
-        requestedDataOfUids.clear();
+        requestedDataOfUids.clear(); // 清空已请求的 uid 映射
     }
+    /**
+     * 推送动态消息
+     * @param uidMap uid 映射
+     * @param dynamicList 动态列表
+     * @param now 当前时间戳
+     * @param interval 推送间隔时间
+     * @param weiboConfigData 微博配置数据
+     */
     async pushDynamicMessages(uidMap, dynamicList, now, interval, weiboConfigData) {
         for (let [chatType, chatTypeMap] of uidMap) {
             for (let [key, value] of chatTypeMap) {
                 const tempDynamicList = dynamicList[key] || [];
                 const willPushDynamicList = [];
-                const printedList = new Set();
+                const printedList = new Set(); // 已打印的动态列表
                 for (let dynamicItem of tempDynamicList) {
                     let raw_post = dynamicItem || {};
                     let user = raw_post?.mblog?.user || {};
@@ -76,30 +94,40 @@ class WeiboTask {
                     if (Number(now - WeiboQuery.getDynamicCreatetDate(raw_post) / 1000) > interval) {
                         logger.debug(`超过间隔，跳过   [ ${user?.screen_name} : ${user?.id} ] ${raw_post?.mblog?.created_at} 的动态`);
                         continue;
-                    }
+                    } // 如果超过推送时间间隔，跳过当前循环
                     if (dynamicItem.type === 'DYNAMIC_TYPE_FORWARD' && !weiboConfigData.pushTransmit)
-                        continue;
+                        continue; // 如果关闭了转发动态的推送，跳过当前循环
                     willPushDynamicList.push(dynamicItem);
                 }
                 printedList.clear();
-                const pushMapInfo = value || {};
+                const pushMapInfo = value || {}; // 获取当前 uid 对应的推送信息
                 const { chatIds, bot_id, upName, type } = pushMapInfo;
+                // 遍历待推送的动态数组，发送动态消息
                 for (let pushDynamicData of willPushDynamicList) {
                     if (chatIds && chatIds.length) {
                         for (let chatId of chatIds) {
                             if (type && type.length && !type.includes(pushDynamicData.type))
-                                continue;
-                            await this.sendDynamic(chatId, bot_id, upName, pushDynamicData, weiboConfigData, chatType);
-                            await this.randomDelay(1000, 2000);
+                                continue; // 如果禁用了某类型的动态推送，跳过当前循环
+                            await this.sendDynamic(chatId, bot_id, upName, pushDynamicData, weiboConfigData, chatType); // 发送动态消息
+                            await this.randomDelay(1000, 2000); // 随机延时1-2秒
                         }
                     }
                 }
             }
         }
     }
+    /**
+     * 发送动态消息
+     * @param chatId 聊天 ID
+     * @param bot_id 机器人 ID
+     * @param upName 用户名
+     * @param pushDynamicData 推送动态数据
+     * @param weiboConfigData 微博配置数据
+     * @param chatType 聊天类型
+     */
     async sendDynamic(chatId, bot_id, upName, pushDynamicData, weiboConfigData, chatType) {
-        const id_str = WeiboQuery.getDynamicId(pushDynamicData);
-        let sended, markKey;
+        const id_str = WeiboQuery.getDynamicId(pushDynamicData); // 获取动态 ID
+        let sended = null, markKey = '';
         if (chatType === 'group') {
             markKey = this.groupKey;
             sended = await redis.get(`${markKey}${chatId}:${id_str}`);
@@ -109,18 +137,18 @@ class WeiboTask {
             sended = await redis.get(`${markKey}${chatId}:${id_str}`);
         }
         if (sended)
-            return;
+            return; // 如果已经发送过，则直接返回
         if (!!weiboConfigData.pushMsgMode) {
-            const { data, uid } = await WeiboQuery.formatDynamicData(pushDynamicData);
+            const { data, uid } = await WeiboQuery.formatDynamicData(pushDynamicData); // 处理动态数据
             const eval2 = eval;
-            let banWords = eval2(`/${weiboConfigData.banWords.join('|')}/g`);
+            let banWords = eval2(`/${weiboConfigData.banWords.join('|')}/g`); // 构建屏蔽关键字正则表达式
             if (new RegExp(banWords).test(`${data?.title}${data?.content}`)) {
-                return 'return';
+                return 'return'; // 如果动态包含屏蔽关键字，则直接返回
             }
-            let boxGrid = !!weiboConfigData.boxGrid === false ? false : true;
-            let isSplit = !!weiboConfigData.isSplit === false ? false : true;
-            let style = isSplit ? '' : `.unfold { max-height: ${weiboConfigData?.noSplitHeight ?? 7500}px; }`;
-            let splitHeight = weiboConfigData?.splitHeight ?? 8000;
+            let boxGrid = !!weiboConfigData.boxGrid === false ? false : true; // 是否启用九宫格样式，默认为 true
+            let isSplit = !!weiboConfigData.isSplit === false ? false : true; // 是否启用分片截图，默认为 true
+            let style = isSplit ? '' : `.unfold { max-height: ${weiboConfigData?.noSplitHeight ?? 7500}px; }`; // 不启用分片截图模式的样式
+            let splitHeight = weiboConfigData?.splitHeight ?? 8000; // 分片截图高度，默认 8000, 单位 px，启用分片截图时生效
             const extentData = { ...data };
             const urlQrcodeData = await QRCode.toDataURL(extentData?.url);
             let renderData = this.buildRenderData(extentData, urlQrcodeData, boxGrid);
@@ -139,38 +167,52 @@ class WeiboTask {
             let imgs = await this.renderDynamicCard(uid, renderData, ScreenshotOptionsData);
             if (!imgs)
                 return;
-            redis.set(`${markKey}${chatId}:${id_str}`, '1', { EX: 3600 * 72 });
+            redis.set(`${markKey}${chatId}:${id_str}`, '1', { EX: 3600 * 72 }); // 设置已发送标记
             (logger ?? Bot.logger)?.mark('优纪插件：微博动态执行推送');
             for (let i = 0; i < imgs.length; i++) {
                 const image = imgs[i];
                 await this.sendMessage(chatId, bot_id, chatType, segment.image(image));
-                await this.randomDelay(1000, 2000);
+                await this.randomDelay(1000, 2000); // 随机延时1-2秒
             }
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 1000)); // 休眠1秒
         }
         else {
-            const dynamicMsg = await WeiboQuery.formatTextDynamicData(upName, pushDynamicData, false, weiboConfigData);
-            redis.set(`${markKey}${chatId}:${id_str}`, '1', { EX: 3600 * 72 });
-            if (dynamicMsg == 'continue') {
-                return 'return';
+            const dynamicMsg = await WeiboQuery.formatTextDynamicData(upName, pushDynamicData, false, weiboConfigData); //构建文字动态消息
+            redis.set(`${markKey}${chatId}:${id_str}`, '1', { EX: 3600 * 72 }); // 设置已发送标记
+            if (dynamicMsg === undefined || dynamicMsg === 'continue') {
+                return 'return'; // 如果动态消息构建失败或内部资源获取失败，则直接返回
             }
             if (weiboConfigData.banWords.length > 0) {
-                const banWords = new RegExp(weiboConfigData.banWords.join('|'), 'g');
+                const banWords = new RegExp(weiboConfigData.banWords.join('|'), 'g'); // 构建屏蔽关键字正则表达式
                 if (banWords.test(dynamicMsg.msg.join(''))) {
-                    return 'return';
+                    return 'return'; // 如果动态消息包含屏蔽关键字，则直接返回
                 }
             }
-            await this.sendMessage(chatId, bot_id, chatType, dynamicMsg.msg);
-            const pics = dynamicMsg.pics;
-            if (pics && pics.length > 0) {
-                for (let i = 0; i < pics.length; i++) {
-                    await this.sendMessage(chatId, bot_id, chatType, pics[i]);
-                    await this.randomDelay(1000, 2000);
-                }
+            let mergeTextPic = !!weiboConfigData.mergeTextPic === false ? false : true; // 是否合并文字和图片，默认为 true
+            if (mergeTextPic) {
+                const mergeMsg = [...dynamicMsg.msg, ...dynamicMsg.pics];
+                await this.sendMessage(chatId, bot_id, chatType, mergeMsg);
             }
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            else {
+                await this.sendMessage(chatId, bot_id, chatType, dynamicMsg.msg);
+                const pics = dynamicMsg.pics;
+                if (pics && pics.length > 0) {
+                    for (let i = 0; i < pics.length; i++) {
+                        await this.sendMessage(chatId, bot_id, chatType, pics[i]);
+                        await this.randomDelay(1000, 2000); // 随机延时1-2秒
+                    }
+                }
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
         }
     }
+    /**
+     * 构建渲染数据
+     * @param extentData 扩展数据
+     * @param urlQrcodeData URL 二维码数据
+     * @param boxGrid 是否启用九宫格样式
+     * @returns 渲染数据
+     */
     buildRenderData(extentData, urlQrcodeData, boxGrid) {
         if (extentData.orig && extentData.orig.length !== 0) {
             return {
@@ -224,20 +266,34 @@ class WeiboTask {
             };
         }
     }
+    /**
+     * 渲染动态卡片
+     * @param uid 用户 ID
+     * @param renderData 渲染数据
+     * @param ScreenshotOptionsData 截图选项数据
+     * @returns 图片数据
+     */
     async renderDynamicCard(uid, renderData, ScreenshotOptionsData) {
-        const dynamicMsg = await renderPage(uid, 'MainPage', renderData, ScreenshotOptionsData);
+        const dynamicMsg = await renderPage(uid, 'MainPage', renderData, ScreenshotOptionsData); // 渲染动态卡片
         if (dynamicMsg !== false) {
-            return dynamicMsg.img;
+            return dynamicMsg.img; // 缓存图片数据
         }
         else {
             return null;
         }
     }
+    /**
+     * 发送消息
+     * @param chatId 聊天 ID
+     * @param bot_id 机器人 ID
+     * @param chatType 聊天类型
+     * @param message 消息内容
+     */
     async sendMessage(chatId, bot_id, chatType, message) {
         if (chatType === 'group') {
             await (Bot[bot_id] ?? Bot)
                 ?.pickGroup(String(chatId))
-                .sendMsg(message)
+                .sendMsg(message) // 发送群聊
                 .catch(error => {
                 (logger ?? Bot.logger)?.error(`群组[${chatId}]推送失败：${JSON.stringify(error)}`);
             });
@@ -248,9 +304,14 @@ class WeiboTask {
                 .sendMsg(message)
                 .catch(error => {
                 (logger ?? Bot.logger)?.error(`用户[${chatId}]推送失败：${JSON.stringify(error)}`);
-            });
+            }); // 发送好友私聊
         }
     }
+    /**
+     * 随机延时
+     * @param min 最小延时时间
+     * @param max 最大延时时间
+     */
     async randomDelay(min, max) {
         await new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * (max - min + 1) + min)));
     }
