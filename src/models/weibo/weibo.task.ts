@@ -235,15 +235,21 @@ export class WeiboTask {
         }
       }
 
-      await this.sendMessage(chatId, bot_id, chatType, dynamicMsg.msg);
-      const pics = dynamicMsg.pics;
-      if (pics && pics.length > 0) {
-        for (let i = 0; i < pics.length; i++) {
-          await this.sendMessage(chatId, bot_id, chatType, pics[i]);
-          await this.randomDelay(1000, 2000); // 随机延时1-2秒
+      let mergeTextPic = !!weiboConfigData.mergeTextPic === false ? false : true; // 是否合并文字和图片，默认为 true
+      if (mergeTextPic) {
+        const mergeMsg = [...dynamicMsg.msg, ...dynamicMsg.pics];
+        await this.sendMessage(chatId, bot_id, chatType, mergeMsg);
+      } else {
+        await this.sendMessage(chatId, bot_id, chatType, dynamicMsg.msg);
+        const pics = dynamicMsg.pics;
+        if (pics && pics.length > 0) {
+          for (let i = 0; i < pics.length; i++) {
+            await this.sendMessage(chatId, bot_id, chatType, pics[i]);
+            await this.randomDelay(1000, 2000); // 随机延时1-2秒
+          }
         }
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
-      await new Promise(resolve => setTimeout(resolve, 1000));
     }
   }
 
