@@ -33,7 +33,7 @@ export async function applyLoginQRCode(e: any) {
     throw new Error(`获取B站登录二维码URL网络请求失败，状态码: ${response.status}`);
   }
 
-  const res: {
+  const res = (await response.json()) as {
     code?: number;
     message?: string;
     ttl?: number;
@@ -41,11 +41,11 @@ export async function applyLoginQRCode(e: any) {
       url?: string;
       qrcode_key?: string;
     };
-  } = await response.json();
+  };
 
   if (res?.code === 0) {
-    const qrcodeKey = res.data.qrcode_key;
-    const qrcodeUrl = res.data.url;
+    const qrcodeKey = res?.data?.qrcode_key;
+    const qrcodeUrl = res?.data?.url;
     let loginUrlQrcodeData = await QRCode.toDataURL(`${qrcodeUrl}`);
     const LoginPropsData: LoginProps = {
       data: { url: loginUrlQrcodeData }
@@ -60,7 +60,7 @@ export async function applyLoginQRCode(e: any) {
       const { img } = qrCodeImage;
       qrCodeBufferArray = img;
     }
-    let msg = [];
+    let msg: string[] = [];
     if (qrCodeBufferArray.length === 0) {
       msg.push('渲染二维码图片失败，请查看终端输出的实时日志，\n复制哔哩登陆二维码URL，使用在线或本地二维码生成工具生成二维码并扫码。');
     } else {
@@ -91,7 +91,7 @@ export async function pollLoginQRCode(e: any, qrcodeKey: string) {
     throw new Error(`处理B站登录token网络请求失败，状态码: ${response.status}`);
   }
 
-  const data: {
+  const data = (await response.json()) as {
     code?: number;
     message?: string;
     ttl?: number;
@@ -102,13 +102,13 @@ export async function pollLoginQRCode(e: any, qrcodeKey: string) {
       code?: number;
       message?: string;
     };
-  } = await response.json();
+  };
 
   if (data.code === 0) {
-    if (data.data.code === 0) {
+    if (data?.data?.code === 0) {
       // 登录成功，获取 cookie
       const LoginCookie = response.headers.get('set-cookie');
-      let loginCk: string = '';
+      let loginCk: string | null = '';
       try {
         const nomalCk = await getNewTempCk();
         loginCk = `${nomalCk}${LoginCookie}`;
@@ -118,18 +118,18 @@ export async function pollLoginQRCode(e: any, qrcodeKey: string) {
       }
       e.reply(`~B站登陆成功~`);
       return loginCk;
-    } else if (data.data.code === 86101) {
+    } else if (data?.data?.code === 86101) {
       // 未扫码
       // 继续轮询
       await new Promise(resolve => setTimeout(resolve, 2000));
       (logger ?? Bot.logger)?.mark(`优纪插件：扫码B站登录：未扫码，轮询中...`);
       return pollLoginQRCode(e, qrcodeKey);
-    } else if (data.data.code === 86090) {
+    } else if (data?.data?.code === 86090) {
       // 已扫码未确认
       // 继续轮询
       await new Promise(resolve => setTimeout(resolve, 2000));
       return pollLoginQRCode(e, qrcodeKey);
-    } else if (data.data.code === 86038) {
+    } else if (data?.data?.code === 86038) {
       // 二维码已失效
       e.reply('B站登陆二维码已失效');
       return null;
@@ -532,7 +532,12 @@ export async function cookieWithBiliTicket(cookie: string): Promise<string> {
       const csrf = await readSavedCookieItems(cookie, ['bili_jct'], false);
       const { ticket, ttl } = await getBiliTicket(csrf);
       await redis.set(BiliJctKey, ticket, { EX: ttl });
-      return cookie + `;bili_ticket=${ticket};`;
+      if (ticket && ttl) {
+        await redis.set(BiliJctKey, ticket, { EX: ttl });
+        return cookie + `;bili_ticket=${ticket};`;
+      } else {
+        return cookie;
+      }
     } catch (error) {
       logger?.error(`${error}`);
       return cookie;

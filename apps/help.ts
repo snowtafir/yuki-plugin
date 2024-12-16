@@ -56,7 +56,7 @@ export default class YukiHelp extends plugin {
     } else {
       return;
     }
-    let msg = [];
+    let msg: any[] = [];
     msg.push(segment.image(imgRes.img[0]));
     await this.e.reply(msg);
   }

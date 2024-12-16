@@ -45,7 +45,7 @@ function encWbi(params: { [key: string]: string | number | object }, img_key: st
 // 获取最新的 img_key 和 sub_key
 async function getWbiKeys(headers, cookie) {
   const IMG_SUB_KEY = 'Yz:yuki:bili:wbi_img_key';
-  const wbi_img_data: string = await redis.get(IMG_SUB_KEY);
+  const wbi_img_data: string | null = await redis.get(IMG_SUB_KEY);
   if (wbi_img_data) {
     const wbi_img_data_json = JSON.parse(wbi_img_data);
     return {

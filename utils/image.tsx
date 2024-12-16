@@ -55,7 +55,7 @@ class Image extends Picture {
 }
 
 // 存储单例实例
-let instance: Image = null;
+let instance: Image;
 
 // 存储任务队列
 const queue: Array<{

@@ -5,7 +5,7 @@
     "noImplicitAny": false,
     "esModuleInterop": true,
     "moduleResolution": "bundler",
-    "removeComments": true,
+    "removeComments": false,
     "preserveConstEnums": true,
     "ignoreDeprecations": "5.0",
     "jsx": "react",

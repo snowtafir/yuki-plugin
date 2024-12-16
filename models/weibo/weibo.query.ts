@@ -302,7 +302,7 @@ export class WeiboQuery {
         const origin_post_info = info?.retweeted_status;
         isForward = true;
         let orig = await this.formatTextDynamicData(upName, origin_post_info, isForward, setData);
-        let origContent = [];
+        let origContent: any[] = [];
         if (orig && typeof orig === 'object') {
           origContent = orig.msg.slice(2);
           pics = orig.pics;

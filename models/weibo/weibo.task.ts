@@ -70,6 +70,7 @@ export class WeiboTask {
         uidMap.set(chatType, new Map());
       }
       const chatTypeMap = uidMap.get(chatType); // 建立当前 chatType (group 或 private) 的 uid 映射
+      if (chatTypeMap === undefined) continue; // 如果 chatTypeMap 未定义，跳过此次循环
 
       for (let chatId in weiboPushData[chatType]) {
         const subUpsOfChat: { uid: string; bot_id: string[]; name: string; type: string[] }[] = Array.prototype.slice.call(
@@ -114,7 +115,7 @@ export class WeiboTask {
     for (let [chatType, chatTypeMap] of uidMap) {
       for (let [key, value] of chatTypeMap) {
         const tempDynamicList = dynamicList[key] || [];
-        const willPushDynamicList = [];
+        const willPushDynamicList: any[] = [];
 
         const printedList = new Set(); // 已打印的动态列表
         for (let dynamicItem of tempDynamicList) {
@@ -163,7 +164,8 @@ export class WeiboTask {
   async sendDynamic(chatId: string | number, bot_id: string | number, upName: string, pushDynamicData: any, weiboConfigData: any, chatType: string) {
     const id_str: string = WeiboQuery.getDynamicId(pushDynamicData); // 获取动态 ID
 
-    let sended: string | null, markKey: string;
+    let sended: string | null = null,
+      markKey: string = '';
     if (chatType === 'group') {
       markKey = this.groupKey;
       sended = await redis.get(`${markKey}${chatId}:${id_str}`);
@@ -223,7 +225,7 @@ export class WeiboTask {
 
       redis.set(`${markKey}${chatId}:${id_str}`, '1', { EX: 3600 * 72 }); // 设置已发送标记
 
-      if (dynamicMsg == 'continue') {
+      if (dynamicMsg === undefined || dynamicMsg === 'continue') {
         return 'return'; // 如果动态消息构建失败或内部资源获取失败，则直接返回
       }
 
