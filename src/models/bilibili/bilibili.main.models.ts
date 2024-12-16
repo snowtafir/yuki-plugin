@@ -6,7 +6,7 @@ import { promisify } from 'node:util';
 import path from 'path';
 import QRCode from 'qrcode';
 import YAML from 'yaml';
-import { Bot, Redis, Segment, EventType } from 'yunzaijs';
+import { Redis, Segment, EventType } from 'yunzaijs';
 import { LoginProps } from '@src/components/loginQrcode/Page';
 import { renderPage } from '@src/utils/image';
 import { _paths } from '@src/utils/paths';
@@ -35,7 +35,7 @@ export async function applyLoginQRCode(e: EventType) {
     throw new Error(`获取B站登录二维码URL网络请求失败，状态码: ${response.status}`);
   }
 
-  const res: {
+  const res = (await response.json()) as {
     code?: number;
     message?: string;
     ttl?: number;
@@ -43,11 +43,11 @@ export async function applyLoginQRCode(e: EventType) {
       url?: string;
       qrcode_key?: string;
     };
-  } = await response.json();
+  };
 
   if (res?.code === 0) {
-    const qrcodeKey = res.data.qrcode_key;
-    const qrcodeUrl = res.data.url;
+    const qrcodeKey = res?.data?.qrcode_key;
+    const qrcodeUrl = res?.data?.url;
     let loginUrlQrcodeData = await QRCode.toDataURL(`${qrcodeUrl}`);
     const LoginPropsData: LoginProps = {
       data: { url: loginUrlQrcodeData }
@@ -62,7 +62,7 @@ export async function applyLoginQRCode(e: EventType) {
       const { img } = qrCodeImage;
       qrCodeBufferArray = img;
     }
-    let msg = [];
+    let msg: string[] = [];
     if (qrCodeBufferArray.length === 0) {
       msg.push('渲染二维码图片失败，请查看终端输出的实时日志，\n复制哔哩登陆二维码URL，使用在线或本地二维码生成工具生成二维码并扫码。');
     } else {
@@ -93,7 +93,7 @@ export async function pollLoginQRCode(e: EventType, qrcodeKey: string) {
     throw new Error(`处理B站登录token网络请求失败，状态码: ${response.status}`);
   }
 
-  const data: {
+  const data = (await response.json()) as {
     code?: number;
     message?: string;
     ttl?: number;
@@ -104,13 +104,13 @@ export async function pollLoginQRCode(e: EventType, qrcodeKey: string) {
       code?: number;
       message?: string;
     };
-  } = await response.json();
+  };
 
   if (data.code === 0) {
-    if (data.data.code === 0) {
+    if (data?.data?.code === 0) {
       // 登录成功，获取 cookie
       const LoginCookie = response.headers.get('set-cookie');
-      let loginCk: string = '';
+      let loginCk: string | null = '';
       try {
         const nomalCk = await getNewTempCk();
         loginCk = `${nomalCk}${LoginCookie}`;
@@ -120,18 +120,18 @@ export async function pollLoginQRCode(e: EventType, qrcodeKey: string) {
       }
       e.reply(`~B站登陆成功~`);
       return loginCk;
-    } else if (data.data.code === 86101) {
+    } else if (data?.data?.code === 86101) {
       // 未扫码
       // 继续轮询
       await new Promise(resolve => setTimeout(resolve, 2000));
-      (logger ?? Bot.logger)?.mark(`优纪插件：扫码B站登录：未扫码，轮询中...`);
+      global?.logger?.mark(`优纪插件：扫码B站登录：未扫码，轮询中...`);
       return pollLoginQRCode(e, qrcodeKey);
-    } else if (data.data.code === 86090) {
+    } else if (data?.data?.code === 86090) {
       // 已扫码未确认
       // 继续轮询
       await new Promise(resolve => setTimeout(resolve, 2000));
       return pollLoginQRCode(e, qrcodeKey);
-    } else if (data.data.code === 86038) {
+    } else if (data?.data?.code === 86038) {
       // 二维码已失效
       e.reply('B站登陆二维码已失效');
       return null;
@@ -158,7 +158,7 @@ export async function checkBiliLogin(e: EventType) {
       redirect: 'follow'
     });
     const resData: any = await res.json();
-    Bot?.logger?.debug(`B站验证登录状态:${JSON.stringify(resData)}`);
+    global?.logger?.debug(`B站验证登录状态:${JSON.stringify(resData)}`);
 
     if (resData.code === 0) {
       let uname = resData.data?.uname;
@@ -533,8 +533,12 @@ export async function cookieWithBiliTicket(cookie: string): Promise<string> {
     try {
       const csrf = await readSavedCookieItems(cookie, ['bili_jct'], false);
       const { ticket, ttl } = await getBiliTicket(csrf);
-      await Redis.set(BiliJctKey, ticket, { EX: ttl });
-      return cookie + `;bili_ticket=${ticket};`;
+      if (ticket && ttl) {
+        await Redis.set(BiliJctKey, ticket, { EX: ttl });
+        return cookie + `;bili_ticket=${ticket};`;
+      } else {
+        return cookie;
+      }
     } catch (error) {
       logger?.error(`${error}`);
       return cookie;

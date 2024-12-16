@@ -1,7 +1,7 @@
 import moment from 'moment';
 import fetch from 'node-fetch';
 import { WeiboApi } from '@src/models/weibo/weibo.api';
-import { Segment, Bot } from 'yunzaijs';
+import { Segment } from 'yunzaijs';
 import { JSDOM } from 'jsdom';
 
 declare const logger: any;
@@ -212,7 +212,7 @@ export class WeiboQuery {
           info = JSON.parse(full_json_text);
         }
       } catch (err) {
-        (logger ?? Bot.logger)?.mark(`优纪插件：获取微博动态全文出错：https://m.weibo.cn/detail/${info?.mid}`);
+        global?.logger?.mark(`优纪插件：获取微博动态全文出错：https://m.weibo.cn/detail/${info?.mid}`);
       }
     }
 
@@ -301,7 +301,7 @@ export class WeiboQuery {
         const origin_post_info = info?.retweeted_status;
         isForward = true;
         let orig = await this.formatTextDynamicData(upName, origin_post_info, isForward, setData);
-        let origContent = [];
+        let origContent: any[] = [];
         if (orig && typeof orig === 'object') {
           origContent = orig.msg.slice(2);
           pics = orig.pics;

@@ -168,7 +168,7 @@ message.use(
     } else {
       let subData = weiboPushData || { group: {}, private: {} };
 
-      const messages = [];
+      const messages: string[] = [];
 
       const typeMap = {
         DYNAMIC_TYPE_AV: '视频',
@@ -231,7 +231,7 @@ message.use(
   async e => {
     let subData = weiboPushData || { group: {}, private: {} };
 
-    const messages = [];
+    const messages: string[] = [];
 
     const typeMap = {
       DYNAMIC_TYPE_AV: '视频',
@@ -335,7 +335,7 @@ message.use(
       return;
     }
 
-    const messages = [];
+    const messages: string[] = [];
 
     messages.push(
       `-----微博-----

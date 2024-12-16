@@ -41,7 +41,7 @@ message.use(
     } else {
       return;
     }
-    let msg = [];
+    let msg: any[] = [];
     msg.push(Segment.image(imgRes.img[0]));
     await e.reply(msg);
   },

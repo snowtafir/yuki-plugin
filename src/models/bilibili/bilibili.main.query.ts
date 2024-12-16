@@ -1,11 +1,9 @@
 import moment from 'moment';
-import { Bot, Segment } from 'yunzaijs';
+import { Segment } from 'yunzaijs';
 import { cookieWithBiliTicket, readSyncCookie } from '@src/models/bilibili/bilibili.main.models';
 import BiliApi from '@src/models/bilibili/bilibili.main.api';
 import axios from 'axios';
 import lodash from 'lodash';
-
-declare const logger: any;
 
 export class BiliQuery {
   /**
@@ -16,7 +14,7 @@ export class BiliQuery {
   static async formatDynamicData(data: any) {
     const BiliDrawDynamicLinkUrl = 'https://m.bilibili.com/dynamic/';
     let desc: any,
-      pics = [],
+      pics: any[] = [],
       majorType: any;
     let formatData: { data: { [key: string]: any } } = { data: {} };
 
@@ -107,26 +105,32 @@ export class BiliQuery {
           formatData.data.title = desc?.title;
           // 文章内容过长，则尝试获取全文
           if (desc?.summary?.text?.length >= 480) {
-            const { readInfo, articleType } = await this.getFullArticleContent(this.formatUrl(desc?.jump_url));
-            // 文章链接类型为 cv（旧类型） 或者 opus（新类型）
-            if (articleType === 'cv') {
-              formatData.data.content = this.praseFullOldTypeArticleContent(readInfo?.content);
-              if (String(formatData.data.content).length < 100) {
+            const fullArticleContent = await this.getFullArticleContent(this.formatUrl(desc?.jump_url));
+            if (fullArticleContent) {
+              const { readInfo, articleType } = fullArticleContent;
+              // 文章链接类型为 cv（旧类型） 或者 opus（新类型）
+              if (articleType === 'cv') {
+                formatData.data.content = this.praseFullOldTypeArticleContent(readInfo?.content);
+                if (String(formatData.data.content).length < 100) {
+                  formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || '';
+                  formatData.data.pics = pics;
+                } else {
+                  formatData.data.pics = [];
+                }
+              } else if (articleType === 'opus') {
+                const FullNewTypeArticleContent = this.praseFullNewTypeArticleContent(readInfo?.paragraphs);
+                if (FullNewTypeArticleContent) {
+                  const { content, img } = FullNewTypeArticleContent;
+                  formatData.data.content = content;
+                  formatData.data.pics = img && img.length > 0 ? img : pics;
+                  if (content && content.length < 100) {
+                    formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text);
+                  }
+                }
+              } else {
                 formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || '';
                 formatData.data.pics = pics;
-              } else {
-                formatData.data.pics = [];
               }
-            } else if (articleType === 'opus') {
-              const { content, img } = this.praseFullNewTypeArticleContent(readInfo?.paragraphs);
-              formatData.data.content = content;
-              formatData.data.pics = img && img.length > 0 ? img : pics;
-              if (content && content.length < 100) {
-                formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text);
-              }
-            } else {
-              formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || '';
-              formatData.data.pics = pics;
             }
           } else {
             formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || '';
@@ -219,7 +223,7 @@ export class BiliQuery {
 
               case 'RICH_TEXT_NODE_TYPE_TEXT':
                 // 正文将 \n 替换为 <br> 以实现换行
-                return node.text.replace(/\n/g, '<br>');
+                return node?.text?.replace(/\n/g, '<br>') || '';
 
               case 'RICH_TEXT_NODE_TYPE_AT':
                 // 处理 @ 类型，使用官方的HTML标签写法
@@ -305,8 +309,19 @@ export class BiliQuery {
     return content;
   }
 
-  /**解析新版完整文章内容
-   * @param paragraphs - MODULE_TYPE_CONTENT 类型文章的段落数组
+  /**
+   * 解析新版完整文章内容，将其转换为HTML格式的正文和图片数组。
+   * 该方法处理的是 MODULE_TYPE_CONTENT 类型的文章，文章内容由多个段落组成。
+   * 每个段落可能包含不同类型的内容，如正文、图片、链接、表情等。
+   *
+   * @param paragraphs - MODULE_TYPE_CONTENT 类型文章的段落数组，每个段落是一个对象。
+   *                     每个段落对象包含一个 para_type 属性，用于标识段落类型（1表示正文，2表示图片）。
+   *                     正文段落中可能包含多个 nodes，每个 node 表示一段文本或一个富文本元素。
+   *                     图片段落中包含一个 pic 对象，其中 pics 是图片信息的数组。
+   * @returns 返回一个对象，包含两个属性：
+   *          - content: string 类型，解析后的HTML格式的正文字符串。
+   *          - img: array 类型，包含图片信息的对象数组，每个对象有 url、width 和 height 属性。
+   *          如果输入的 paragraphs 不是数组，则返回 null。
    */
   static praseFullNewTypeArticleContent = (paragraphs: any[] | any) => {
     if (Array.isArray(paragraphs)) {
@@ -320,61 +335,65 @@ export class BiliQuery {
         switch (item.para_type) {
           case 1:
             // 处理正文
-            content += item.text.nodes
-              .map((node: any) => {
-                let nodeType = node.type;
-                if (nodeType === 'TEXT_NODE_TYPE_RICH') {
-                  let richType = node?.rich?.type;
-                  switch (richType) {
-                    case 'RICH_TEXT_NODE_TYPE_TOPIC':
-                      // 确保链接以 https:// 开头
-                      let jumpUrl = node?.rich?.jump_url;
-                      if (jumpUrl && !jumpUrl.startsWith('http://') && !jumpUrl.startsWith('https://')) {
-                        jumpUrl = `https://${jumpUrl}`;
-                      }
-                      return `<span class="bili-rich-text-module topic" href="${jumpUrl}">${node?.rich?.text}</span>`;
+            if (item.text?.nodes) {
+              content += item.text.nodes
+                .map((node: any) => {
+                  let nodeType = node.type;
+                  if (nodeType === 'TEXT_NODE_TYPE_RICH') {
+                    let richType = node?.rich?.type;
+                    switch (richType) {
+                      case 'RICH_TEXT_NODE_TYPE_TOPIC':
+                        // 确保链接以 https:// 开头
+                        let jumpUrl = node?.rich?.jump_url;
+                        if (jumpUrl && !jumpUrl.startsWith('http://') && !jumpUrl.startsWith('https://')) {
+                          jumpUrl = `https://${jumpUrl}`;
+                        }
+                        return `<span class="bili-rich-text-module topic" href="${jumpUrl}">${node?.rich?.text}</span>`;
 
-                    case 'RICH_TEXT_NODE_TYPE_TEXT':
-                      // 正文将 \n 替换为 <br> 以实现换行
-                      return node?.rich?.text.replace(/\n/g, '<br>');
+                      case 'RICH_TEXT_NODE_TYPE_TEXT':
+                        // 正文将 \n 替换为 <br> 以实现换行
+                        return node?.rich?.text.replace(/\n/g, '<br>');
 
-                    case 'RICH_TEXT_NODE_TYPE_AT':
-                      // 处理 @ 类型，使用官方的HTML标签写法
-                      return `<span data-module="desc" data-type="at" data-oid="${node?.rich?.rid}" class="bili-rich-text-module at">${node?.rich?.text}</span>`;
+                      case 'RICH_TEXT_NODE_TYPE_AT':
+                        // 处理 @ 类型，使用官方的HTML标签写法
+                        return `<span data-module="desc" data-type="at" data-oid="${node?.rich?.rid}" class="bili-rich-text-module at">${node?.rich?.text}</span>`;
 
-                    case 'RICH_TEXT_NODE_TYPE_LOTTERY':
-                      // 处理互动抽奖类型，使用官方的HTML标签写法
-                      return `<span data-module="desc" data-type="lottery" data-oid="${node?.rich?.rid}" class="bili-rich-text-module lottery">${node?.rich?.text}</span>`;
+                      case 'RICH_TEXT_NODE_TYPE_LOTTERY':
+                        // 处理互动抽奖类型，使用官方的HTML标签写法
+                        return `<span data-module="desc" data-type="lottery" data-oid="${node?.rich?.rid}" class="bili-rich-text-module lottery">${node?.rich?.text}</span>`;
 
-                    case 'RICH_TEXT_NODE_TYPE_WEB':
-                      // 处理 RICH_TEXT_NODE_TYPE_WEB 类型，直接拼接 text 属性
-                      return node?.rich?.text;
+                      case 'RICH_TEXT_NODE_TYPE_WEB':
+                        // 处理 RICH_TEXT_NODE_TYPE_WEB 类型，直接拼接 text 属性
+                        return node?.rich?.text;
 
-                    case 'RICH_TEXT_NODE_TYPE_EMOJI':
-                      // 处理表情类型，使用 img 标签显示表情
-                      const emoji = node?.rich?.emoji;
-                      return `<img src="${emoji?.icon_url}" alt="${emoji?.text}" title="${emoji?.text}" style="vertical-align: middle; width: ${emoji?.size}em; height: ${emoji?.size}em;">`;
+                      case 'RICH_TEXT_NODE_TYPE_EMOJI':
+                        // 处理表情类型，使用 img 标签显示表情
+                        const emoji = node?.rich?.emoji;
+                        return `<img src="${emoji?.icon_url}" alt="${emoji?.text}" title="${emoji?.text}" style="vertical-align: middle; width: ${emoji?.size}em; height: ${emoji?.size}em;">`;
 
-                    case 'RICH_TEXT_NODE_TYPE_GOODS':
-                      // 处理商品推广类型，使用官方的HTML标签写法
-                      const goods_url = node?.rich?.jump_url;
-                      return `<span data-module="desc" data-type="goods" data-url="${goods_url}" data-oid="${node?.rich?.rid}" class="bili-rich-text-module goods ${node?.rich?.icon_name}">&ZeroWidthSpace;${node?.rich?.text}</span>`;
-                    default:
-                      return node;
+                      case 'RICH_TEXT_NODE_TYPE_GOODS':
+                        // 处理商品推广类型，使用官方的HTML标签写法
+                        const goods_url = node?.rich?.jump_url;
+                        return `<span data-module="desc" data-type="goods" data-url="${goods_url}" data-oid="${node?.rich?.rid}" class="bili-rich-text-module goods ${node?.rich?.icon_name}">&ZeroWidthSpace;${node?.rich?.text}</span>`;
+                      default:
+                        return node;
+                    }
+                  } else if (nodeType === 'TEXT_NODE_TYPE_WORD') {
+                    return `${node?.word?.words}<br>`;
                   }
-                } else if (nodeType === 'TEXT_NODE_TYPE_WORD') {
-                  return `${node?.word?.words}<br>`;
-                }
-              })
-              .join('');
+                })
+                .join('');
+            }
             break;
           case 2:
             // 处理图片
-            img = img.concat(
-              item?.pic?.pics.map((item: any) => {
-                return { url: item?.url, width: item?.width, height: item?.height };
-              }) || []
-            );
+            if (item?.pic?.pics) {
+              img = img.concat(
+                item?.pic?.pics.map((item: any) => {
+                  return { url: item?.url, width: item?.width, height: item?.height };
+                }) || []
+              );
+            }
             break;
           default:
             break;
@@ -572,7 +591,7 @@ export class BiliQuery {
 
         isForward = true;
         let orig = await this.formatTextDynamicData(upName, data.orig, isForward, setData);
-        let origContent = [];
+        let origContent: any[] = [];
         if (orig && typeof orig === 'object') {
           origContent = orig.msg.slice(2);
           pics = orig.pics;
@@ -608,7 +627,7 @@ export class BiliQuery {
 
       default:
         // 处理未定义的动态类型
-        (Bot.logger ?? logger)?.mark(`未处理的B站推送【${upName}】：${data.type}`);
+        global?.logger?.mark(`未处理的B站推送【${upName}】：${data.type}`);
         return 'continue';
     }
   }

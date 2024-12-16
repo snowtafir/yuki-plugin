@@ -1,6 +1,6 @@
 import JSON from 'json5';
 import lodash from 'lodash';
-import { Bot, Messages, Redis, EventType } from 'yunzaijs';
+import { Messages, Redis, EventType } from 'yunzaijs';
 import { BiliQuery } from '@src/models/bilibili/bilibili.main.query';
 import { BiliTask } from '@src/models/bilibili/bilibili.main.task';
 import Config from '@src/utils/config';
@@ -95,7 +95,7 @@ message.use(
       }
       const { has_more, items } = data || {};
 
-      let infoName: string;
+      let infoName: string = '';
       if (code === 0 && has_more === false) {
         e.reply(`检测到该uid的主页空间动态内容为空，\n执行uid：${uid} 校验...`);
 
@@ -121,7 +121,7 @@ message.use(
         }
       }
 
-      let name: string | number;
+      let name: string | number = '';
       if (Array.isArray(items)) {
         if (items.length > 0) {
           name = items[0].modules?.module_author?.name || uid;
@@ -218,29 +218,31 @@ message.use(
     if (e.isMaster) {
       try {
         const token = await applyLoginQRCode(e);
+        if (token) {
+          let biliLoginCk = await pollLoginQRCode(e, token);
+          if (biliLoginCk) {
+            if (lodash.trim(biliLoginCk).length != 0) {
+              await saveLoginCookie(e, biliLoginCk);
+              e.reply(`get bilibili LoginCk：成功！`);
+              const result = await postGateway(biliLoginCk); //激活ck
 
-        let biliLoginCk = await pollLoginQRCode(e, token);
+              const { code, data } = await result.data; // 解析校验结果
 
-        if (lodash.trim(biliLoginCk).length != 0) {
-          await saveLoginCookie(e, biliLoginCk);
-          e.reply(`get bilibili LoginCk：成功！`);
-          const result = await postGateway(biliLoginCk); //激活ck
-
-          const { code, data } = await result.data; // 解析校验结果
-
-          switch (code) {
-            case 0:
-              (logger ?? Bot.logger)?.mark(`优纪插件：获取biliLoginCK，Gateway校验成功：${JSON.stringify(data)}`);
-              break;
-            default:
-              (logger ?? Bot.logger)?.mark(`优纪插件：获取biliLoginCK，Gateway校验失败：${JSON.stringify(data)}`);
-              break;
+              switch (code) {
+                case 0:
+                  global?.logger?.mark(`优纪插件：获取biliLoginCK，Gateway校验成功：${JSON.stringify(data)}`);
+                  break;
+                default:
+                  global?.logger?.mark(`优纪插件：获取biliLoginCK，Gateway校验失败：${JSON.stringify(data)}`);
+                  break;
+              }
+            } else {
+              e.reply(`get bilibili LoginCk：失败X﹏X`);
+            }
           }
-        } else {
-          e.reply(`get bilibili LoginCk：失败X﹏X`);
         }
       } catch (Error) {
-        (logger ?? Bot.logger)?.info(`yuki-plugin Login bilibili Failed：${Error}`);
+        global?.logger?.info(`yuki-plugin Login bilibili Failed：${Error}`);
       }
     } else {
       e.reply('未取得bot主人身份，无权限配置B站登录ck');
@@ -296,7 +298,7 @@ message.use(
         if (!param.buvid3 || !param._uuid || !param.buvid4 || !param.DedeUserID) {
           await e.reply('发送的cookie字段缺失\n请添加完整cookie\n获取方法查看仓库主页。');
 
-          const missingCookies = [];
+          const missingCookies: string[] = [];
           if (!param.buvid3 || param.buvid3.length === 0) {
             missingCookies.push('buvid3');
           }
@@ -337,10 +339,10 @@ message.use(
 
         switch (code) {
           case 0:
-            (logger ?? Bot.logger)?.mark(`优纪插件：绑定localCK，Gateway校验成功：${JSON.stringify(data)}`);
+            global?.logger?.mark(`优纪插件：绑定localCK，Gateway校验成功：${JSON.stringify(data)}`);
             break;
           default:
-            (logger ?? Bot.logger)?.mark(`优纪插件：绑定localCK，Gateway校验失败：${JSON.stringify(data)}`);
+            global?.logger?.mark(`优纪插件：绑定localCK，Gateway校验失败：${JSON.stringify(data)}`);
             break;
         }
       }
@@ -416,7 +418,7 @@ message.use(
       }
     } catch (error) {
       e.reply(`~yuki-plugin:\n临时b站ck刷新失败X﹏X\n请重启bot(手动或发送指令 #重启)后重试`);
-      (logger ?? Bot.logger)?.mark(`优纪插件：B站临时ck刷新error：${error}`);
+      global?.logger?.mark(`优纪插件：B站临时ck刷新error：${error}`);
     }
   },
   [/^(#|\/)(yuki|优纪)?刷新(b站|B站|bili|bilibili|哔哩|哔哩哔哩)临时(ck|CK|cookie|COOKIE)$/]
@@ -430,7 +432,7 @@ message.use(
     } else {
       let subData = Config.getConfigData('config', 'bilibili', 'push') || { group: {}, private: {} };
 
-      const messages = [];
+      const messages: string[] = [];
 
       const typeMap = {
         DYNAMIC_TYPE_AV: '视频',
@@ -494,7 +496,7 @@ message.use(
   async e => {
     let subData = Config.getConfigData('config', 'bilibili', 'push') || { group: {}, private: {} };
 
-    const messages = [];
+    const messages: string[] = [];
 
     const typeMap = {
       DYNAMIC_TYPE_AV: '视频',
@@ -603,7 +605,7 @@ message.use(
       return;
     }
 
-    const messages = [];
+    const messages: string[] = [];
 
     for (let index = 0; index < Math.min(data.result.length, 5); index++) {
       const item: { uname: string; mid: number; fans: number } = data.result[index];

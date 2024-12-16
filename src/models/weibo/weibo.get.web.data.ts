@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Bot, EventType } from 'yunzaijs';
+import { EventType } from 'yunzaijs';
 import { WeiboApi } from '@src/models/weibo/weibo.api';
 import { WeiboQuery } from '@src/models/weibo/weibo.query';
 
@@ -59,7 +59,7 @@ export class WeiboGetWebData {
 
       return data.cards.filter(WeiboQuery.filterCardTypeCustom);
     } catch (error) {
-      (logger ?? Bot.logger)?.mark('微博推送：Error fetching sub list:', error);
+      global?.logger?.mark('微博推送：Error fetching sub list:', error);
       return [];
     }
   }
