@@ -185,7 +185,15 @@ export class BiliTask {
     }
   }
 
-  /*发送动态*/
+  /**
+   * 发送动态消息
+   * @param chatId 聊天 ID
+   * @param bot_id 机器人 ID
+   * @param upName 用户名
+   * @param pushDynamicData 推送动态数据
+   * @param biliConfigData 哔哩配置数据
+   * @param chatType 聊天类型
+   */
   async sendDynamic(chatId: string | number, bot_id: string | number, upName: string, pushDynamicData: any, biliConfigData: any, chatType: string) {
     const id_str = pushDynamicData.id_str;
 
@@ -261,15 +269,21 @@ export class BiliTask {
         }
       }
 
-      await this.sendMessage(chatId, bot_id, chatType, dynamicMsg.msg);
-      const pics = dynamicMsg.pics;
-      if (pics && pics.length > 0) {
-        for (let i = 0; i < pics.length; i++) {
-          await this.sendMessage(chatId, bot_id, chatType, pics[i]);
-          await this.randomDelay(1000, 2000); // 随机延时1-2秒
+      let mergeTextPic: boolean = !!biliConfigData.mergeTextPic === false ? false : true; // 是否合并文本和图片，默认为 true
+      if (mergeTextPic) {
+        const mergeMsg = [...dynamicMsg.msg, ...dynamicMsg.pics];
+        await this.sendMessage(chatId, bot_id, chatType, mergeMsg);
+      } else {
+        await this.sendMessage(chatId, bot_id, chatType, dynamicMsg.msg);
+        const pics = dynamicMsg.pics;
+        if (pics && pics.length > 0) {
+          for (let i = 0; i < pics.length; i++) {
+            await this.sendMessage(chatId, bot_id, chatType, pics[i]);
+            await this.randomDelay(1000, 2000); // 随机延时1-2秒
+          }
         }
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
-      await new Promise(resolve => setTimeout(resolve, 1000));
     }
   }
 
