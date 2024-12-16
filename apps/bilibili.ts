@@ -158,7 +158,7 @@ export default class YukiBili extends Plugin {
       }
       const { has_more, items } = data || {};
 
-      let infoName: string;
+      let infoName: string = '';
       if (code === 0 && has_more === false) {
         this.e.reply(`检测到该uid的主页空间动态内容为空，\n执行uid：${uid} 校验...`);
 
@@ -184,7 +184,7 @@ export default class YukiBili extends Plugin {
         }
       }
 
-      let name: string | number;
+      let name: string | number = '';
       if (Array.isArray(items)) {
         if (items.length > 0) {
           name = items[0].modules?.module_author?.name || uid;
@@ -275,29 +275,31 @@ export default class YukiBili extends Plugin {
     if (this.e.isMaster) {
       try {
         const token = await applyLoginQRCode(this.e);
+        if (token) {
+          let biliLoginCk = await pollLoginQRCode(this.e, token);
+          if (biliLoginCk) {
+            if (lodash.trim(biliLoginCk).length != 0) {
+              await saveLoginCookie(this.e, biliLoginCk);
+              this.e.reply(`get bilibili LoginCk：成功！`);
+              const result = await postGateway(biliLoginCk); //激活ck
 
-        let biliLoginCk = await pollLoginQRCode(this.e, token);
+              const { code, data } = await result.data; // 解析校验结果
 
-        if (lodash.trim(biliLoginCk).length != 0) {
-          await saveLoginCookie(this.e, biliLoginCk);
-          this.e.reply(`get bilibili LoginCk：成功！`);
-          const result = await postGateway(biliLoginCk); //激活ck
-
-          const { code, data } = await result.data; // 解析校验结果
-
-          switch (code) {
-            case 0:
-              (logger ?? Bot.logger)?.mark(`优纪插件：获取biliLoginCK，Gateway校验成功：${JSON.stringify(data)}`);
-              break;
-            default:
-              (logger ?? Bot.logger)?.mark(`优纪插件：获取biliLoginCK，Gateway校验失败：${JSON.stringify(data)}`);
-              break;
+              switch (code) {
+                case 0:
+                  global?.logger?.mark(`优纪插件：获取biliLoginCK，Gateway校验成功：${JSON.stringify(data)}`);
+                  break;
+                default:
+                  global?.logger?.mark(`优纪插件：获取biliLoginCK，Gateway校验失败：${JSON.stringify(data)}`);
+                  break;
+              }
+            } else {
+              this.e.reply(`get bilibili LoginCk：失败X﹏X`);
+            }
           }
-        } else {
-          this.e.reply(`get bilibili LoginCk：失败X﹏X`);
         }
       } catch (Error) {
-        (logger ?? Bot.logger)?.info(`yuki-plugin Login bilibili Failed：${Error}`);
+        global?.logger?.info(`yuki-plugin Login bilibili Failed：${Error}`);
       }
     } else {
       this.e.reply('未取得bot主人身份，无权限配置B站登录ck');
@@ -344,7 +346,7 @@ export default class YukiBili extends Plugin {
         if (!param.buvid3 || !param._uuid || !param.buvid4 || !param.DedeUserID) {
           await this.e.reply('发送的cookie字段缺失\n请添加完整cookie\n获取方法查看仓库主页。');
 
-          const missingCookies = [];
+          const missingCookies: string[] = [];
           if (!param.buvid3 || param.buvid3.length === 0) {
             missingCookies.push('buvid3');
           }
@@ -385,10 +387,10 @@ export default class YukiBili extends Plugin {
 
         switch (code) {
           case 0:
-            (logger ?? Bot.logger)?.mark(`优纪插件：绑定localCK，Gateway校验成功：${JSON.stringify(data)}`);
+            global?.logger?.mark(`优纪插件：绑定localCK，Gateway校验成功：${JSON.stringify(data)}`);
             break;
           default:
-            (logger ?? Bot.logger)?.mark(`优纪插件：绑定localCK，Gateway校验失败：${JSON.stringify(data)}`);
+            global?.logger?.mark(`优纪插件：绑定localCK，Gateway校验失败：${JSON.stringify(data)}`);
             break;
         }
       }
@@ -443,9 +445,9 @@ export default class YukiBili extends Plugin {
         const data = await result.data; // 解析校验结果
 
         if (data?.code !== 0) {
-          logger?.error(`优纪插件：tempCK，Gateway校验失败：${JSON.stringify(data)}`);
+          global?.logger?.error(`优纪插件：tempCK，Gateway校验失败：${JSON.stringify(data)}`);
         } else if (data?.code === 0) {
-          logger?.mark(`优纪插件：tempCK，Gateway校验成功：${JSON.stringify(data)}`);
+          global?.logger?.mark(`优纪插件：tempCK，Gateway校验成功：${JSON.stringify(data)}`);
         }
         this.e.reply(
           `~yuki-plugin:\n临时b站ck刷新成功~❤~\n接下来如果获取动态失败，请重启bot(手动或发送指令 #重启)刷新状态~\n如果重启续仍不可用，请考虑 #优纪添加b站登录 吧~`
@@ -455,7 +457,7 @@ export default class YukiBili extends Plugin {
       }
     } catch (error) {
       this.e.reply(`~yuki-plugin:\n临时b站ck刷新失败X﹏X\n请重启bot(手动或发送指令 #重启)后重试`);
-      (logger ?? Bot.logger)?.mark(`优纪插件：B站临时ck刷新error：${error}`);
+      global?.logger?.mark(`优纪插件：B站临时ck刷新error：${error}`);
     }
   }
 
@@ -466,7 +468,7 @@ export default class YukiBili extends Plugin {
     } else {
       let subData = this.biliPushData || { group: {}, private: {} };
 
-      const messages = [];
+      const messages: string[] = [];
 
       const typeMap = {
         DYNAMIC_TYPE_AV: '视频',
@@ -527,7 +529,7 @@ export default class YukiBili extends Plugin {
   async singelSubDynamicPushList() {
     let subData = this.biliPushData || { group: {}, private: {} };
 
-    const messages = [];
+    const messages: string[] = [];
 
     const typeMap = {
       DYNAMIC_TYPE_AV: '视频',
@@ -630,7 +632,7 @@ export default class YukiBili extends Plugin {
       return;
     }
 
-    const messages = [];
+    const messages: string[] = [];
 
     for (let index = 0; index < Math.min(data.result.length, 5); index++) {
       const item: { uname: string; mid: number; fans: number } = data.result[index];

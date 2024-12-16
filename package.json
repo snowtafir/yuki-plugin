@@ -39,6 +39,7 @@
     "yaml": "^2.6.1"
   },
   "devDependencies": {
+    "@types/chokidar": "2.1.7",
     "@rollup/plugin-commonjs": "^26.0.1",
     "@rollup/plugin-image": "^3.0.3",
     "@rollup/plugin-json": "^6.1.0",

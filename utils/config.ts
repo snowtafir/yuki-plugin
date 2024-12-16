@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import YAML from 'yaml';
-import chokidar from 'chokidar';
+import * as chokidar from 'chokidar';
 import lodash from 'lodash';
 import path from 'path';
 import { _paths } from '@/utils/paths';

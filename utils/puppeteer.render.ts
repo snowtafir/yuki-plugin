@@ -71,6 +71,7 @@ export class YukiPuppeteerRender {
       }
 
       const boundingBox = await element.boundingBox(); // 获取内容区域的边界框信息
+      if (!boundingBox) return false;
       const num = Options?.isSplit ? Math.ceil(boundingBox.height / pageHeight) : 1; // 根据是否需要分片，计算分片数量，默认为 1
       pageHeight = Math.round(boundingBox.height / num); //动态调整分片高度，防止过短影响观感。
 
