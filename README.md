@@ -8,6 +8,28 @@
 
 [![访问量](https://profile-counter.glitch.me/yuki-plugin/count.svg)](https://github.com/snowtafir/yuki-plugin)
 
+
+# 🚩运行环境：
+1. 系统：
+* windows 10/11+，
+* Linux推荐：Ubuntu 24.04.1 LTS+, CentOS Stream 8 +, Debian 12+, Fedora 35+
+
+2. node v22+ 下载地址：https://nodejs.org/zh-cn/download/
+
+3. 推荐使用chrome或chromium浏览器，其他浏览器可能存在兼容性问题。
+* chrome 浏览器 v131+  win_x64下载地址：https://www.google.cn/chrome/
+* chromium 浏览器 v128+ Linux/win手动下载安装：https://download-chromium.appspot.com
+
+> linux命令行安装chromiun浏览器：
+```sh
+sudo apt-get install chromium-browser # Ubuntu/Debian
+sudo dnf install chromium # Fedora
+sudo yum install chromium # CentOS Stream 8
+
+#查看版本
+chromium-browser --version
+```
+
 # 🌰一、安装插件
 
 ## 选择安装方式
