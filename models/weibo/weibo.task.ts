@@ -229,8 +229,9 @@ export class WeiboTask {
         return 'return'; // 如果动态消息构建失败或内部资源获取失败，则直接返回
       }
 
-      if (weiboConfigData.banWords.length > 0) {
-        const banWords = new RegExp(weiboConfigData.banWords.join('|'), 'g'); // 构建屏蔽关键字正则表达式
+      const getBanWords: string[] | null = weiboConfigData?.banWords;
+      if (getBanWords && Array.isArray(getBanWords) && getBanWords.length > 0) {
+        const banWords = new RegExp(getBanWords.join('|'), 'g'); // 构建屏蔽关键字正则表达式
         if (banWords.test(dynamicMsg.msg.join(''))) {
           return 'return'; // 如果动态消息包含屏蔽关键字，则直接返回
         }
