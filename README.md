@@ -29,6 +29,7 @@ sudo yum install chromium # CentOS Stream 8
 #查看版本
 chromium-browser --version
 ```
+> 注意，如果windows下手动安装chromium浏览器，或安装了其他修改版chrome浏览器，出现找不到浏览器，需要手动将`可执行文件路径`添加到 [./.puppeteerrc.cjs](./.puppeteerrc.cjs) 的路径列表中。
 
 # 🌰一、安装插件
 
