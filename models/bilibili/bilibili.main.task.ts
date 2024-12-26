@@ -261,8 +261,9 @@ export class BiliTask {
         return 'return'; // 如果动态消息构建失败，则直接返回
       }
 
-      if (biliConfigData.banWords.length > 0) {
-        const banWords = new RegExp(biliConfigData.banWords.join('|'), 'g'); // 构建屏蔽关键字正则表达式
+      const getBanWords: string[] | null = biliConfigData?.banWords;
+      if (getBanWords && Array.isArray(getBanWords) && getBanWords.length > 0) {
+        const banWords = new RegExp(getBanWords.join('|'), 'g'); // 构建屏蔽关键字正则表达式
         if (banWords.test(dynamicMsg.msg.join(''))) {
           return 'return'; // 如果动态消息包含屏蔽关键字，则直接返回
         }
