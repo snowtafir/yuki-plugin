@@ -31,8 +31,10 @@ export class WeiboQuery {
       return 'DYNAMIC_TYPE_AV';
     } else if (raw_post?.mblog?.pics) {
       return 'DYNAMIC_TYPE_DRAW';
-    } else {
+    } else if (!raw_post?.mblog?.pics && String(raw_post?.mblog?.text).trim().length > 0) {
       return 'DYNAMIC_TYPE_ARTICLE';
+    } else {
+      return 'DYNAMIC_TYPE_UNKNOWN';
     }
   }
 
@@ -85,7 +87,7 @@ export class WeiboQuery {
 
     /**头像框 */
     formatData.data.pendant = '';
-
+    /**生成日期 */
     formatData.data.created = moment().format('YYYY年MM月DD日 HH:mm:ss');
 
     formatData.data.type = type;
@@ -133,6 +135,8 @@ export class WeiboQuery {
         let origin_post_info = info?.retweeted_status;
         formatData.data.orig = await this.formatDynamicData(origin_post_info);
         formatData.data.category = '转发动态';
+        break;
+      default:
         break;
     }
 
