@@ -28,8 +28,11 @@ class WeiboQuery {
         else if (raw_post?.mblog?.pics) {
             return 'DYNAMIC_TYPE_DRAW';
         }
-        else {
+        else if (!raw_post?.mblog?.pics && String(raw_post?.mblog?.text).trim().length > 0) {
             return 'DYNAMIC_TYPE_ARTICLE';
+        }
+        else {
+            return 'DYNAMIC_TYPE_UNKNOWN';
         }
     }
     /**筛选正文 */
@@ -76,6 +79,7 @@ class WeiboQuery {
         formatData.data.name = nick_name;
         /**头像框 */
         formatData.data.pendant = '';
+        /**生成日期 */
         formatData.data.created = moment().format('YYYY年MM月DD日 HH:mm:ss');
         formatData.data.type = type;
         switch (type) {

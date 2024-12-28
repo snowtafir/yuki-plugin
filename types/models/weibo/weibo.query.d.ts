@@ -6,7 +6,7 @@ export declare class WeiboQuery {
     /**转换微博动态创建时间：（created_at）转换为 UNIX 时间戳（以毫秒为单位） */
     static getDynamicCreatetDate(raw_post: any): number;
     /**分类动态，返回标识 */
-    static MakeCategory(raw_post: any): "DYNAMIC_TYPE_AV" | "DYNAMIC_TYPE_DRAW" | "DYNAMIC_TYPE_ARTICLE" | "DYNAMIC_TYPE_FORWARD";
+    static MakeCategory(raw_post: any): "DYNAMIC_TYPE_AV" | "DYNAMIC_TYPE_DRAW" | "DYNAMIC_TYPE_ARTICLE" | "DYNAMIC_TYPE_FORWARD" | "DYNAMIC_TYPE_UNKNOWN";
     /**筛选正文 */
     static filterText(raw_text: string): string;
     /** 获取并生成微博动态渲染数据 */
