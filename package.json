@@ -1,6 +1,6 @@
 {
   "name": "yz-yuki-plugin",
-  "version": "2.0.6-3",
+  "version": "2.0.6-4",
   "description": "优纪插件，yunzaijs 关于 微博推送、B站推送 等功能的拓展插件",
   "author": "snowtafir",
   "type": "module",
@@ -60,6 +60,7 @@
     "axios": "^1.7.9",
     "chokidar": "^4.0.1",
     "husky": "^9.1.6",
+    "icqq": "^0.6.10",
     "jsdom": "^24.1.1",
     "json5": "^2.2.3",
     "jsxp": "^1.0.8",
