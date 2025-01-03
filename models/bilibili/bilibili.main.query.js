@@ -391,6 +391,7 @@ class BiliQuery {
         const BiliDrawDynamicLinkUrl = 'https://m.bilibili.com/dynamic/';
         let desc, msg = [], pics = [], author, majorType, content, dynamicTitle;
         let title = `B站【${upName}】动态推送：\n`;
+        let dynamicType = data.type;
         switch (data.type) {
             case 'DYNAMIC_TYPE_AV':
                 // 处理视频动态
@@ -408,7 +409,7 @@ class BiliQuery {
                     `时间：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}`
                 ];
                 pics = [segment.image(desc?.cover)];
-                return { msg, pics };
+                return { msg, pics, dynamicType };
             case 'DYNAMIC_TYPE_WORD':
                 // 处理文字动态
                 author = data?.modules?.module_author;
@@ -438,7 +439,7 @@ class BiliQuery {
                     `链接：${BiliDrawDynamicLinkUrl}${data.id_str}\n`,
                     `时间：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}`
                 ];
-                return { msg, pics };
+                return { msg, pics, dynamicType };
             case 'DYNAMIC_TYPE_DRAW':
                 // 处理图文动态
                 author = data?.modules?.module_author;
@@ -484,7 +485,7 @@ class BiliQuery {
                     `链接：${BiliDrawDynamicLinkUrl}${data.id_str}\n`,
                     `时间：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}`
                 ];
-                return { msg, pics };
+                return { msg, pics, dynamicType };
             case 'DYNAMIC_TYPE_ARTICLE':
                 // 处理文章动态
                 author = data?.modules?.module_author;
@@ -527,7 +528,7 @@ class BiliQuery {
                     `链接：${this.formatUrl(desc.jump_url)}\n`,
                     `时间：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}`
                 ];
-                return { msg, pics };
+                return { msg, pics, dynamicType };
             case 'DYNAMIC_TYPE_FORWARD':
                 // 处理转发动态
                 author = data?.modules?.module_author;
@@ -557,7 +558,7 @@ class BiliQuery {
                     '\n---以下为转发内容---\n',
                     ...origContent
                 ];
-                return { msg, pics };
+                return { msg, pics, dynamicType };
             case 'DYNAMIC_TYPE_LIVE_RCMD':
                 // 处理直播动态
                 desc = data?.modules?.module_dynamic?.major?.live_rcmd?.content;
@@ -570,7 +571,7 @@ class BiliQuery {
                 title = `B站【${upName}】直播动态推送：\n`;
                 msg = [title, `-----------------------------\n`, `标题：${desc.title}\n`, `链接：https:${desc.link}`];
                 pics = [segment.image(desc.cover)];
-                return { msg, pics };
+                return { msg, pics, dynamicType };
             default:
                 // 处理未定义的动态类型
                 (Bot.logger ?? logger)?.mark(`未处理的B站推送【${upName}】：${data.type}`);

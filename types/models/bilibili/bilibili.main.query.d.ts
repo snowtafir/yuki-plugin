@@ -56,6 +56,7 @@ export declare class BiliQuery {
     static formatTextDynamicData(upName: string, data: any, isForward: boolean, setData: any): Promise<"continue" | {
         msg: any[];
         pics: any[];
+        dynamicType: string;
     }>;
     static dynamicContentLimit(content: string, setData: any): string;
     /**根据关键字更新 up 的动态类型 */
