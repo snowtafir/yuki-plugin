@@ -171,8 +171,8 @@ class BiliTask {
         }
         if (sended)
             return; // 如果已经发送过，则直接返回
-        let liveAtAll = biliConfigData.atAll === true ? true : false; // 直播动态是否@全体成员，默认false
-        let liveAtAllCD = biliConfigData.atAllCD || 1800; // 直播动态@全体成员 冷却时间CD，默认 30 分钟
+        let liveAtAll = biliConfigData.liveAtAll === true ? true : false; // 直播动态是否@全体成员，默认false
+        let liveAtAllCD = biliConfigData.liveAtAllCD || 1800; // 直播动态@全体成员 冷却时间CD，默认 30 分钟
         let liveAtAllMark = await redis.get(`${markKey}${chatId}:liveAtAllMark`); // 直播动态@全体成员标记，默认 0
         if (!!biliConfigData.pushMsgMode) {
             const { data, uid } = await BiliQuery.formatDynamicData(pushDynamicData); // 处理动态数据
