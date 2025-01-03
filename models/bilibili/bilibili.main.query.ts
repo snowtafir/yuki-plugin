@@ -430,6 +430,7 @@ export class BiliQuery {
       content: any,
       dynamicTitle: any;
     let title = `B站【${upName}】动态推送：\n`;
+    let dynamicType: string = data.type;
 
     switch (data.type) {
       case 'DYNAMIC_TYPE_AV':
@@ -450,7 +451,7 @@ export class BiliQuery {
 
         pics = [segment.image(desc?.cover)];
 
-        return { msg, pics };
+        return { msg, pics, dynamicType };
 
       case 'DYNAMIC_TYPE_WORD':
         // 处理文字动态
@@ -482,7 +483,7 @@ export class BiliQuery {
           `时间：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}`
         ];
 
-        return { msg, pics };
+        return { msg, pics, dynamicType };
 
       case 'DYNAMIC_TYPE_DRAW':
         // 处理图文动态
@@ -532,7 +533,7 @@ export class BiliQuery {
           `时间：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}`
         ];
 
-        return { msg, pics };
+        return { msg, pics, dynamicType };
 
       case 'DYNAMIC_TYPE_ARTICLE':
         // 处理文章动态
@@ -577,7 +578,7 @@ export class BiliQuery {
           `时间：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}`
         ];
 
-        return { msg, pics };
+        return { msg, pics, dynamicType };
 
       case 'DYNAMIC_TYPE_FORWARD':
         // 处理转发动态
@@ -610,7 +611,7 @@ export class BiliQuery {
           ...origContent
         ];
 
-        return { msg, pics };
+        return { msg, pics, dynamicType };
 
       case 'DYNAMIC_TYPE_LIVE_RCMD':
         // 处理直播动态
@@ -623,7 +624,7 @@ export class BiliQuery {
         msg = [title, `-----------------------------\n`, `标题：${desc.title}\n`, `链接：https:${desc.link}`];
 
         pics = [segment.image(desc.cover)];
-        return { msg, pics };
+        return { msg, pics, dynamicType };
 
       default:
         // 处理未定义的动态类型
