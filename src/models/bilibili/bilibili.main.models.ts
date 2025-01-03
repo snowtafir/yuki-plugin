@@ -62,7 +62,7 @@ export async function applyLoginQRCode(e: EventType) {
       const { img } = qrCodeImage;
       qrCodeBufferArray = img;
     }
-    let msg: string[] = [];
+    let msg: any[] = [];
     if (qrCodeBufferArray.length === 0) {
       msg.push('渲染二维码图片失败，请查看终端输出的实时日志，\n复制哔哩登陆二维码URL，使用在线或本地二维码生成工具生成二维码并扫码。');
     } else {
