@@ -175,6 +175,7 @@ class BiliTask {
         let liveAtAll = biliConfigData.liveAtAll === true ? true : false; // 直播动态是否@全体成员，默认false
         let liveAtAllCD = biliConfigData.liveAtAllCD || 1800; // 直播动态@全体成员 冷却时间CD，默认 30 分钟
         let liveAtAllMark = await Redis.get(`${markKey}${chatId}:liveAtAllMark`); // 直播动态@全体成员标记，默认 0
+        let liveAtAllGroupList = new Set(Array.isArray(biliConfigData.liveAtAllGroupList) ? biliConfigData.liveAtAllGroupList : []); // 直播动态@全体成员的群组列表，默认空数组，为空则不进行@全体成员操作
         if (!!biliConfigData.pushMsgMode) {
             const { data, uid } = await BiliQuery.formatDynamicData(pushDynamicData); // 处理动态数据
             const extentData = { ...data };
@@ -206,7 +207,7 @@ class BiliTask {
                 return;
             Redis.set(`${markKey}${chatId}:${id_str}`, '1', { EX: 3600 * 72 }); // 设置已发送标记
             global?.logger?.mark('优纪插件：B站动态执行推送');
-            if (liveAtAll && liveAtAllMark && extentData?.type === 'DYNAMIC_TYPE_LIVE_RCMD') {
+            if (liveAtAll && liveAtAllMark && extentData?.type === 'DYNAMIC_TYPE_LIVE_RCMD' && liveAtAllGroupList.has(chatId)) {
                 try {
                     await this.sendMessage(chatId, bot_id, chatType, Segment.at('all'));
                     await Redis.set(`${markKey}${chatId}:liveAtAllMark`, 1, { EX: liveAtAllCD }); // 设置直播动态@全体成员标记为 1
@@ -239,7 +240,7 @@ class BiliTask {
             let mergeTextPic = !!biliConfigData.mergeTextPic === false ? false : true; // 是否合并文本和图片，默认为 true
             if (mergeTextPic) {
                 const mergeMsg = [...dynamicMsg.msg, ...dynamicMsg.pics];
-                if (liveAtAll && liveAtAllMark && dynamicMsg.dynamicType === 'DYNAMIC_TYPE_LIVE_RCMD') {
+                if (liveAtAll && liveAtAllMark && dynamicMsg.dynamicType === 'DYNAMIC_TYPE_LIVE_RCMD' && liveAtAllGroupList.has(chatId)) {
                     try {
                         await this.sendMessage(chatId, bot_id, chatType, Segment.at('all'));
                         await Redis.set(`${markKey}${chatId}:liveAtAllMark`, 1, { EX: liveAtAllCD }); // 设置直播动态@全体成员标记为 1
@@ -252,7 +253,7 @@ class BiliTask {
                 await this.sendMessage(chatId, bot_id, chatType, mergeMsg);
             }
             else {
-                if (liveAtAll && liveAtAllMark && dynamicMsg.dynamicType === 'DYNAMIC_TYPE_LIVE_RCMD') {
+                if (liveAtAll && liveAtAllMark && dynamicMsg.dynamicType === 'DYNAMIC_TYPE_LIVE_RCMD' && liveAtAllGroupList.has(chatId)) {
                     try {
                         await this.sendMessage(chatId, bot_id, chatType, Segment.at('all'));
                         await Redis.set(`${markKey}${chatId}:liveAtAllMark`, 1, { EX: liveAtAllCD }); // 设置直播动态@全体成员标记为 1
