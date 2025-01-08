@@ -3,8 +3,8 @@ import { MainProps } from '@/components/dynamic/MainPage';
 import Config from '@/utils/config';
 import { renderPage } from '@/utils/image';
 import { ScreenshotOptions } from '@/utils/puppeteer.render';
-import { WeiboGetWebData } from '@/models/weibo/weibo.get.web.data';
-import { WeiboQuery } from '@/models/weibo/weibo.query';
+import { WeiboGetWebData } from '@/models/weibo/weibo.main.get.web.data';
+import { WeiboQuery } from '@/models/weibo/weibo.main.query';
 
 declare const Bot: any, redis: any, segment: any;
 
@@ -25,6 +25,7 @@ export class WeiboTask {
     let weiboConfigData = await Config.getUserConfig('weibo', 'config');
     let weiboPushData = await Config.getUserConfig('weibo', 'push');
     let interval: number = weiboConfigData.interval || 7200; // 推送间隔时间，单位为秒，默认2小时
+    logger.debug(`当前微博功能配置：${JSON.stringify(weiboConfigData)}`);
     const uidMap: Map<any, Map<string, any>> = new Map(); // 存放group 和 private 对应所属 uid 与推送信息的映射
     const dynamicList = {}; // 存放获取的所有动态，键为 uid，值为动态数组
 

@@ -1,6 +1,6 @@
 import moment from 'moment';
 import fetch from 'node-fetch';
-import { WeiboApi } from '@/models/weibo/weibo.api';
+import { WeiboApi } from '@/models/weibo/weibo.main.api';
 import { JSDOM } from 'jsdom';
 
 declare const Bot: any, segment: any;
