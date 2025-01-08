@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { WeiboApi } from './weibo.api.js';
-import { WeiboQuery } from './weibo.query.js';
+import { WeiboApi } from './weibo.main.api.js';
+import { WeiboQuery } from './weibo.main.query.js';
 
 class WeiboGetWebData {
     e;

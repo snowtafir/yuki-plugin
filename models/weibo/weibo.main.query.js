@@ -1,6 +1,6 @@
 import moment from 'moment';
 import fetch from 'node-fetch';
-import { WeiboApi } from './weibo.api.js';
+import { WeiboApi } from './weibo.main.api.js';
 import { JSDOM } from 'jsdom';
 
 class WeiboQuery {

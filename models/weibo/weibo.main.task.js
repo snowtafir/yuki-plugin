@@ -1,8 +1,8 @@
 import QRCode from 'qrcode';
 import Config from '../../utils/config.js';
 import { renderPage } from '../../utils/image.js';
-import { WeiboGetWebData } from './weibo.get.web.data.js';
-import { WeiboQuery } from './weibo.query.js';
+import { WeiboGetWebData } from './weibo.main.get.web.data.js';
+import { WeiboQuery } from './weibo.main.query.js';
 
 class WeiboTask {
     taskName;
@@ -18,6 +18,7 @@ class WeiboTask {
         let weiboConfigData = await Config.getUserConfig('weibo', 'config');
         let weiboPushData = await Config.getUserConfig('weibo', 'push');
         let interval = weiboConfigData.interval || 7200; // 推送间隔时间，单位为秒，默认2小时
+        logger.debug(`当前微博功能配置：${JSON.stringify(weiboConfigData)}`);
         const uidMap = new Map(); // 存放group 和 private 对应所属 uid 与推送信息的映射
         const dynamicList = {}; // 存放获取的所有动态，键为 uid，值为动态数组
         await this.processWeiboData(weiboPushData, uidMap, dynamicList);
