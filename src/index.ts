@@ -5,7 +5,7 @@ import path from 'path';
 import { _paths } from '@src/utils/paths';
 import * as apps from '@src/apps/index';
 import { BiliTask } from '@src/models/bilibili/bilibili.main.task';
-import { WeiboTask } from '@src/models/weibo/weibo.task';
+import { WeiboTask } from '@src/models/weibo/weibo.main.task';
 declare const logger: any;
 type RulesType = {
   reg: RegExp | string;
