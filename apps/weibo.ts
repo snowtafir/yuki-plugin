@@ -1,9 +1,9 @@
 import { Plugin } from 'yunzaijs';
-import { WeiboQuery } from '@/models/weibo/weibo.query';
-import { WeiboTask } from '@/models/weibo/weibo.task';
+import { WeiboQuery } from '@/models/weibo/weibo.main.query';
+import { WeiboTask } from '@/models/weibo/weibo.main.task';
 import Config from '@/utils/config';
 import { _paths } from '@/utils/paths';
-import { WeiboGetWebData } from '@/models/weibo/weibo.get.web.data';
+import { WeiboGetWebData } from '@/models/weibo/weibo.main.get.web.data';
 
 declare const logger: any;
 
