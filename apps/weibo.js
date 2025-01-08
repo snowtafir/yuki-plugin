@@ -1,8 +1,8 @@
 import { Plugin } from 'yunzaijs';
-import { WeiboQuery } from '../models/weibo/weibo.query.js';
-import { WeiboTask } from '../models/weibo/weibo.task.js';
+import { WeiboQuery } from '../models/weibo/weibo.main.query.js';
+import { WeiboTask } from '../models/weibo/weibo.main.task.js';
 import Config from '../utils/config.js';
-import { WeiboGetWebData } from '../models/weibo/weibo.get.web.data.js';
+import { WeiboGetWebData } from '../models/weibo/weibo.main.get.web.data.js';
 
 class YukiWeibo extends Plugin {
     constructor() {
