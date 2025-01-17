@@ -12,7 +12,7 @@
 # 🚩运行环境：
 1. 系统：
 * windows 10/11+，
-* Linux推荐：Ubuntu 24.04.1 LTS+, CentOS Stream 8 +, Debian 12+, Fedora 35+
+* Linux推荐：CentOS Stream 8 +, Debian 12+, Fedora 35+
 
 2. node v22+ 下载地址：https://nodejs.org/zh-cn/download/
 
