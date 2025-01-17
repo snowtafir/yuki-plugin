@@ -16,11 +16,11 @@ class Image extends Picture {
     // 继承父类实例
     super();
     // 父类已经实例化组件渲染对象
-    //this.Com;
+    //this.component;
     // 父类已经实例化启动 Puppeteer
-    //this.Pup.start();
+    //this.puppeteer.start();
     // 初始化 YukiPuppeteerRender 实例
-    this.yukiPuppeteerRender = new YukiPuppeteerRender(this.Pup);
+    this.yukiPuppeteerRender = new YukiPuppeteerRender(this.puppeteer);
   }
 
   /**
@@ -43,7 +43,7 @@ class Image extends Picture {
     const Page = ReactPages[page];
     // 调用 yukiPuppeteerRender 进行截图操作
     return this.yukiPuppeteerRender.yukiScreenshot(
-      this.Com.compile({
+      this.component.compile({
         path: page,
         name: `${uid}.html`,
         component: <Page {...props} />,
