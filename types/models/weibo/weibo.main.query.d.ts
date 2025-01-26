@@ -33,6 +33,19 @@ export declare class WeiboQuery {
     static formatTextDynamicData(upName: string, raw_post: any, isForward?: boolean, setData?: any): Promise<"continue" | {
         msg: any[];
         pics: any[];
+        dynamicType: "DYNAMIC_TYPE_AV";
+    } | {
+        msg: any[];
+        pics: any[];
+        dynamicType: "DYNAMIC_TYPE_DRAW";
+    } | {
+        msg: any[];
+        pics: any[];
+        dynamicType: "DYNAMIC_TYPE_ARTICLE";
+    } | {
+        msg: any[];
+        pics: any[];
+        dynamicType: "DYNAMIC_TYPE_FORWARD";
     }>;
     static dynamicContentLimit(content: string, setData: any): string;
     static formatUrl(url: string): string;
