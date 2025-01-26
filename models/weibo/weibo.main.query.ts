@@ -204,7 +204,7 @@ export class WeiboQuery {
     let info = raw_post?.mblog || raw_post;
     let retweeted = info && info.retweeted_status ? true : false; //是否为转发动态
     let pic_num = retweeted ? info?.retweeted_status?.pic_num : info?.pic_num;
-    let type = this.MakeCategory(raw_post);
+    let dynamicType = this.MakeCategory(raw_post);
 
     /**获取动态全文 */
     if (info?.isLongText || pic_num > 9) {
@@ -230,7 +230,7 @@ export class WeiboQuery {
 
     const dynamicPicCountLimit = setData.pushPicCountLimit || 3;
 
-    switch (type) {
+    switch (dynamicType) {
       case 'DYNAMIC_TYPE_AV':
         if (!info) return;
 
@@ -250,7 +250,7 @@ export class WeiboQuery {
 
         pics = [cover_img];
 
-        return { msg, pics };
+        return { msg, pics, dynamicType };
       case 'DYNAMIC_TYPE_DRAW':
         raw_pics_list = retweeted ? info?.retweeted_status?.pics || [] : info?.pics || [];
 
@@ -274,7 +274,7 @@ export class WeiboQuery {
           `时间：${created_time ? moment(created_time).format('YYYY年MM月DD日 HH:mm:ss') : ''}`
         ];
 
-        return { msg, pics };
+        return { msg, pics, dynamicType };
       case 'DYNAMIC_TYPE_ARTICLE':
         if (!info) return;
 
@@ -298,7 +298,7 @@ export class WeiboQuery {
           `时间：${created_time ? moment(created_time).format('YYYY年MM月DD日 HH:mm:ss') : ''}`
         ];
 
-        return { msg, pics };
+        return { msg, pics, dynamicType };
       case 'DYNAMIC_TYPE_FORWARD':
         if (!info) return;
         if (!info?.retweeted_status) return;
@@ -325,9 +325,9 @@ export class WeiboQuery {
           ...origContent
         ];
 
-        return { msg, pics };
+        return { msg, pics, dynamicType };
       default:
-        logger?.mark(`未处理的微博推送【${upName}】：${type}`);
+        logger?.mark(`未处理的微博推送【${upName}】：${dynamicType}`);
         return 'continue';
     }
   }

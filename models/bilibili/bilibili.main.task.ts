@@ -40,6 +40,9 @@ export class BiliTask {
     return resjson;
   }
 
+  /**
+   * 执行动态推送任务
+   */
   async runTask() {
     let biliConfigData = await Config.getUserConfig('bilibili', 'config');
     let biliPushData = await Config.getUserConfig('bilibili', 'push');
@@ -51,7 +54,16 @@ export class BiliTask {
     await this.processBiliData(biliPushData, biliConfigData, uidMap, dynamicList);
 
     let now: number = Date.now() / 1000; // 时间戳（秒）
-    await this.pushDynamicMessages(uidMap, dynamicList, now, interval, biliConfigData);
+
+    // 定义待推送动态消息映射
+    const messageMap: Map<
+      string,
+      Map<string | number, Map<string | number, { sendMode: string; dynamicUUid_str: string; dynamicType: string; messages: any[] }[]>>
+    > = new Map();
+
+    await this.makeUidDynamicDataMap(uidMap, dynamicList, now, interval, biliConfigData, messageMap);
+
+    await this.sendDynamicMessage(messageMap, biliConfigData);
   }
 
   /**
@@ -138,14 +150,21 @@ export class BiliTask {
   }
 
   /**
-   * 推送动态消息
+   * 构建uid对应动态数据映射
    * @param uidMap uid 映射
    * @param dynamicList 动态列表
    * @param now 当前时间戳
    * @param interval 推送间隔时间
    * @param biliConfigData Bilibili配置数据
    */
-  async pushDynamicMessages(uidMap: Map<any, Map<string, any>>, dynamicList: any, now: number, interval: number, biliConfigData: any) {
+  async makeUidDynamicDataMap(
+    uidMap: Map<any, Map<string, any>>,
+    dynamicList: any,
+    now: number,
+    interval: number,
+    biliConfigData: any,
+    messageMap: Map<string, Map<string | number, Map<string | number, { sendMode: string; dynamicUUid_str: string; dynamicType: string; messages: any[] }[]>>>
+  ) {
     for (let [chatType, chatTypeMap] of uidMap) {
       for (let [key, value] of chatTypeMap) {
         const tempDynamicList = dynamicList[key] || [];
@@ -177,7 +196,7 @@ export class BiliTask {
           if (chatIds && chatIds.length) {
             for (let chatId of chatIds) {
               if (type && type.length && !type.includes(pushDynamicData.type)) continue; // 如果禁用了某类型的动态推送，跳过当前循环
-              await this.sendDynamic(chatId, bot_id, upName, pushDynamicData, biliConfigData, chatType); // 发送动态消息
+              await this.makeDynamicMessageMap(chatId, bot_id, upName, pushDynamicData, biliConfigData, chatType, messageMap); // 发送动态消息
               await this.randomDelay(1000, 2000); // 随机延时1-2秒
             }
           }
@@ -187,15 +206,23 @@ export class BiliTask {
   }
 
   /**
-   * 发送动态消息
+   * 渲染构建待发送的动态消息数据的映射数组
    * @param chatId 聊天 ID
    * @param bot_id 机器人 ID
-   * @param upName 用户名
+   * @param upName up主用户名
    * @param pushDynamicData 推送动态数据
    * @param biliConfigData 哔哩配置数据
    * @param chatType 聊天类型
    */
-  async sendDynamic(chatId: string | number, bot_id: string | number, upName: string, pushDynamicData: any, biliConfigData: any, chatType: string) {
+  async makeDynamicMessageMap(
+    chatId: string | number,
+    bot_id: string | number,
+    upName: string,
+    pushDynamicData: any,
+    biliConfigData: any,
+    chatType: string,
+    messageMap: Map<string, Map<string | number, Map<string | number, { sendMode: string; dynamicUUid_str: string; dynamicType: string; messages: any[] }[]>>>
+  ) {
     const id_str = pushDynamicData.id_str;
 
     let sended: string | null = null,
@@ -209,15 +236,9 @@ export class BiliTask {
     }
     if (sended) return; // 如果已经发送过，则直接返回
 
-    let liveAtAll: boolean = !!biliConfigData.liveAtAll === true ? true : false; // 直播动态是否@全体成员，默认false
-    let liveAtAllCD: number = biliConfigData.liveAtAllCD || 1800; // 直播动态@全体成员 冷却时间CD，默认 30 分钟
-    let liveAtAllMark: number | string = await redis.get(`${markKey}${chatId}:liveAtAllMark`); // 直播动态@全体成员标记，默认 0
-    // 直播动态@全体成员的群组列表，默认空数组，为空则不进行@全体成员操作
-    let liveAtAllGroupList = new Set(
-      Array.isArray(biliConfigData?.liveAtAllGroupList) ? Array.from(biliConfigData.liveAtAllGroupList).map(item => String(item)) : []
-    );
-
-    if (!!biliConfigData.pushMsgMode) {
+    // 判断推送内容模式
+    let pushMsgMode: string = !!biliConfigData.pushMsgMode === false ? 'TEXT' : 'PIC'; // 是否启用图文模式，默认为 PIC 截图模式
+    if (pushMsgMode === 'PIC') {
       const { data, uid } = await BiliQuery.formatDynamicData(pushDynamicData); // 处理动态数据
       const extentData = { ...data };
 
@@ -249,33 +270,20 @@ export class BiliTask {
       };
 
       let imgs: Buffer[] | null = await this.renderDynamicCard(uid, renderData, ScreenshotOptionsData);
-      if (!imgs) return;
+      if (!imgs) return; // 如果渲染失败，则直接返回
 
-      redis.set(`${markKey}${chatId}:${id_str}`, '1', { EX: 3600 * 72 }); // 设置已发送标记
-
-      (logger ?? Bot.logger)?.mark('优纪插件：B站动态执行推送');
-
-      if (liveAtAll && !liveAtAllMark && extentData?.type === 'DYNAMIC_TYPE_LIVE_RCMD' && liveAtAllGroupList.has(String(chatId))) {
-        try {
-          await this.sendMessage(chatId, bot_id, chatType, segment.at('all'));
-          await redis.set(`${markKey}${chatId}:liveAtAllMark`, 1, { EX: liveAtAllCD }); // 设置直播动态@全体成员标记为 1
-        } catch (error) {
-          logger.error(`直播动态发送@全体成员失败，请检查 <机器人> 是否有 [管理员权限] 或 [聊天平台是否支持] ：${error}`);
-          await this.sendMessage(chatId, bot_id, chatType, ['直播动态发送@全体成员失败，请检查权限或平台是否支持']);
-        }
-      }
-
-      for (let i = 0; i < imgs.length; i++) {
-        const image: Buffer = imgs[i];
-        await this.sendMessage(chatId, bot_id, chatType, segment.image(image));
-        await this.randomDelay(1000, 2000); // 随机延时1-2秒
-      }
-
-      await new Promise(resolve => setTimeout(resolve, 1000)); // 休眠1秒
+      await this.addMessageToMap(
+        messageMap,
+        chatType,
+        bot_id,
+        chatId,
+        'SINGLE',
+        id_str,
+        extentData?.type,
+        imgs.map(img => segment.image(img))
+      );
     } else {
       const dynamicMsg = await BiliQuery.formatTextDynamicData(upName, pushDynamicData, false, biliConfigData); // 构建图文动态消息
-
-      redis.set(`${markKey}${chatId}:${id_str}`, '1', { EX: 3600 * 72 }); // 设置已发送标记
 
       if (dynamicMsg === undefined || dynamicMsg === 'continue') {
         return 'return'; // 如果动态消息构建失败，则直接返回
@@ -290,41 +298,17 @@ export class BiliTask {
       }
 
       let mergeTextPic: boolean = !!biliConfigData.mergeTextPic === false ? false : true; // 是否合并文本和图片，默认为 true
+      //开启了合并文本和图片
       if (mergeTextPic === true) {
         const mergeMsg = [...dynamicMsg.msg, ...dynamicMsg.pics];
-        if (liveAtAll && !liveAtAllMark && dynamicMsg.dynamicType === 'DYNAMIC_TYPE_LIVE_RCMD' && liveAtAllGroupList.has(String(chatId))) {
-          try {
-            await this.sendMessage(chatId, bot_id, chatType, segment.at('all'));
-            await redis.set(`${markKey}${chatId}:liveAtAllMark`, 1, { EX: liveAtAllCD }); // 设置直播动态@全体成员标记为 1
-          } catch (error) {
-            logger.error(`直播动态发送@全体成员失败，请检查 <机器人> 是否有 [管理员权限] 或 [聊天平台是否支持] ：${error}`);
-            await this.sendMessage(chatId, bot_id, chatType, ['直播动态发送@全体成员失败，请检查权限或平台是否支持']);
-          }
-        }
-        await this.sendMessage(chatId, bot_id, chatType, mergeMsg);
+        await this.addMessageToMap(messageMap, chatType, bot_id, chatId, 'MERGE', id_str, dynamicMsg.dynamicType, mergeMsg);
       } else {
-        if (liveAtAll && !liveAtAllMark && dynamicMsg.dynamicType === 'DYNAMIC_TYPE_LIVE_RCMD' && liveAtAllGroupList.has(String(chatId))) {
-          try {
-            await this.sendMessage(chatId, bot_id, chatType, segment.at('all'));
-            await redis.set(`${markKey}${chatId}:liveAtAllMark`, 1, { EX: liveAtAllCD }); // 设置直播动态@全体成员标记为 1
-          } catch (error) {
-            logger.error(`直播动态发送@全体成员失败，请检查 <机器人> 是否有 [管理员权限] 或 [聊天平台是否支持] ：${error}`);
-            await this.sendMessage(chatId, bot_id, chatType, ['直播动态发送@全体成员失败，请检查权限或平台是否支持']);
-          }
-        }
-        await this.sendMessage(chatId, bot_id, chatType, dynamicMsg.msg);
-        const pics = dynamicMsg.pics;
-        if (pics && pics.length > 0) {
-          for (let i = 0; i < pics.length; i++) {
-            await this.sendMessage(chatId, bot_id, chatType, pics[i]);
-            await this.randomDelay(1000, 2000); // 随机延时1-2秒
-          }
-        }
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        //不合并文本和图片
+        await this.addMessageToMap(messageMap, chatType, bot_id, chatId, 'MERGE', id_str, dynamicMsg.dynamicType, dynamicMsg.msg);
+        await this.addMessageToMap(messageMap, chatType, bot_id, chatId, 'SINGLE', id_str, dynamicMsg.dynamicType, dynamicMsg.pics);
       }
     }
   }
-
   /**
    * 构建渲染数据
    * @param extentData 扩展数据
@@ -402,26 +386,132 @@ export class BiliTask {
   }
 
   /**
-   * 发送消息
+   * 收集消息映射
+   * @param messageMap 消息映射
+   * @param chatType 聊天类型
+   * @param bot_id 机器人 ID
+   * @param chatId 聊天 ID
+   * @param sendMode 发送模式: SINGLE 逐条发送，MERGE 合并发送
+   * @param dynamicUUid_str 动态 UUID
+   * @param dynamicType 动态类型
+   * @param message 消息内容
+   */
+  async addMessageToMap(
+    messageMap: Map<string, Map<string | number, Map<string | number, { sendMode: string; dynamicUUid_str: string; dynamicType: string; messages: any[] }[]>>>,
+    chatType: string,
+    bot_id: string | number,
+    chatId: string | number,
+    sendMode: string,
+    dynamicUUid_str: string,
+    dynamicType: string,
+    messages: any
+  ) {
+    if (!messageMap.has(chatType)) {
+      messageMap.set(chatType, new Map());
+    }
+    const botMap = messageMap.get(chatType);
+    if (!botMap?.has(bot_id)) {
+      botMap?.set(bot_id, new Map());
+    }
+    const chatMap = botMap?.get(bot_id);
+    if (!chatMap?.has(chatId)) {
+      chatMap?.set(chatId, []);
+    }
+    chatMap?.get(chatId)?.push({ sendMode, dynamicUUid_str, dynamicType, messages });
+  }
+
+  /**
+   * 推送动态消息
+   * @param messageMap 消息映射
+   * @param biliConfigData 哔哩配置数据
+   */
+  async sendDynamicMessage(
+    messageMap: Map<string, Map<string | number, Map<string | number, { sendMode: string; dynamicUUid_str: string; dynamicType: string; messages: any[] }[]>>>,
+    biliConfigData: { [key: string]: string | number | boolean | any[] }
+  ) {
+    let liveAtAll: boolean = !!biliConfigData.liveAtAll === true ? true : false; // 直播动态是否@全体成员，默认false
+    let liveAtAllCD = biliConfigData.liveAtAllCD || 1800; // 直播动态@全体成员 冷却时间CD，默认 30 分钟
+    // 直播动态@全体成员的群组/好友列表，默认空数组，为空则不进行@全体成员操作
+    let liveAtAllGroupList = new Set(
+      Array.isArray(biliConfigData?.liveAtAllGroupList) ? Array.from(biliConfigData.liveAtAllGroupList).map(item => String(item)) : []
+    );
+    const LogMark = new Set(); // 日志mark
+    for (const [chatType, botMap] of messageMap) {
+      for (const [bot_id, chatMap] of botMap) {
+        for (const [chatId, messageCombinationList] of chatMap) {
+          // 遍历组合消息
+          for (const messageCombination of messageCombinationList) {
+            const { sendMode, dynamicUUid_str, dynamicType, messages } = messageCombination;
+            let sended: string | null = null;
+            let markKey: string = '';
+            if (chatType === 'group') {
+              markKey = this.groupKey;
+              sended = await redis.get(`${markKey}${chatId}:${dynamicUUid_str}`);
+            } else if (chatType === 'private') {
+              markKey = this.privateKey;
+              sended = await redis.get(`${markKey}${chatId}:${dynamicUUid_str}`);
+            }
+            const sendMarkKey = `${markKey}${chatId}:${dynamicUUid_str}`;
+            if (sended) {
+              continue; // 如果已经发送过，则直接跳过
+            }
+            if (!LogMark.has('1')) {
+              global?.logger?.mark('优纪插件: B站动态执行推送');
+              LogMark.add('1');
+            }
+            let liveAtAllMark: number | string | null = await redis.get(`${markKey}${chatId}:liveAtAllMark`); // 直播动态@全体成员标记，默认 0
+            // 如果开启了直播动态@全体成员
+            if (liveAtAll && !liveAtAllMark && dynamicType === 'DYNAMIC_TYPE_LIVE_RCMD' && liveAtAllGroupList.has(String(chatId))) {
+              try {
+                await this.sendMessageApi(chatId, bot_id, chatType, [segment.at('all')]);
+                await redis.set(`${markKey}${chatId}:liveAtAllMark`, 1, { EX: liveAtAllCD }); // 设置直播动态@全体成员标记为 1
+              } catch (error) {
+                logger.error(`直播动态发送@全体成员失败，请检查 <机器人> 是否有 [管理员权限] 或 [聊天平台是否支持] ：${error}`);
+                let liveAtAllErrMsg: boolean = !!biliConfigData.liveAtAllErrMsg === false ? false : true; // 直播动态@全体成员失败是否发送错误提示消息，默认 false
+                if (liveAtAllErrMsg) {
+                  await this.sendMessageApi(chatId, bot_id, chatType, ['直播动态发送@全体成员失败，请检查权限或平台是否支持']);
+                }
+              }
+            }
+
+            if (sendMode === 'SINGLE') {
+              for (let i = 0; i < messages.length; i++) {
+                await this.sendMessageApi(chatId, bot_id, chatType, messages[i]);
+              }
+              await redis.set(sendMarkKey, '1', { EX: 3600 * 72 }); // 发送成功后设置标记
+              await this.randomDelay(1000, 2000); // 随机延时1-2秒
+            } else if (sendMode === 'MERGE') {
+              await this.sendMessageApi(chatId, bot_id, chatType, messages);
+              await redis.set(sendMarkKey, '1', { EX: 3600 * 72 }); // 发送成功后设置标记
+            }
+          }
+        }
+      }
+    }
+    LogMark.clear(); // 清空日志mark
+  }
+
+  /**
+   * 发送消息api
    * @param chatId 聊天 ID
    * @param bot_id 机器人 ID
    * @param chatType 聊天类型
    * @param message 消息内容
    */
-  async sendMessage(chatId: string | number, bot_id: string | number, chatType: string, message: any) {
+  async sendMessageApi(chatId: string | number, bot_id: string | number, chatType: string, message: any) {
     if (chatType === 'group') {
       await (Bot[bot_id] ?? Bot)
         ?.pickGroup(String(chatId))
         .sendMsg(message) // 发送群聊
         .catch((error: any) => {
-          (logger ?? Bot.logger)?.error(`群组[${chatId}]推送失败：${JSON.stringify(error)}`);
+          global?.logger?.error(`群组[${chatId}]推送失败：${JSON.stringify(error)}`);
         });
     } else if (chatType === 'private') {
       await (Bot[bot_id] ?? Bot)
         ?.pickFriend(String(chatId))
         .sendMsg(message)
         .catch((error: any) => {
-          (logger ?? Bot.logger)?.error(`用户[${chatId}]推送失败：${JSON.stringify(error)}`);
+          global?.logger?.error(`用户[${chatId}]推送失败：${JSON.stringify(error)}`);
         }); // 发送好友私聊
     }
   }

@@ -21,6 +21,9 @@ export class WeiboTask {
     this.privateKey = 'Yz:yuki:weibo:upPush:private:';
   }
 
+  /**
+   * 执行动态推送任务
+   */
   async runTask() {
     let weiboConfigData = await Config.getUserConfig('weibo', 'config');
     let weiboPushData = await Config.getUserConfig('weibo', 'push');
@@ -32,7 +35,16 @@ export class WeiboTask {
     await this.processWeiboData(weiboPushData, uidMap, dynamicList);
 
     let now: number = Date.now() / 1000; // 当前时间戳（秒）
-    await this.pushDynamicMessages(uidMap, dynamicList, now, interval, weiboConfigData);
+
+    // 定义待推送动态消息映射
+    const messageMap: Map<
+      string,
+      Map<string | number, Map<string | number, { sendMode: string; dynamicUUid_str: string; dynamicType: string; messages: any[] }[]>>
+    > = new Map();
+
+    await this.makeUidDynamicDataMap(uidMap, dynamicList, now, interval, weiboConfigData, messageMap);
+
+    await this.sendDynamicMessage(messageMap, weiboConfigData);
   }
 
   /**
@@ -101,18 +113,25 @@ export class WeiboTask {
         }
       }
     }
-    requestedDataOfUids.clear(); // 清空已请求的 uid 映射
+    requestedDataOfUids.clear(); // 清空已请求的映射
   }
 
   /**
-   * 推送动态消息
+   * 构建uid对应动态数据映射
    * @param uidMap uid 映射
    * @param dynamicList 动态列表
    * @param now 当前时间戳
    * @param interval 推送间隔时间
    * @param weiboConfigData 微博配置数据
    */
-  async pushDynamicMessages(uidMap: Map<any, Map<string, any>>, dynamicList: any, now: number, interval: number, weiboConfigData: any) {
+  async makeUidDynamicDataMap(
+    uidMap: Map<any, Map<string, any>>,
+    dynamicList: any,
+    now: number,
+    interval: number,
+    weiboConfigData: any,
+    messageMap: Map<string, Map<string | number, Map<string | number, { sendMode: string; dynamicUUid_str: string; dynamicType: string; messages: any[] }[]>>>
+  ) {
     for (let [chatType, chatTypeMap] of uidMap) {
       for (let [key, value] of chatTypeMap) {
         const tempDynamicList = dynamicList[key] || [];
@@ -144,7 +163,7 @@ export class WeiboTask {
           if (chatIds && chatIds.length) {
             for (let chatId of chatIds) {
               if (type && type.length && !type.includes(pushDynamicData.type)) continue; // 如果禁用了某类型的动态推送，跳过当前循环
-              await this.sendDynamic(chatId, bot_id, upName, pushDynamicData, weiboConfigData, chatType); // 发送动态消息
+              await this.makeDynamicMessageMap(chatId, bot_id, upName, pushDynamicData, weiboConfigData, chatType, messageMap); // 发送动态消息
               await this.randomDelay(1000, 2000); // 随机延时1-2秒
             }
           }
@@ -154,15 +173,24 @@ export class WeiboTask {
   }
 
   /**
-   * 发送动态消息
+   * 渲染构建待发送的动态消息数据的映射数组
    * @param chatId 聊天 ID
    * @param bot_id 机器人 ID
-   * @param upName 用户名
+   * @param upName 博主用户名
    * @param pushDynamicData 推送动态数据
    * @param weiboConfigData 微博配置数据
    * @param chatType 聊天类型
+   * @param messageMap 待发送的动态消息映射
    */
-  async sendDynamic(chatId: string | number, bot_id: string | number, upName: string, pushDynamicData: any, weiboConfigData: any, chatType: string) {
+  async makeDynamicMessageMap(
+    chatId: string | number,
+    bot_id: string | number,
+    upName: string,
+    pushDynamicData: any,
+    weiboConfigData: any,
+    chatType: string,
+    messageMap: Map<string, Map<string | number, Map<string | number, { sendMode: string; dynamicUUid_str: string; dynamicType: string; messages: any[] }[]>>>
+  ) {
     const id_str: string = WeiboQuery.getDynamicId(pushDynamicData); // 获取动态 ID
 
     let sended: string | null = null,
@@ -208,23 +236,20 @@ export class WeiboTask {
       };
 
       let imgs: Buffer[] | null = await this.renderDynamicCard(uid, renderData, ScreenshotOptionsData);
-      if (!imgs) return;
+      if (!imgs) return; // 如果渲染失败，则直接返回
 
-      redis.set(`${markKey}${chatId}:${id_str}`, '1', { EX: 3600 * 72 }); // 设置已发送标记
-
-      (logger ?? Bot.logger)?.mark('优纪插件：微博动态执行推送');
-
-      for (let i = 0; i < imgs.length; i++) {
-        const image: Buffer = imgs[i];
-        await this.sendMessage(chatId, bot_id, chatType, segment.image(image));
-        await this.randomDelay(1000, 2000); // 随机延时1-2秒
-      }
-
-      await new Promise(resolve => setTimeout(resolve, 1000)); // 休眠1秒
+      await this.addMessageToMap(
+        messageMap,
+        chatType,
+        bot_id,
+        chatId,
+        'SINGLE',
+        id_str,
+        extentData?.type,
+        imgs.map(img => segment.image(img))
+      );
     } else {
       const dynamicMsg = await WeiboQuery.formatTextDynamicData(upName, pushDynamicData, false, weiboConfigData); //构建文字动态消息
-
-      redis.set(`${markKey}${chatId}:${id_str}`, '1', { EX: 3600 * 72 }); // 设置已发送标记
 
       if (dynamicMsg === undefined || dynamicMsg === 'continue') {
         return 'return'; // 如果动态消息构建失败或内部资源获取失败，则直接返回
@@ -239,19 +264,14 @@ export class WeiboTask {
       }
 
       let mergeTextPic = !!weiboConfigData.mergeTextPic === false ? false : true; // 是否合并文字和图片，默认为 true
-      if (mergeTextPic) {
+      //开启了合并文本和图片
+      if (mergeTextPic === true) {
         const mergeMsg = [...dynamicMsg.msg, ...dynamicMsg.pics];
-        await this.sendMessage(chatId, bot_id, chatType, mergeMsg);
+        await this.addMessageToMap(messageMap, chatType, bot_id, chatId, 'MERGE', id_str, dynamicMsg.dynamicType, mergeMsg);
       } else {
-        await this.sendMessage(chatId, bot_id, chatType, dynamicMsg.msg);
-        const pics = dynamicMsg.pics;
-        if (pics && pics.length > 0) {
-          for (let i = 0; i < pics.length; i++) {
-            await this.sendMessage(chatId, bot_id, chatType, pics[i]);
-            await this.randomDelay(1000, 2000); // 随机延时1-2秒
-          }
-        }
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        //不合并文本和图片
+        await this.addMessageToMap(messageMap, chatType, bot_id, chatId, 'MERGE', id_str, dynamicMsg.dynamicType, dynamicMsg.msg);
+        await this.addMessageToMap(messageMap, chatType, bot_id, chatId, 'SINGLE', id_str, dynamicMsg.dynamicType, dynamicMsg.pics);
       }
     }
   }
@@ -333,26 +353,116 @@ export class WeiboTask {
   }
 
   /**
-   * 发送消息
+   * 收集消息映射
+   * @param messageMap 消息映射
+   * @param chatType 聊天类型
+   * @param bot_id 机器人 ID
+   * @param chatId 聊天 ID
+   * @param sendMode 发送模式: SINGLE 逐条发送，MERGE 合并发送
+   * @param dynamicUUid_str 动态 UUID
+   * @param dynamicType 动态类型
+   * @param message 消息内容
+   */
+  async addMessageToMap(
+    messageMap: Map<string, Map<string | number, Map<string | number, { sendMode: string; dynamicUUid_str: string; dynamicType: string; messages: any[] }[]>>>,
+    chatType: string,
+    bot_id: string | number,
+    chatId: string | number,
+    sendMode: string,
+    dynamicUUid_str: string,
+    dynamicType: string,
+    messages: any
+  ) {
+    if (!messageMap.has(chatType)) {
+      messageMap.set(chatType, new Map());
+    }
+    const botMap = messageMap.get(chatType);
+    if (!botMap?.has(bot_id)) {
+      botMap?.set(bot_id, new Map());
+    }
+    const chatMap = botMap?.get(bot_id);
+    if (!chatMap?.has(chatId)) {
+      chatMap?.set(chatId, []);
+    }
+    chatMap?.get(chatId)?.push({ sendMode, dynamicUUid_str, dynamicType, messages });
+  }
+
+  /**
+   * 推送动态消息
+   * @param messageMap 消息映射
+   * @param biliConfigData 微博配置数据
+   */
+  async sendDynamicMessage(
+    messageMap: Map<string, Map<string | number, Map<string | number, { sendMode: string; dynamicUUid_str: string; dynamicType: string; messages: any[] }[]>>>,
+    weiboConfigData: { [key: string]: string | number | boolean | any[] }
+  ) {
+    const LogMark = new Set(); // 日志mark
+    for (const [chatType, botMap] of messageMap) {
+      for (const [bot_id, chatMap] of botMap) {
+        for (const [chatId, messageCombinationList] of chatMap) {
+          // 遍历组合消息
+          for (const messageCombination of messageCombinationList) {
+            const { sendMode, dynamicUUid_str, dynamicType, messages } = messageCombination;
+
+            let sended: string | null = null;
+            let markKey: string = '';
+            if (chatType === 'group') {
+              markKey = this.groupKey;
+              sended = await redis.get(`${markKey}${chatId}:${dynamicUUid_str}`);
+            } else if (chatType === 'private') {
+              markKey = this.privateKey;
+              sended = await redis.get(`${markKey}${chatId}:${dynamicUUid_str}`);
+            }
+
+            const sendMarkKey = `${markKey}${chatId}:${dynamicUUid_str}`;
+
+            if (sended) {
+              continue; // 如果已经发送过，则直接跳过
+            }
+
+            if (!LogMark.has('1')) {
+              global?.logger?.mark('优纪插件: B站动态执行推送');
+              LogMark.add('1');
+            }
+
+            if (sendMode === 'SINGLE') {
+              for (let i = 0; i < messages.length; i++) {
+                await this.sendMessageApi(chatId, bot_id, chatType, messages[i]);
+              }
+              await redis.set(sendMarkKey, '1', { EX: 3600 * 72 }); // 发送成功后设置标记
+              await this.randomDelay(1000, 2000); // 随机延时1-2秒
+            } else if (sendMode === 'MERGE') {
+              await this.sendMessageApi(chatId, bot_id, chatType, messages);
+              await redis.set(sendMarkKey, '1', { EX: 3600 * 72 }); // 发送成功后设置标记
+            }
+          }
+        }
+      }
+    }
+    LogMark.clear(); // 清空日志mark
+  }
+
+  /**
+   * 发送消息api
    * @param chatId 聊天 ID
    * @param bot_id 机器人 ID
    * @param chatType 聊天类型
    * @param message 消息内容
    */
-  async sendMessage(chatId: string | number, bot_id: string | number, chatType: string, message: any) {
+  async sendMessageApi(chatId: string | number, bot_id: string | number, chatType: string, message: any) {
     if (chatType === 'group') {
       await (Bot[bot_id] ?? Bot)
         ?.pickGroup(String(chatId))
         .sendMsg(message) // 发送群聊
         .catch(error => {
-          (logger ?? Bot.logger)?.error(`群组[${chatId}]推送失败：${JSON.stringify(error)}`);
+          global?.logger?.error(`群组[${chatId}]推送失败：${JSON.stringify(error)}`);
         });
     } else if (chatType === 'private') {
       await (Bot[bot_id] ?? Bot)
         ?.pickFriend(String(chatId))
         .sendMsg(message)
         .catch(error => {
-          (logger ?? Bot.logger)?.error(`用户[${chatId}]推送失败：${JSON.stringify(error)}`);
+          global?.logger?.error(`用户[${chatId}]推送失败：${JSON.stringify(error)}`);
         }); // 发送好友私聊
     }
   }
