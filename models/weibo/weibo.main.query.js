@@ -185,7 +185,7 @@ class WeiboQuery {
         let info = raw_post?.mblog || raw_post;
         let retweeted = info && info.retweeted_status ? true : false; //是否为转发动态
         let pic_num = retweeted ? info?.retweeted_status?.pic_num : info?.pic_num;
-        let type = this.MakeCategory(raw_post);
+        let dynamicType = this.MakeCategory(raw_post);
         /**获取动态全文 */
         if (info?.isLongText || pic_num > 9) {
             const res = await fetch(`https://m.weibo.cn/detail/${info.mid}`, { headers: WeiboApi.WEIBO_HEADERS });
@@ -206,7 +206,7 @@ class WeiboQuery {
         let detail_url = `https://weibo.com/${info?.user?.id}/${info?.bid}`;
         let title = `微博【${upName}】动态推送：\n`;
         const dynamicPicCountLimit = setData.pushPicCountLimit || 3;
-        switch (type) {
+        switch (dynamicType) {
             case 'DYNAMIC_TYPE_AV':
                 if (!info)
                     return;
@@ -222,7 +222,7 @@ class WeiboQuery {
                     `时间：${created_time ? moment(created_time).format('YYYY年MM月DD日 HH:mm:ss') : ''}`
                 ];
                 pics = [cover_img];
-                return { msg, pics };
+                return { msg, pics, dynamicType };
             case 'DYNAMIC_TYPE_DRAW':
                 raw_pics_list = retweeted ? info?.retweeted_status?.pics || [] : info?.pics || [];
                 if (!info && !raw_pics_list)
@@ -242,7 +242,7 @@ class WeiboQuery {
                     `链接：${detail_url}\n`,
                     `时间：${created_time ? moment(created_time).format('YYYY年MM月DD日 HH:mm:ss') : ''}`
                 ];
-                return { msg, pics };
+                return { msg, pics, dynamicType };
             case 'DYNAMIC_TYPE_ARTICLE':
                 if (!info)
                     return;
@@ -262,7 +262,7 @@ class WeiboQuery {
                     `链接：${detail_url}\n`,
                     `时间：${created_time ? moment(created_time).format('YYYY年MM月DD日 HH:mm:ss') : ''}`
                 ];
-                return { msg, pics };
+                return { msg, pics, dynamicType };
             case 'DYNAMIC_TYPE_FORWARD':
                 if (!info)
                     return;
@@ -289,9 +289,9 @@ class WeiboQuery {
                     '\n---以下为转发内容---\n',
                     ...origContent
                 ];
-                return { msg, pics };
+                return { msg, pics, dynamicType };
             default:
-                logger?.mark(`未处理的微博推送【${upName}】：${type}`);
+                logger?.mark(`未处理的微博推送【${upName}】：${dynamicType}`);
                 return 'continue';
         }
     }

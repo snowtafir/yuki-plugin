@@ -56,7 +56,27 @@ export declare class BiliQuery {
     static formatTextDynamicData(upName: string, data: any, isForward: boolean, setData: any): Promise<"continue" | {
         msg: any[];
         pics: any[];
-        dynamicType: string;
+        dynamicType: "DYNAMIC_TYPE_AV";
+    } | {
+        msg: any[];
+        pics: any[];
+        dynamicType: "DYNAMIC_TYPE_WORD";
+    } | {
+        msg: any[];
+        pics: any[];
+        dynamicType: "DYNAMIC_TYPE_DRAW";
+    } | {
+        msg: any[];
+        pics: any[];
+        dynamicType: "DYNAMIC_TYPE_ARTICLE";
+    } | {
+        msg: any[];
+        pics: any[];
+        dynamicType: "DYNAMIC_TYPE_FORWARD";
+    } | {
+        msg: any[];
+        pics: any[];
+        dynamicType: "DYNAMIC_TYPE_LIVE_RCMD";
     }>;
     static dynamicContentLimit(content: string, setData: any): string;
     /**根据关键字更新 up 的动态类型 */
