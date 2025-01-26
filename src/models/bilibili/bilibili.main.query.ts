@@ -430,9 +430,15 @@ export class BiliQuery {
       content: any,
       dynamicTitle: any;
     let title = `B站【${upName}】动态推送：\n`;
-    let dynamicType: string = data.type;
+    let dynamicType:
+      | 'DYNAMIC_TYPE_AV'
+      | 'DYNAMIC_TYPE_WORD'
+      | 'DYNAMIC_TYPE_DRAW'
+      | 'DYNAMIC_TYPE_ARTICLE'
+      | 'DYNAMIC_TYPE_FORWARD'
+      | 'DYNAMIC_TYPE_LIVE_RCMD' = data.type;
 
-    switch (data.type) {
+    switch (dynamicType) {
       case 'DYNAMIC_TYPE_AV':
         // 处理视频动态
         desc = data?.modules?.module_dynamic?.major?.archive;
