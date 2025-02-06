@@ -10,9 +10,9 @@ pushTime: '*/23  * * * *'
 
 # 请求头 User-Agent 列表。如出现 -352 风控，可尝试更换请求头，请根据需要自行添加或修改。可设置多个请求头，每次重启后会随机选择一个。获取方法请浏览器自行搜索。
 userAgentList:
-  - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36
-  #- Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:131.0) Gecko/20100101 Firefox/131.0
-  #- Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0
+  - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36
+  #- Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0
+  #- Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0
 
 # 推送监测间隔，单位为秒，默认7200秒即2小时，即以当前时间为基准，监测过去2小时内的动态，并推送。取值范围：3600-36000秒，即过去的1-10h。应大于pushTime的周期。
 interval: 7200
