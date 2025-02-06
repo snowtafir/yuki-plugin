@@ -1,8 +1,8 @@
 import React from 'react';
-import { ConfigController, BOT_NAME } from 'yunzaijs';
+import { BOT_NAME, ConfigController } from 'yunzaijs';
 import Config from '../../utils/config.js';
 import path from 'path';
-import { _paths, createRequire } from '../../utils/paths.js';
+import { createRequire, _paths } from '../../utils/paths.js';
 
 // Footer.tsx
 const require = createRequire(import.meta.url);

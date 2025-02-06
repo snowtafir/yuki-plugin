@@ -2,7 +2,7 @@ import React from 'react';
 import { BOT_NAME, ConfigController } from 'yunzaijs';
 import Config from '../../utils/config.js';
 import path from 'path';
-import { _paths, createRequire } from '../../utils/paths.js';
+import { createRequire, _paths } from '../../utils/paths.js';
 
 const require = createRequire(import.meta.url);
 const botVersion = ConfigController.package?.version;

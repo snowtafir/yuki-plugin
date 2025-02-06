@@ -19,6 +19,8 @@ export declare function exitBiliLogin(e: EventType): Promise<void>;
  */
 /**保存扫码登录的loginCK*/
 export declare function saveLoginCookie(e: EventType, biliLoginCk: string): Promise<void>;
+/** 读取扫码登陆后缓存的cookie */
+export declare function readLoginCookie(): Promise<string>;
 /** 覆盖保存手动获取绑定的B站ck */
 export declare function saveLocalBiliCk(data: any): Promise<void>;
 /** 读取缓存的tempCK */
