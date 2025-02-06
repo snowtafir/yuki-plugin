@@ -12,6 +12,7 @@ import {
   getNewTempCk,
   pollLoginQRCode,
   postGateway,
+  readLoginCookie,
   readSavedCookieItems,
   readSyncCookie,
   saveLocalBiliCk,
@@ -278,37 +279,42 @@ export default class YukiBili extends plugin {
 
   /** 扫码登录B站 */
   async scanBiliLogin() {
-    if (this.e.isMaster) {
-      try {
-        const token = await applyLoginQRCode(this.e);
-        if (token) {
-          let biliLoginCk = await pollLoginQRCode(this.e, token);
-          if (biliLoginCk) {
-            if (lodash.trim(biliLoginCk).length != 0) {
-              await saveLoginCookie(this.e, biliLoginCk);
-              this.e.reply(`get bilibili LoginCk：成功！`);
-              const result = await postGateway(biliLoginCk); //激活ck
+    if (!this.e.isMaster) {
+      this.e.reply('未取得bot主人身份，无权限配置B站登录ck');
+    } else {
+      const LoginCk = await readLoginCookie();
+      if (LoginCk) {
+        this.e.reply(`当前已有B站登录ck，请勿重复扫码！\n如需更换，请先删除当前登录ck：\n#yuki删除B站登录`);
+      } else {
+        try {
+          const token = await applyLoginQRCode(this.e);
+          if (token) {
+            let biliLoginCk = await pollLoginQRCode(this.e, token);
+            if (biliLoginCk) {
+              if (lodash.trim(biliLoginCk).length != 0) {
+                await saveLoginCookie(this.e, biliLoginCk);
+                this.e.reply(`get bilibili LoginCk：成功！`);
+                const result = await postGateway(biliLoginCk); //激活ck
 
-              const { code, data } = await result.data; // 解析校验结果
+                const { code, data } = await result.data; // 解析校验结果
 
-              switch (code) {
-                case 0:
-                  (logger ?? Bot.logger)?.mark(`优纪插件：获取biliLoginCK，Gateway校验成功：${JSON.stringify(data)}`);
-                  break;
-                default:
-                  (logger ?? Bot.logger)?.mark(`优纪插件：获取biliLoginCK，Gateway校验失败：${JSON.stringify(data)}`);
-                  break;
+                switch (code) {
+                  case 0:
+                    global?.logger?.mark(`优纪插件：获取biliLoginCK，Gateway校验成功：${JSON.stringify(data)}`);
+                    break;
+                  default:
+                    global?.logger?.mark(`优纪插件：获取biliLoginCK，Gateway校验失败：${JSON.stringify(data)}`);
+                    break;
+                }
+              } else {
+                this.e.reply(`get bilibili LoginCk：失败X﹏X`);
               }
-            } else {
-              this.e.reply(`get bilibili LoginCk：失败X﹏X`);
             }
           }
+        } catch (Error) {
+          global?.logger?.info(`yuki-plugin Login bilibili Failed：${Error}`);
         }
-      } catch (Error) {
-        (logger ?? Bot.logger)?.info(`yuki-plugin Login bilibili Failed：${Error}`);
       }
-    } else {
-      this.e.reply('未取得bot主人身份，无权限配置B站登录ck');
     }
   }
 
