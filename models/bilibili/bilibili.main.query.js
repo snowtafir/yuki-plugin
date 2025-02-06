@@ -241,7 +241,7 @@ class BiliQuery {
     };
     /**获取完整B站文章内容
      * @param postUrl - 文章链接: https://www.bilibili.com/read/cvxxxx 或者 https://www.bilibili.com/opus/xxxx
-     * @returns {Json} 完整的B站文章内容json数据
+     * @returns {JSON} 完整的B站文章内容json数据
      */
     static async getFullArticleContent(postUrl) {
         let { cookie } = await readSyncCookie();

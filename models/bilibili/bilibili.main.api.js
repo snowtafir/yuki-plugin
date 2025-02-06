@@ -8,7 +8,7 @@ class BiliApi {
         this.USER_AGENT = BiliApi.BILIBILI_USER_AGENT;
         this.initialize();
     }
-    static BILIBILI_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
+    static BILIBILI_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36';
     //初始化User-Agent
     async initialize() {
         await this.initUserAgent();

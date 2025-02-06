@@ -143,7 +143,9 @@ async function checkBiliLogin(e) {
             let current_level = level_info?.current_level;
             let current_exp = level_info?.current_exp;
             let next_exp = level_info?.next_exp;
-            e.reply(`~B站账号已登陆~\n昵称：${uname}\nuid：${mid}\n硬币：${money}\n经验等级：${current_level}\n当前经验值exp：${current_exp}\n下一等级所需exp：${next_exp}`);
+            const LoginCookieTTL = await readLoginCookieTTL();
+            const LoginCookieTTLStr = LoginCookieTTL === -1 ? '永久' : LoginCookieTTL === -2 ? '-' : `${new Date(Date.now() + LoginCookieTTL * 1000).toLocaleString()}`;
+            e.reply(`~B站账号已登陆~，有效期至：${LoginCookieTTLStr}。\n昵称：${uname}\nuid：${mid}\n硬币：${money}\n经验等级：${current_level}\n当前经验值exp：${current_exp}\n下一等级所需exp：${next_exp}`);
         }
         else {
             // 处理其他情况
@@ -226,6 +228,18 @@ async function readLoginCookie() {
     const CK_KEY = 'Yz:yuki:bili:loginCookie';
     const tempCk = await redis.get(CK_KEY);
     return tempCk ? tempCk : '';
+}
+/** 读取扫码登陆后缓存的cookie的有效时间 */
+async function readLoginCookieTTL() {
+    const CK_KEY = 'Yz:yuki:bili:loginCookie';
+    const tempCk = await redis.get(CK_KEY);
+    if (tempCk) {
+        const LoginCookieTTL = await redis.ttl(CK_KEY);
+        return LoginCookieTTL;
+    }
+    else {
+        return -2;
+    }
 }
 /** 读取手动绑定的B站ck */
 async function readLocalBiliCk() {
@@ -473,4 +487,4 @@ async function cookieWithBiliTicket(cookie) {
     }
 }
 
-export { applyLoginQRCode, checkBiliLogin, cookieWithBiliTicket, exitBiliLogin, genUUID, gen_b_lsid, getNewTempCk, get_buvid_fp, pollLoginQRCode, postGateway, readSavedCookieItems, readSavedCookieOtherItems, readSyncCookie, readTempCk, saveLocalBiliCk, saveLoginCookie, saveTempCk };
+export { applyLoginQRCode, checkBiliLogin, cookieWithBiliTicket, exitBiliLogin, genUUID, gen_b_lsid, getNewTempCk, get_buvid_fp, pollLoginQRCode, postGateway, readLoginCookie, readSavedCookieItems, readSavedCookieOtherItems, readSyncCookie, readTempCk, saveLocalBiliCk, saveLoginCookie, saveTempCk };

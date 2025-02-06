@@ -103,7 +103,7 @@ class YukiWeibo extends plugin {
             }
             const userInfo = data.userInfo || {};
             let name = uid;
-            if (userInfo.length !== 0) {
+            if (userInfo && userInfo.length !== 0) {
                 name = userInfo.screen_name || uid;
             }
             // 添加新的推送数据
