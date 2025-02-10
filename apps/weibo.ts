@@ -3,7 +3,7 @@ import { WeiboQuery } from '@/models/weibo/weibo.main.query';
 import { WeiboTask } from '@/models/weibo/weibo.main.task';
 import Config from '@/utils/config';
 import { _paths } from '@/utils/paths';
-import { WeiboGetWebData } from '@/models/weibo/weibo.main.get.web.data';
+import { WeiboWebDataFetcher } from '@/models/weibo/weibo.main.get.web.data';
 
 declare const logger: any;
 
@@ -97,9 +97,9 @@ export default class YukiWeibo extends Plugin {
       }
 
       // 获取 微博 博主信息
-      const res = await new WeiboGetWebData(this.e).getBloggerInfo(uid);
+      const res = await new WeiboWebDataFetcher(this.e).getBloggerInfo(uid);
 
-      if (res.statusText !== 'OK') {
+      if (res?.statusText !== 'OK') {
         this.e.reply('出了点网络问题，等会再试试吧~');
         return false;
       }
@@ -296,9 +296,9 @@ export default class YukiWeibo extends Plugin {
   async getWeiboUserInfoByUid() {
     let uid = this.e.msg.replace(/^(#|\/)(yuki|优纪)?(微博|weibo|WEIBO)(博|bo|BO)主/g, '').trim();
 
-    const res = await new WeiboGetWebData(this.e).getBloggerInfo(uid);
+    const res = await new WeiboWebDataFetcher(this.e).getBloggerInfo(uid);
 
-    if (res.statusText !== 'OK') {
+    if (res?.statusText !== 'OK') {
       this.e.reply('诶嘿，出了点网络问题，等会再试试吧~');
       return;
     }
@@ -334,9 +334,9 @@ export default class YukiWeibo extends Plugin {
   async searchWeiboUserInfoByKeyword() {
     let keyword = this.e.msg.replace(/^(#|\/)(yuki|优纪)?搜索(微博|weibo|WEIBO)(博|bo|BO)主/g, '').trim();
 
-    const res = await new WeiboGetWebData(this.e).searchBloggerInfo(keyword);
+    const res = await new WeiboWebDataFetcher(this.e).searchBloggerInfo(keyword);
 
-    if (res.statusText !== 'OK') {
+    if (res?.statusText !== 'OK') {
       this.e.reply('诶嘿，出了点网络问题，等会再试试吧~');
       return;
     }
