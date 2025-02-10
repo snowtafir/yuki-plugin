@@ -1,5 +1,14 @@
+import { AxiosInstance, AxiosRequestConfig } from 'axios';
+import https from 'https';
 import { EventType } from 'yunzaijs';
-export declare class WeiboGetWebData {
+declare class WeiboHttpClient {
+    httpsAgent: https.Agent;
+    client: AxiosInstance;
+    constructor();
+    private initializeClient;
+    request(url: string, config?: AxiosRequestConfig): Promise<import("axios").AxiosResponse<any, any>>;
+}
+export declare class WeiboWebDataFetcher extends WeiboHttpClient {
     e?: EventType;
     constructor(e?: EventType);
     /**通过uid获取博主信息 */
@@ -9,3 +18,4 @@ export declare class WeiboGetWebData {
     /**获取主页动态资源相关数组 */
     getBloggerDynamicList(target: any): Promise<any>;
 }
+export {};

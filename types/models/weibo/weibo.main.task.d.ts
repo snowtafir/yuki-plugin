@@ -1,10 +1,12 @@
 import { EventType } from 'yunzaijs';
 import { MainProps } from '@/components/dynamic/MainPage';
 import { ScreenshotOptions } from '@/utils/puppeteer.render';
+import { WeiboWebDataFetcher } from '@/models/weibo/weibo.main.get.web.data';
 export declare class WeiboTask {
     taskName: string;
     groupKey: string;
     privateKey: string;
+    WeiboWebDataFetcher: WeiboWebDataFetcher;
     e?: EventType;
     constructor(e?: any);
     /**
