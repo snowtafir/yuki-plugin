@@ -126,7 +126,7 @@ class YukiBili extends plugin {
             }
             // 获取 Bilibili 动态信息
             const res = await new BilibiliWebDataFetcher(this.e).getBiliDynamicListDataByUid(uid);
-            if (res.statusText !== 'OK') {
+            if (res?.statusText !== 'OK') {
                 this.e.reply('出了点网络问题，等会再试试吧~');
                 return false;
             }
@@ -140,7 +140,7 @@ class YukiBili extends plugin {
             if (code === 0 && has_more === false) {
                 this.e.reply(`检测到该uid的主页空间动态内容为空，\n执行uid：${uid} 校验...`);
                 const resp = await new BilibiliWebDataFetcher(this.e).getBilibiUserInfoByUid(uid);
-                if (resp.statusText !== 'OK') {
+                if (resp?.statusText !== 'OK') {
                     this.e.reply('出了点网络问题，发起uid校验失败，等会再试试吧~');
                     return false;
                 }
@@ -512,7 +512,7 @@ class YukiBili extends plugin {
     async getBilibiUserInfoByUid() {
         let uid = this.e.msg.replace(/^(#|\/)(yuki|优纪)?(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(up|UP)主/g, '').trim();
         const res = await new BilibiliWebDataFetcher(this.e).getBilibiUserInfoByUid(uid);
-        if (res.statusText !== 'OK') {
+        if (res?.statusText !== 'OK') {
             this.e.reply('诶嘿，出了点网络问题，等会再试试吧~');
             return;
         }
@@ -540,7 +540,7 @@ class YukiBili extends plugin {
     async searchBiliUserInfoByKeyword() {
         let keyword = this.e.msg.replace(/^(#|\/)(yuki|优纪)?搜索(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(up|UP)主/g, '').trim();
         const res = await new BilibiliWebDataFetcher(this.e).searchBiliUserInfoByKeyword(keyword);
-        if (res.statusText !== 'OK') {
+        if (res?.statusText !== 'OK') {
             this.e.reply('诶嘿，出了点网络问题，等会再试试吧~');
             return;
         }

@@ -8,21 +8,21 @@ import { getDmImg } from './bilibili.risk.dm.img.js';
 import { getWebId } from './bilibili.risk.w_webid.js';
 
 class BiliHttpClient {
-    httpsAgent;
     client;
     constructor() {
-        this.initializeClient();
+        this.client = this.initializeClient();
     }
     initializeClient() {
-        this.httpsAgent = new https.Agent({
+        const httpsAgent = new https.Agent({
             keepAlive: true,
             maxSockets: 100,
             timeout: 20000
         });
-        this.client = axios.create({
-            httpsAgent: this.httpsAgent,
+        const client = axios.create({
+            httpsAgent: httpsAgent,
             timeout: 20000
         });
+        return client;
     }
     async request(url, config) {
         try {
@@ -32,7 +32,7 @@ class BiliHttpClient {
         catch (error) {
             console.error('BiliHttpClient Request failed:', error);
             // 重新创建 AxiosInstance
-            this.initializeClient();
+            this.client = this.initializeClient();
         }
     }
 }

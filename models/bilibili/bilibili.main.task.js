@@ -20,7 +20,7 @@ class BiliTask {
     async hendleEventDynamicData(uid, count = 0) {
         let { cookie } = await readSyncCookie();
         const resp = await this.BilibiliWebDataFetcher.getBiliDynamicListDataByUid(uid);
-        const resjson = await resp.data;
+        const resjson = await resp?.data;
         if (!resjson || resjson.code !== 0 || resjson.code === -352) {
             await postGateway(cookie);
             if (count < 2) {
