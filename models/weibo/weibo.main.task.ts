@@ -3,7 +3,7 @@ import { MainProps } from '@/components/dynamic/MainPage';
 import Config from '@/utils/config';
 import { renderPage } from '@/utils/image';
 import { ScreenshotOptions } from '@/utils/puppeteer.render';
-import { WeiboGetWebData } from '@/models/weibo/weibo.main.get.web.data';
+import { WeiboWebDataFetcher } from '@/models/weibo/weibo.main.get.web.data';
 import { WeiboQuery } from '@/models/weibo/weibo.main.query';
 
 declare const Bot: any, redis: any, segment: any;
@@ -14,11 +14,13 @@ export class WeiboTask {
   taskName: string;
   groupKey: string;
   privateKey: string;
+  WeiboWebDataFetcher: WeiboWebDataFetcher;
   e?: any;
   constructor(e?) {
     this.taskName = 'weiboTask';
     this.groupKey = 'Yz:yuki:weibo:upPush:group:';
     this.privateKey = 'Yz:yuki:weibo:upPush:private:';
+    this.WeiboWebDataFetcher = new WeiboWebDataFetcher(e);
   }
 
   /**
@@ -97,7 +99,7 @@ export class WeiboTask {
             const dynamicData = resp || [];
             dynamicList[subInfoOfup.uid] = dynamicData;
           } else {
-            resp = await await new WeiboGetWebData().getBloggerDynamicList(subInfoOfup.uid); // 获取指定 uid 的动态列表
+            resp = await this.WeiboWebDataFetcher.getBloggerDynamicList(subInfoOfup.uid); // 获取指定 uid 的动态列表
             if (resp) {
               requestedDataOfUids.set(subInfoOfup.uid, resp); // 将响应数据存储到映射中
               const dynamicData = resp || [];

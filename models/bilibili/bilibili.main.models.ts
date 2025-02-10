@@ -171,7 +171,7 @@ export async function checkBiliLogin(e: any) {
       const LoginCookieTTLStr =
         LoginCookieTTL === -1 ? '永久' : LoginCookieTTL === -2 ? '-' : `${new Date(Date.now() + LoginCookieTTL * 1000).toLocaleString()}`;
       e.reply(
-        `~B站账号已登陆~，有效期至：${LoginCookieTTLStr}。\n昵称：${uname}\nuid：${mid}\n硬币：${money}\n经验等级：${current_level}\n当前经验值exp：${current_exp}\n下一等级所需exp：${next_exp}`
+        `~B站账号已登陆~\n有效期至：${LoginCookieTTLStr}。\n昵称：${uname}\nuid：${mid}\n硬币：${money}\n经验等级：${current_level}\n当前经验值exp：${current_exp}\n下一等级所需exp：${next_exp}`
       );
     } else {
       // 处理其他情况

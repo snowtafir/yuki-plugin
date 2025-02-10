@@ -3,7 +3,7 @@ import { MainProps } from '@/components/dynamic/MainPage';
 import Config from '@/utils/config';
 import { renderPage } from '@/utils/image';
 import { ScreenshotOptions } from '@/utils/puppeteer.render';
-import { BiliGetWebData } from '@/models/bilibili/bilibili.main.get.web.data';
+import { BilibiliWebDataFetcher } from '@/models/bilibili/bilibili.main.get.web.data';
 import { postGateway, readSyncCookie } from '@/models/bilibili/bilibili.main.models';
 import { BiliQuery } from '@/models/bilibili/bilibili.main.query';
 
@@ -15,17 +15,19 @@ export class BiliTask {
   taskName: string;
   groupKey: string;
   privateKey: string;
+  BilibiliWebDataFetcher: BilibiliWebDataFetcher;
   e?: any;
   constructor(e?: any) {
     this.taskName = 'biliTask';
     this.groupKey = 'Yz:yuki:bili:upPush:group:';
     this.privateKey = 'Yz:yuki:bili:upPush:private:';
+    this.BilibiliWebDataFetcher = new BilibiliWebDataFetcher();
   }
 
   async hendleEventDynamicData(uid: string | number, count: number = 0): Promise<any> {
     let { cookie } = await readSyncCookie();
-    const resp = await new BiliGetWebData().getBiliDynamicListDataByUid(uid);
-    const resjson = await resp.data;
+    const resp = await this.BilibiliWebDataFetcher.getBiliDynamicListDataByUid(uid);
+    const resjson = await resp?.data;
 
     if (!resjson || resjson.code !== 0 || resjson.code === -352) {
       await postGateway(cookie);
