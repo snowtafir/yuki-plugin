@@ -4,21 +4,21 @@ import { WeiboApi } from './weibo.main.api.js';
 import { WeiboQuery } from './weibo.main.query.js';
 
 class WeiboHttpClient {
-    httpsAgent;
     client;
     constructor() {
-        this.initializeClient();
+        this.client = this.initializeClient();
     }
     initializeClient() {
-        this.httpsAgent = new https.Agent({
+        const httpsAgent = new https.Agent({
             keepAlive: true,
             maxSockets: 100,
             timeout: 20000
         });
-        this.client = axios.create({
-            httpsAgent: this.httpsAgent,
+        const client = axios.create({
+            httpsAgent: httpsAgent,
             timeout: 20000
         });
+        return client;
     }
     async request(url, config) {
         try {
@@ -28,7 +28,7 @@ class WeiboHttpClient {
         catch (error) {
             console.error('WeiboHttpClient Request failed:', error);
             // 重新创建 AxiosInstance
-            this.initializeClient();
+            this.client = this.initializeClient();
         }
     }
 }
@@ -72,7 +72,7 @@ class WeiboWebDataFetcher extends WeiboHttpClient {
                 method: 'GET',
                 headers: { 'accept': '*/*', 'Content-Type': 'application/json', 'referer': 'https://m.weibo.cn' }
             });
-            const { ok, data, msg } = response.data;
+            const { ok, data, msg } = response?.data;
             if (!ok && msg !== '这里还没有内容') {
                 throw new Error(response.config.url);
             }

@@ -1,8 +1,6 @@
 import { AxiosInstance, AxiosRequestConfig } from 'axios';
-import https from 'https';
 import { EventType } from 'yunzaijs';
 declare class WeiboHttpClient {
-    httpsAgent: https.Agent;
     client: AxiosInstance;
     constructor();
     private initializeClient;
