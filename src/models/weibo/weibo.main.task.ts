@@ -4,7 +4,7 @@ import { MainProps } from '@src/components/dynamic/MainPage';
 import Config from '@src/utils/config';
 import { renderPage } from '@src/utils/image';
 import { ScreenshotOptions } from '@src/utils/puppeteer.render';
-import { WeiboGetWebData } from '@src/models/weibo/weibo.main.get.web.data';
+import { WeiboWebDataFetcher } from '@src/models/weibo/weibo.main.get.web.data';
 import { WeiboQuery } from '@src/models/weibo/weibo.main.query';
 
 declare const logger: any;
@@ -13,11 +13,13 @@ export class WeiboTask {
   taskName: string;
   groupKey: string;
   privateKey: string;
+  WeiboWebDataFetcher: WeiboWebDataFetcher;
   e?: EventType;
   constructor(e?) {
     this.taskName = 'weiboTask';
     this.groupKey = 'Yz:yuki:weibo:upPush:group:';
     this.privateKey = 'Yz:yuki:weibo:upPush:private:';
+    this.WeiboWebDataFetcher = new WeiboWebDataFetcher(e);
   }
 
   /**
@@ -96,7 +98,7 @@ export class WeiboTask {
             const dynamicData = resp || [];
             dynamicList[subInfoOfup.uid] = dynamicData;
           } else {
-            resp = await await new WeiboGetWebData().getBloggerDynamicList(subInfoOfup.uid); // 获取指定 uid 的动态列表
+            resp = await this.WeiboWebDataFetcher.getBloggerDynamicList(subInfoOfup.uid); // 获取指定 uid 的动态列表
             if (resp) {
               requestedDataOfUids.set(subInfoOfup.uid, resp); // 将响应数据存储到映射中
               const dynamicData = resp || [];

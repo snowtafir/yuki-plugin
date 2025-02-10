@@ -3,7 +3,7 @@ import { WeiboQuery } from '@src/models/weibo/weibo.main.query';
 import { WeiboTask } from '@src/models/weibo/weibo.main.task';
 import Config from '@src/utils/config';
 import { _paths } from '@src/utils/paths';
-import { WeiboGetWebData } from '@src/models/weibo/weibo.main.get.web.data';
+import { WeiboWebDataFetcher } from '@src/models/weibo/weibo.main.get.web.data';
 
 declare const logger: any;
 
@@ -62,9 +62,9 @@ message.use(
       }
 
       // 获取 微博 博主信息
-      const res = await new WeiboGetWebData(e).getBloggerInfo(uid);
+      const res = await new WeiboWebDataFetcher(e).getBloggerInfo(uid);
 
-      if (res.statusText !== 'OK') {
+      if (res?.statusText !== 'OK') {
         e.reply('出了点网络问题，等会再试试吧~');
         return false;
       }
@@ -273,9 +273,9 @@ message.use(
   async e => {
     let uid = e.msg.replace(/^(#|\/)(yuki|优纪)?(微博|weibo|WEIBO)(博|bo|BO)主/g, '').trim();
 
-    const res = await new WeiboGetWebData(e).getBloggerInfo(uid);
+    const res = await new WeiboWebDataFetcher(e).getBloggerInfo(uid);
 
-    if (res.statusText !== 'OK') {
+    if (res?.statusText !== 'OK') {
       e.reply('诶嘿，出了点网络问题，等会再试试吧~');
       return;
     }
@@ -314,9 +314,9 @@ message.use(
   async e => {
     let keyword = e.msg.replace(/^(#|\/)(yuki|优纪)?搜索(微博|weibo|WEIBO)(博|bo|BO)主/g, '').trim();
 
-    const res = await new WeiboGetWebData(e).searchBloggerInfo(keyword);
+    const res = await new WeiboWebDataFetcher(e).searchBloggerInfo(keyword);
 
-    if (res.statusText !== 'OK') {
+    if (res?.statusText !== 'OK') {
       e.reply('诶嘿，出了点网络问题，等会再试试吧~');
       return;
     }
