@@ -1,4 +1,13 @@
-export declare class BiliGetWebData {
+import { AxiosInstance, AxiosRequestConfig } from 'axios';
+import https from 'https';
+declare class BiliHttpClient {
+    httpsAgent: https.Agent;
+    client: AxiosInstance;
+    constructor();
+    private initializeClient;
+    request(url: string, config?: AxiosRequestConfig): Promise<import("axios").AxiosResponse<any, any>>;
+}
+export declare class BilibiliWebDataFetcher extends BiliHttpClient {
     constructor(e?: any);
     /**通过uid获取up动态数据表*/
     getBiliDynamicListDataByUid(uid: any): Promise<import("axios").AxiosResponse<any, any>>;
@@ -7,3 +16,4 @@ export declare class BiliGetWebData {
     /**通过关键词搜索up*/
     searchBiliUserInfoByKeyword(keyword: string): Promise<import("axios").AxiosResponse<any, any>>;
 }
+export {};

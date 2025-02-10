@@ -1,18 +1,20 @@
 import QRCode from 'qrcode';
 import Config from '../../utils/config.js';
 import { renderPage } from '../../utils/image.js';
-import { WeiboGetWebData } from './weibo.main.get.web.data.js';
+import { WeiboWebDataFetcher } from './weibo.main.get.web.data.js';
 import { WeiboQuery } from './weibo.main.query.js';
 
 class WeiboTask {
     taskName;
     groupKey;
     privateKey;
+    WeiboWebDataFetcher;
     e;
     constructor(e) {
         this.taskName = 'weiboTask';
         this.groupKey = 'Yz:yuki:weibo:upPush:group:';
         this.privateKey = 'Yz:yuki:weibo:upPush:private:';
+        this.WeiboWebDataFetcher = new WeiboWebDataFetcher(e);
     }
     /**
      * 执行动态推送任务
@@ -58,7 +60,7 @@ class WeiboTask {
                         dynamicList[subInfoOfup.uid] = dynamicData;
                     }
                     else {
-                        resp = await await new WeiboGetWebData().getBloggerDynamicList(subInfoOfup.uid); // 获取指定 uid 的动态列表
+                        resp = await this.WeiboWebDataFetcher.getBloggerDynamicList(subInfoOfup.uid); // 获取指定 uid 的动态列表
                         if (resp) {
                             requestedDataOfUids.set(subInfoOfup.uid, resp); // 将响应数据存储到映射中
                             const dynamicData = resp || [];

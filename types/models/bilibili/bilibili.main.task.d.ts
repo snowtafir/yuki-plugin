@@ -1,9 +1,11 @@
 import { MainProps } from '@/components/dynamic/MainPage';
 import { ScreenshotOptions } from '@/utils/puppeteer.render';
+import { BilibiliWebDataFetcher } from '@/models/bilibili/bilibili.main.get.web.data';
 export declare class BiliTask {
     taskName: string;
     groupKey: string;
     privateKey: string;
+    BilibiliWebDataFetcher: BilibiliWebDataFetcher;
     e?: any;
     constructor(e?: any);
     hendleEventDynamicData(uid: string | number, count?: number): Promise<any>;

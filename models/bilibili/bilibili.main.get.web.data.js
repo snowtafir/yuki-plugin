@@ -1,4 +1,5 @@
 import axios from 'axios';
+import https from 'https';
 import lodash from 'lodash';
 import BiliApi from './bilibili.main.api.js';
 import { readSyncCookie, cookieWithBiliTicket, readSavedCookieItems, readSavedCookieOtherItems } from './bilibili.main.models.js';
@@ -6,8 +7,39 @@ import { getWbiSign } from './bilibili.risk.wbi.js';
 import { getDmImg } from './bilibili.risk.dm.img.js';
 import { getWebId } from './bilibili.risk.w_webid.js';
 
-class BiliGetWebData {
-    constructor(e) { }
+class BiliHttpClient {
+    httpsAgent;
+    client;
+    constructor() {
+        this.initializeClient();
+    }
+    initializeClient() {
+        this.httpsAgent = new https.Agent({
+            keepAlive: true,
+            maxSockets: 100,
+            timeout: 20000
+        });
+        this.client = axios.create({
+            httpsAgent: this.httpsAgent,
+            timeout: 20000
+        });
+    }
+    async request(url, config) {
+        try {
+            const response = await this.client.request({ url, ...config });
+            return response;
+        }
+        catch (error) {
+            console.error('BiliHttpClient Request failed:', error);
+            // 重新创建 AxiosInstance
+            this.initializeClient();
+        }
+    }
+}
+class BilibiliWebDataFetcher extends BiliHttpClient {
+    constructor(e) {
+        super();
+    }
     /**通过uid获取up动态数据表*/
     async getBiliDynamicListDataByUid(uid) {
         const url = BiliApi.BILIBIL_API.biliDynamicInfoList;
@@ -32,7 +64,8 @@ class BiliGetWebData {
             w_rid: w_rid,
             wts: time_stamp
         };
-        const res = await axios.get(url, {
+        const res = await this.request(url, {
+            method: 'GET',
             params,
             timeout: 10000,
             headers: lodash.merge(BiliApi.BILIBILI_HEADERS, {
@@ -66,7 +99,8 @@ class BiliGetWebData {
             w_rid: w_rid,
             wts: time_stamp
         };
-        const res = await axios.get(url, {
+        const res = await this.request(url, {
+            method: 'GET',
             params,
             timeout: 5000,
             headers: lodash.merge(BiliApi.BILIBILI_HEADERS, {
@@ -96,7 +130,8 @@ class BiliGetWebData {
             w_rid: w_rid,
             wts: time_stamp
         };
-        const res = await axios.get(url, {
+        const res = await this.request(url, {
+            method: 'GET',
             params,
             timeout: 5000,
             headers: lodash.merge(BiliApi.BILIBILI_HEADERS, {
@@ -110,4 +145,4 @@ class BiliGetWebData {
     }
 }
 
-export { BiliGetWebData };
+export { BilibiliWebDataFetcher };

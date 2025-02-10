@@ -1,7 +1,7 @@
 import QRCode from 'qrcode';
 import Config from '../../utils/config.js';
 import { renderPage } from '../../utils/image.js';
-import { BiliGetWebData } from './bilibili.main.get.web.data.js';
+import { BilibiliWebDataFetcher } from './bilibili.main.get.web.data.js';
 import { readSyncCookie, postGateway } from './bilibili.main.models.js';
 import { BiliQuery } from './bilibili.main.query.js';
 
@@ -9,15 +9,17 @@ class BiliTask {
     taskName;
     groupKey;
     privateKey;
+    BilibiliWebDataFetcher;
     e;
     constructor(e) {
         this.taskName = 'biliTask';
         this.groupKey = 'Yz:yuki:bili:upPush:group:';
         this.privateKey = 'Yz:yuki:bili:upPush:private:';
+        this.BilibiliWebDataFetcher = new BilibiliWebDataFetcher();
     }
     async hendleEventDynamicData(uid, count = 0) {
         let { cookie } = await readSyncCookie();
-        const resp = await new BiliGetWebData().getBiliDynamicListDataByUid(uid);
+        const resp = await this.BilibiliWebDataFetcher.getBiliDynamicListDataByUid(uid);
         const resjson = await resp.data;
         if (!resjson || resjson.code !== 0 || resjson.code === -352) {
             await postGateway(cookie);

@@ -1,7 +1,7 @@
 import { WeiboQuery } from '../models/weibo/weibo.main.query.js';
 import { WeiboTask } from '../models/weibo/weibo.main.task.js';
 import Config from '../utils/config.js';
-import { WeiboGetWebData } from '../models/weibo/weibo.main.get.web.data.js';
+import { WeiboWebDataFetcher } from '../models/weibo/weibo.main.get.web.data.js';
 import plugin from '../../../lib/plugins/plugin.js';
 
 class YukiWeibo extends plugin {
@@ -91,7 +91,7 @@ class YukiWeibo extends plugin {
                 return;
             }
             // 获取 微博 博主信息
-            const res = await new WeiboGetWebData(this.e).getBloggerInfo(uid);
+            const res = await new WeiboWebDataFetcher(this.e).getBloggerInfo(uid);
             if (res.statusText !== 'OK') {
                 this.e.reply('出了点网络问题，等会再试试吧~');
                 return false;
@@ -256,7 +256,7 @@ class YukiWeibo extends plugin {
     /**通过uid获取up主信息 */
     async getWeiboUserInfoByUid() {
         let uid = this.e.msg.replace(/^(#|\/)(yuki|优纪)?(微博|weibo|WEIBO)(博|bo|BO)主/g, '').trim();
-        const res = await new WeiboGetWebData(this.e).getBloggerInfo(uid);
+        const res = await new WeiboWebDataFetcher(this.e).getBloggerInfo(uid);
         if (res.statusText !== 'OK') {
             this.e.reply('诶嘿，出了点网络问题，等会再试试吧~');
             return;
@@ -285,7 +285,7 @@ class YukiWeibo extends plugin {
     /** 根据昵称搜索博主信息*/
     async searchWeiboUserInfoByKeyword() {
         let keyword = this.e.msg.replace(/^(#|\/)(yuki|优纪)?搜索(微博|weibo|WEIBO)(博|bo|BO)主/g, '').trim();
-        const res = await new WeiboGetWebData(this.e).searchBloggerInfo(keyword);
+        const res = await new WeiboWebDataFetcher(this.e).searchBloggerInfo(keyword);
         if (res.statusText !== 'OK') {
             this.e.reply('诶嘿，出了点网络问题，等会再试试吧~');
             return;
