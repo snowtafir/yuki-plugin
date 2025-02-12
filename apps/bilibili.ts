@@ -1,6 +1,6 @@
 import JSON from 'json5';
 import lodash from 'lodash';
-import { Bot, Plugin, Redis } from 'yunzaijs';
+import { Plugin, Redis } from 'yunzaijs';
 import { BiliQuery } from '@/models/bilibili/bilibili.main.query';
 import { BiliTask } from '@/models/bilibili/bilibili.main.task';
 import Config from '@/utils/config';
@@ -90,7 +90,7 @@ export default class YukiBili extends Plugin {
 
     /** 定时任务 */
     this.task = {
-      cron: !!this.biliConfigData.pushStatus ? this.biliConfigData.pushTime : '',
+      cron: !!this.biliConfigData.pushStatus ? (this.biliConfigData.checkDynamicCD ? this.biliConfigData.checkDynamicCD : '*/23  * * * *') : '',
       name: 'yuki插件---B站动态推送定时任务',
       fnc: () => this.newPushTask(),
       log: !!this.biliConfigData.pushTaskLog
