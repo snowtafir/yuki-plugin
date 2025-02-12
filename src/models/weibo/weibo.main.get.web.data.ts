@@ -1,49 +1,13 @@
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import https from 'https';
+import axios from 'axios';
 import { EventType } from 'yunzaijs';
 import { WeiboApi } from '@src/models/weibo/weibo.main.api';
 import { WeiboQuery } from '@src/models/weibo/weibo.main.query';
 
 declare const logger: any;
 
-class WeiboHttpClient {
-  client: AxiosInstance;
-
-  constructor() {
-    this.client = this.initializeClient();
-  }
-
-  private initializeClient() {
-    const httpsAgent = new https.Agent({
-      keepAlive: true,
-      maxSockets: 100,
-      timeout: 20000
-    });
-
-    const client = axios.create({
-      httpsAgent: httpsAgent,
-      timeout: 20000
-    });
-    return client;
-  }
-
-  async request(url: string, config?: AxiosRequestConfig) {
-    try {
-      const response = await this.client.request({ url, ...config });
-      return response;
-    } catch (error) {
-      console.error('WeiboHttpClient Request failed:', error);
-      // 重新创建 AxiosInstance
-      this.client = this.initializeClient();
-    }
-  }
-}
-
-export class WeiboWebDataFetcher extends WeiboHttpClient {
+export class WeiboWebDataFetcher {
   e?: EventType;
-  constructor(e?: EventType) {
-    super();
-  }
+  constructor(e?: EventType) {}
 
   /**通过uid获取博主信息 */
   async getBloggerInfo(target: any) {
@@ -51,8 +15,9 @@ export class WeiboWebDataFetcher extends WeiboHttpClient {
     const url = new URL(WeiboApi.WEIBO_API.weiboGetIndex);
     url.search = new URLSearchParams(param).toString();
 
-    const resp = await this.request(url.toString(), {
+    const resp = await axios(url.toString(), {
       method: 'GET',
+      timeout: 10000,
       headers: { 'accept': '*/*', 'Content-Type': 'application/json', 'referer': 'https://m.weibo.cn' }
     });
     return resp;
@@ -66,9 +31,10 @@ export class WeiboWebDataFetcher extends WeiboHttpClient {
       q: keyword
     };
 
-    const resp = await this.request(url, {
+    const resp = await axios(url, {
       method: 'GET',
       params,
+      timeout: 10000,
       headers: { 'accept': '*/*', 'Content-Type': 'application/json', 'referer': 'https://s.weibo.com' }
     });
     return resp;
@@ -83,8 +49,9 @@ export class WeiboWebDataFetcher extends WeiboHttpClient {
     await new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * (6500 - 1000 + 1) + 1000)));
 
     try {
-      const response = await this.request(url.toString(), {
+      const response = await axios(url.toString(), {
         method: 'GET',
+        timeout: 10000,
         headers: { 'accept': '*/*', 'Content-Type': 'application/json', 'referer': 'https://m.weibo.cn' }
       });
       const { ok, data, msg } = response?.data;

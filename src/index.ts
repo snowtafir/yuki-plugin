@@ -66,7 +66,7 @@ export default () => {
             console.error('B站动态推送定时任务', err);
           }
         },
-        biliConfigData.pushStatus ? biliConfigData.pushTime : ''
+        !!biliConfigData.pushStatus ? (biliConfigData.checkDynamicCD ? biliConfigData.checkDynamicCD : ' */23  * * * *') : ''
       );
 
       /** 微博动态推送定时任务 */
@@ -81,7 +81,7 @@ export default () => {
             console.error('微博动态推送定时任务', err);
           }
         },
-        weiboConfigData.pushStatus ? weiboConfigData.pushTime : ''
+        !!weiboConfigData.pushStatus ? (weiboConfigData.checkDynamicCD ? weiboConfigData.checkDynamicCD : ' */23  * * * *') : ''
       );
     },
     async mounted(e) {

@@ -1,49 +1,15 @@
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import https from 'https';
+import axios from 'axios';
 import lodash from 'lodash';
 import BiliApi from '@src/models/bilibili/bilibili.main.api';
+import { EventType } from 'yunzaijs';
 import { cookieWithBiliTicket, readSavedCookieItems, readSavedCookieOtherItems, readSyncCookie } from '@src/models/bilibili/bilibili.main.models';
 import { getWbiSign } from '@src/models/bilibili/bilibili.risk.wbi';
 import { getDmImg } from '@src/models/bilibili/bilibili.risk.dm.img';
 import { getWebId } from '@src/models/bilibili/bilibili.risk.w_webid';
 
-class BiliHttpClient {
-  client: AxiosInstance;
-
-  constructor() {
-    this.client = this.initializeClient();
-  }
-
-  private initializeClient() {
-    const httpsAgent = new https.Agent({
-      keepAlive: true,
-      maxSockets: 100,
-      timeout: 20000
-    });
-
-    const client = axios.create({
-      httpsAgent: httpsAgent,
-      timeout: 20000
-    });
-    return client;
-  }
-
-  async request(url: string, config?: AxiosRequestConfig) {
-    try {
-      const response = await this.client.request({ url, ...config });
-      return response;
-    } catch (error) {
-      console.error('BiliHttpClient Request failed:', error);
-      // 重新创建 AxiosInstance
-      this.client = this.initializeClient();
-    }
-  }
-}
-
-export class BilibiliWebDataFetcher extends BiliHttpClient {
-  constructor(e?) {
-    super();
-  }
+export class BilibiliWebDataFetcher {
+  e?: EventType;
+  constructor(e?: EventType) {}
 
   /**通过uid获取up动态数据表*/
   async getBiliDynamicListDataByUid(uid: any) {
@@ -70,10 +36,10 @@ export class BilibiliWebDataFetcher extends BiliHttpClient {
       w_rid: w_rid,
       wts: time_stamp
     };
-    const res = await this.request(url, {
+    const res = await axios(url, {
       method: 'GET',
       params,
-      timeout: 10000,
+      timeout: 15000,
       headers: lodash.merge(BiliApi.BILIBILI_HEADERS, {
         Cookie: `${cookie}`,
         Host: `api.bilibili.com`,
@@ -108,10 +74,10 @@ export class BilibiliWebDataFetcher extends BiliHttpClient {
       w_rid: w_rid,
       wts: time_stamp
     };
-    const res = await this.request(url, {
+    const res = await axios(url, {
       method: 'GET',
       params,
-      timeout: 5000,
+      timeout: 10000,
       headers: lodash.merge(BiliApi.BILIBILI_HEADERS, {
         Cookie: `${cookie}`,
         Host: `api.bilibili.com`,
@@ -141,10 +107,10 @@ export class BilibiliWebDataFetcher extends BiliHttpClient {
       w_rid: w_rid,
       wts: time_stamp
     };
-    const res = await this.request(url, {
+    const res = await axios(url, {
       method: 'GET',
       params,
-      timeout: 5000,
+      timeout: 10000,
       headers: lodash.merge(BiliApi.BILIBILI_HEADERS, {
         Cookie: `${cookie}`,
         Host: `api.bilibili.com`,
