@@ -42,7 +42,7 @@ class YukiWeibo extends Plugin {
         this.weiboPushData = Config.getConfigData('config', 'weibo', 'push');
         /** 定时任务 */
         this.task = {
-            cron: !!this.weiboConfigData.pushStatus ? this.weiboConfigData.pushTime : '',
+            cron: !!this.weiboConfigData.pushStatus ? (this.weiboConfigData.checkDynamicCD ? this.weiboConfigData.checkDynamicCD : '*/23  * * * *') : '',
             name: 'yuki插件---微博动态推送定时任务',
             fnc: () => this.newPushTask(),
             log: !!this.weiboConfigData.pushTaskLog
