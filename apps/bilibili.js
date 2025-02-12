@@ -78,7 +78,7 @@ class YukiBili extends plugin {
         this.biliPushData = Config.getConfigData('config', 'bilibili', 'push');
         /** 定时任务 */
         this.task = {
-            cron: !!this.biliConfigData.pushStatus ? this.biliConfigData.pushTime : '',
+            cron: !!this.biliConfigData.pushStatus ? (this.biliConfigData.checkDynamicCD ? this.biliConfigData.checkDynamicCD : '*/23  * * * *') : '',
             name: 'yuki插件---B站动态推送定时任务',
             fnc: () => this.newPushTask(),
             log: !!this.biliConfigData.pushTaskLog

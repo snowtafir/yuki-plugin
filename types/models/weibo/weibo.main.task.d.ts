@@ -1,11 +1,9 @@
 import { MainProps } from '@/components/dynamic/MainPage';
 import { ScreenshotOptions } from '@/utils/puppeteer.render';
-import { WeiboWebDataFetcher } from '@/models/weibo/weibo.main.get.web.data';
 export declare class WeiboTask {
     taskName: string;
     groupKey: string;
     privateKey: string;
-    WeiboWebDataFetcher: WeiboWebDataFetcher;
     e?: any;
     constructor(e?: any);
     /**
@@ -41,10 +39,10 @@ export declare class WeiboTask {
      * @param uidMap uid 映射
      * @param dynamicList 动态列表
      * @param now 当前时间戳
-     * @param interval 推送间隔时间
+     * @param dynamicTimeRange 筛选何时发布的动态
      * @param weiboConfigData 微博配置数据
      */
-    makeUidDynamicDataMap(uidMap: Map<any, Map<string, any>>, dynamicList: any, now: number, interval: number, weiboConfigData: any, messageMap: Map<string, Map<string | number, Map<string | number, {
+    makeUidDynamicDataMap(uidMap: Map<any, Map<string, any>>, dynamicList: any, now: number, dynamicTimeRange: number, weiboConfigData: any, messageMap: Map<string, Map<string | number, Map<string | number, {
         sendMode: string;
         dynamicUUid_str: string;
         dynamicType: string;

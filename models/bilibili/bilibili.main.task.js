@@ -9,17 +9,15 @@ class BiliTask {
     taskName;
     groupKey;
     privateKey;
-    BilibiliWebDataFetcher;
     e;
     constructor(e) {
         this.taskName = 'biliTask';
         this.groupKey = 'Yz:yuki:bili:upPush:group:';
         this.privateKey = 'Yz:yuki:bili:upPush:private:';
-        this.BilibiliWebDataFetcher = new BilibiliWebDataFetcher();
     }
     async hendleEventDynamicData(uid, count = 0) {
         let { cookie } = await readSyncCookie();
-        const resp = await this.BilibiliWebDataFetcher.getBiliDynamicListDataByUid(uid);
+        const resp = await new BilibiliWebDataFetcher().getBiliDynamicListDataByUid(uid);
         const resjson = await resp?.data;
         if (!resjson || resjson.code !== 0 || resjson.code === -352) {
             await postGateway(cookie);
@@ -40,7 +38,7 @@ class BiliTask {
     async runTask() {
         let biliConfigData = await Config.getUserConfig('bilibili', 'config');
         let biliPushData = await Config.getUserConfig('bilibili', 'push');
-        let interval = biliConfigData?.interval || 7200;
+        let dynamicTimeRange = biliConfigData?.dynamicTimeRange || 7200; // 筛选何时发布的动态，单位为秒，默认2小时内发布的动态
         logger.debug(`当前B站功能配置：${JSON.stringify(biliConfigData)}`);
         const uidMap = new Map(); // 存放group 和 private 对应所属 uid 与推送信息的映射
         const dynamicList = {}; // 存放获取的所有动态，键为 uid，值为动态数组
@@ -48,7 +46,7 @@ class BiliTask {
         let now = Date.now() / 1000; // 时间戳（秒）
         // 定义待推送动态消息映射
         const messageMap = new Map();
-        await this.makeUidDynamicDataMap(uidMap, dynamicList, now, interval, biliConfigData, messageMap);
+        await this.makeUidDynamicDataMap(uidMap, dynamicList, now, dynamicTimeRange, biliConfigData, messageMap);
         await this.sendDynamicMessage(messageMap, biliConfigData);
     }
     /**
@@ -116,10 +114,10 @@ class BiliTask {
      * @param uidMap uid 映射
      * @param dynamicList 动态列表
      * @param now 当前时间戳
-     * @param interval 推送间隔时间
+     * @param dynamicTimeRange 筛选何时发布的动态
      * @param biliConfigData Bilibili配置数据
      */
-    async makeUidDynamicDataMap(uidMap, dynamicList, now, interval, biliConfigData, messageMap) {
+    async makeUidDynamicDataMap(uidMap, dynamicList, now, dynamicTimeRange, biliConfigData, messageMap) {
         for (let [chatType, chatTypeMap] of uidMap) {
             for (let [key, value] of chatTypeMap) {
                 const tempDynamicList = dynamicList[key] || [];
@@ -133,7 +131,7 @@ class BiliTask {
                     }
                     if (!author?.pub_ts)
                         continue; // 如果动态没有发布时间，跳过当前循环
-                    if (Number(now - author.pub_ts) > interval) {
+                    if (Number(now - author.pub_ts) > dynamicTimeRange) {
                         logger.debug(`超过间隔，跳过  [ ${author?.name} : ${author?.mid} ] ${author?.pub_time} 的动态`);
                         continue;
                     } // 如果超过推送时间间隔，跳过当前循环
