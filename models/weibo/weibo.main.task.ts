@@ -14,13 +14,11 @@ export class WeiboTask {
   taskName: string;
   groupKey: string;
   privateKey: string;
-  WeiboWebDataFetcher: WeiboWebDataFetcher;
   e?: any;
   constructor(e?) {
     this.taskName = 'weiboTask';
     this.groupKey = 'Yz:yuki:weibo:upPush:group:';
     this.privateKey = 'Yz:yuki:weibo:upPush:private:';
-    this.WeiboWebDataFetcher = new WeiboWebDataFetcher(e);
   }
 
   /**
@@ -29,7 +27,7 @@ export class WeiboTask {
   async runTask() {
     let weiboConfigData = await Config.getUserConfig('weibo', 'config');
     let weiboPushData = await Config.getUserConfig('weibo', 'push');
-    let interval: number = weiboConfigData.interval || 7200; // 推送间隔时间，单位为秒，默认2小时
+    let dynamicTimeRange: number = weiboConfigData.dynamicTimeRange || 7200; // 筛选何时发布的动态，单位为秒，默认2小时内发布的动态
     logger.debug(`当前微博功能配置：${JSON.stringify(weiboConfigData)}`);
     const uidMap: Map<any, Map<string, any>> = new Map(); // 存放group 和 private 对应所属 uid 与推送信息的映射
     const dynamicList = {}; // 存放获取的所有动态，键为 uid，值为动态数组
@@ -44,7 +42,7 @@ export class WeiboTask {
       Map<string | number, Map<string | number, { sendMode: string; dynamicUUid_str: string; dynamicType: string; messages: any[] }[]>>
     > = new Map();
 
-    await this.makeUidDynamicDataMap(uidMap, dynamicList, now, interval, weiboConfigData, messageMap);
+    await this.makeUidDynamicDataMap(uidMap, dynamicList, now, dynamicTimeRange, weiboConfigData, messageMap);
 
     await this.sendDynamicMessage(messageMap, weiboConfigData);
   }
@@ -99,7 +97,7 @@ export class WeiboTask {
             const dynamicData = resp || [];
             dynamicList[subInfoOfup.uid] = dynamicData;
           } else {
-            resp = await this.WeiboWebDataFetcher.getBloggerDynamicList(subInfoOfup.uid); // 获取指定 uid 的动态列表
+            resp = await new WeiboWebDataFetcher().getBloggerDynamicList(subInfoOfup.uid); // 获取指定 uid 的动态列表
             if (resp) {
               requestedDataOfUids.set(subInfoOfup.uid, resp); // 将响应数据存储到映射中
               const dynamicData = resp || [];
@@ -123,14 +121,14 @@ export class WeiboTask {
    * @param uidMap uid 映射
    * @param dynamicList 动态列表
    * @param now 当前时间戳
-   * @param interval 推送间隔时间
+   * @param dynamicTimeRange 筛选何时发布的动态
    * @param weiboConfigData 微博配置数据
    */
   async makeUidDynamicDataMap(
     uidMap: Map<any, Map<string, any>>,
     dynamicList: any,
     now: number,
-    interval: number,
+    dynamicTimeRange: number,
     weiboConfigData: any,
     messageMap: Map<string, Map<string | number, Map<string | number, { sendMode: string; dynamicUUid_str: string; dynamicType: string; messages: any[] }[]>>>
   ) {
@@ -148,7 +146,7 @@ export class WeiboTask {
             printedList.add(user?.id);
           }
           if (!raw_post?.mblog?.created_at) continue;
-          if (Number(now - WeiboQuery.getDynamicCreatetDate(raw_post) / 1000) > interval) {
+          if (Number(now - WeiboQuery.getDynamicCreatetDate(raw_post) / 1000) > dynamicTimeRange) {
             logger.debug(`超过间隔，跳过   [ ${user?.screen_name} : ${user?.id} ] ${raw_post?.mblog?.created_at} 的动态`);
             continue;
           } // 如果超过推送时间间隔，跳过当前循环
