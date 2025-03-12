@@ -11,6 +11,13 @@ pushStatus: 1
 # ❀请勿设置周期过短比如小于10分钟，以免触发访问限制。
 checkDynamicCD: '*/23  * * * *'
 
+# 请求头 User-Agent 列表。请根据需要自行添加或修改。
+# 可设置多个请求头，每次重启后会随机选择一个。获取方法请浏览器自行搜索。
+userAgentList:
+  - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36
+  #- Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0
+  #- Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0
+
 # 筛选何时发布的动态，单位为秒，默认7200秒即2小时，即以当前时间为基准，筛选过去2小时内发布的动态，并推送。
 # 取值范围：3600-36000秒，即过去的1-10h。应大于checkDynamicCD的周期。
 dynamicTimeRange: 7200
