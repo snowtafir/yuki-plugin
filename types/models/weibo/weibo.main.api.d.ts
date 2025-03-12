@@ -1,10 +1,16 @@
-export declare class WeiboApi {
-    static WEIBO_API: {
+declare class WeiboApi {
+    weiboConfigData: any;
+    USER_AGENT: string;
+    constructor();
+    static WEIBO_USER_AGENT: string;
+    initialize(): Promise<void>;
+    initUserAgent(): Promise<void>;
+    get WEIBO_API(): {
         weiboGetIndex: string;
         weiboAjaxSearch: string;
     };
     /**统一设置header */
-    static WEIBO_HEADERS: {
+    get WEIBO_HEADERS(): {
         Accept: string;
         'Accept-language': string;
         Authority: string;
@@ -16,3 +22,5 @@ export declare class WeiboApi {
         'User-agent': string;
     };
 }
+declare const _default: WeiboApi;
+export default _default;
