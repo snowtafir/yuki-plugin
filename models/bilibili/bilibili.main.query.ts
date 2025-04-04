@@ -107,7 +107,7 @@ export class BiliQuery {
             }) || [];
           formatData.data.title = desc?.title;
           // 文章内容过长，则尝试获取全文
-          if (desc?.summary?.text?.length >= 480) {
+          if (String(desc?.summary?.text).length >= 480) {
             const fullArticleContent = await this.getFullArticleContent(this.formatUrl(desc?.jump_url));
             if (fullArticleContent) {
               const { readInfo, articleType } = fullArticleContent;
