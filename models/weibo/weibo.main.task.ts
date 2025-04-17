@@ -207,10 +207,15 @@ export class WeiboTask {
     if (!!weiboConfigData.pushMsgMode) {
       const { data, uid } = await WeiboQuery.formatDynamicData(pushDynamicData); // 处理动态数据
 
-      const eval2 = eval;
-      let banWords: RegExp = eval2(`/${weiboConfigData.banWords.join('|')}/g`); // 构建屏蔽关键字正则表达式
-      if (new RegExp(banWords).test(`${data?.title}${data?.content}`)) {
-        return 'return'; // 如果动态包含屏蔽关键字，则直接返回
+      const getBanWords: string[] | null = weiboConfigData?.banWords;
+      if (getBanWords && Array.isArray(getBanWords) && getBanWords.length > 0) {
+        // 构建屏蔽关键字正则表达式，转义特殊字符
+        const banWords = new RegExp(getBanWords.map(word => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g');
+        if (banWords.test(`${data?.title}${data?.content}`)) {
+          return 'return'; // 如果动态消息包含屏蔽关键字，则直接返回
+        }
+      } else if (getBanWords && !Array.isArray(getBanWords)) {
+        logger.error(`微博动态：Yaml配置文件中，banWords 字段格式不是数组格式，请检查！`);
       }
 
       let boxGrid: boolean = !!weiboConfigData.boxGrid === false ? false : true; // 是否启用九宫格样式，默认为 true
@@ -257,10 +262,13 @@ export class WeiboTask {
 
       const getBanWords: string[] | null = weiboConfigData?.banWords;
       if (getBanWords && Array.isArray(getBanWords) && getBanWords.length > 0) {
-        const banWords = new RegExp(getBanWords.join('|'), 'g'); // 构建屏蔽关键字正则表达式
+        // 构建屏蔽关键字正则表达式，转义特殊字符
+        const banWords = new RegExp(getBanWords.map(word => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g');
         if (banWords.test(dynamicMsg.msg.join(''))) {
           return 'return'; // 如果动态消息包含屏蔽关键字，则直接返回
         }
+      } else if (getBanWords && !Array.isArray(getBanWords)) {
+        logger.error(`微博动态：Yaml配置文件中，banWords 字段格式不是数组格式，请检查！`);
       }
 
       let mergeTextPic = !!weiboConfigData.mergeTextPic === false ? false : true; // 是否合并文字和图片，默认为 true
