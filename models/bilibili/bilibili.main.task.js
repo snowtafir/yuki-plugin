@@ -183,10 +183,20 @@ class BiliTask {
         if (pushMsgMode === 'PIC') {
             const { data, uid } = await BiliQuery.formatDynamicData(pushDynamicData); // 处理动态数据
             const extentData = { ...data };
-            const eval2 = eval;
-            let banWords = eval2(`/${biliConfigData.banWords.join('|')}/g`); // 构建屏蔽关键字正则表达式
-            if (new RegExp(banWords).test(`${extentData?.title}${extentData?.content}`)) {
-                return 'return'; // 如果动态包含屏蔽关键字，则直接返回
+            if (biliConfigData?.banWords && Array.isArray(biliConfigData.banWords)) {
+                const banWordsPattern = `/${biliConfigData.banWords.join('|')}/g`;
+                try {
+                    const banWordsRegex = new RegExp(banWordsPattern);
+                    if (banWordsRegex.test(`${extentData?.title}${extentData?.content}`)) {
+                        return 'return'; // 如果动态包含屏蔽关键字，则直接返回
+                    }
+                }
+                catch (error) {
+                    logger.error(`B站动态：构建屏蔽关键字正则表达式失败，banWords 字段格式可能不正确：${error}`);
+                }
+            }
+            else if (biliConfigData?.banWords) {
+                logger.error(`B站动态：Yaml配置文件中，banWords 字段格式不是数组格式，请检查！`);
             }
             let boxGrid = !!biliConfigData.boxGrid === false ? false : true; // 是否启用九宫格样式，默认为 true
             let isSplit = !!biliConfigData.isSplit === false ? false : true; // 是否启用分片截图，默认为 true
