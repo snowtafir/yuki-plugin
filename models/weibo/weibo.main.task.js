@@ -148,19 +148,15 @@ class WeiboTask {
             return; // 如果已经发送过，则直接返回
         if (!!weiboConfigData.pushMsgMode) {
             const { data, uid } = await WeiboQuery.formatDynamicData(pushDynamicData); // 处理动态数据
-            if (weiboConfigData?.banWords && Array.isArray(weiboConfigData.banWords)) {
-                const banWordsPattern = `/${weiboConfigData.banWords.join('|')}/g`;
-                try {
-                    const banWordsRegex = new RegExp(banWordsPattern);
-                    if (banWordsRegex.test(`${data?.title}${data?.content}`)) {
-                        return 'return'; // 如果动态包含屏蔽关键字，则直接返回
-                    }
-                }
-                catch (error) {
-                    logger.error(`微博动态：构建屏蔽关键字正则表达式失败，banWords 字段格式可能不正确：${error}`);
+            const getBanWords = weiboConfigData?.banWords;
+            if (getBanWords && Array.isArray(getBanWords) && getBanWords.length > 0) {
+                // 构建屏蔽关键字正则表达式，转义特殊字符
+                const banWords = new RegExp(getBanWords.map(word => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g');
+                if (banWords.test(`${data?.title}${data?.content}`)) {
+                    return 'return'; // 如果动态消息包含屏蔽关键字，则直接返回
                 }
             }
-            else if (weiboConfigData?.banWords) {
+            else if (getBanWords && !Array.isArray(getBanWords)) {
                 logger.error(`微博动态：Yaml配置文件中，banWords 字段格式不是数组格式，请检查！`);
             }
             let boxGrid = !!weiboConfigData.boxGrid === false ? false : true; // 是否启用九宫格样式，默认为 true
@@ -194,10 +190,14 @@ class WeiboTask {
             }
             const getBanWords = weiboConfigData?.banWords;
             if (getBanWords && Array.isArray(getBanWords) && getBanWords.length > 0) {
-                const banWords = new RegExp(getBanWords.join('|'), 'g'); // 构建屏蔽关键字正则表达式
+                // 构建屏蔽关键字正则表达式，转义特殊字符
+                const banWords = new RegExp(getBanWords.map(word => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g');
                 if (banWords.test(dynamicMsg.msg.join(''))) {
                     return 'return'; // 如果动态消息包含屏蔽关键字，则直接返回
                 }
+            }
+            else if (getBanWords && !Array.isArray(getBanWords)) {
+                logger.error(`微博动态：Yaml配置文件中，banWords 字段格式不是数组格式，请检查！`);
             }
             let mergeTextPic = !!weiboConfigData.mergeTextPic === false ? false : true; // 是否合并文字和图片，默认为 true
             //开启了合并文本和图片
