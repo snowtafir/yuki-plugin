@@ -120,4 +120,52 @@ export class BilibiliWebDataFetcher {
     });
     return res;
   }
+
+  /*通过aid/bvid获取视频信息*/
+  async getBiliVideoInfoByAid_BV(vedioID: { aid?: number; bvid?: string }) {
+    const url = BiliApi.BILIBIL_API.biliVideoInfoWbi;
+    let { cookie } = await readSyncCookie();
+    cookie = await cookieWithBiliTicket(cookie);
+    let referer = vedioID?.bvid ? `https://www.bilibili.com/video/${vedioID.bvid}` : `https://www.bilibili.com/video/av${vedioID.aid}`;
+    let data = vedioID?.bvid ? { bvid: vedioID.bvid } : { aid: vedioID.aid };
+
+    let signCookie = (await readSavedCookieItems(cookie, ['SESSDATA'], false)) || (await readSavedCookieOtherItems(cookie, ['SESSDATA']));
+    const { w_rid, time_stamp } = await getWbiSign(data, BiliApi.BILIBILI_HEADERS, signCookie);
+    const params = {
+      ...data,
+      w_rid: w_rid,
+      wts: time_stamp
+    };
+    const res = await axios(url, {
+      method: 'GET',
+      params,
+      timeout: 5000,
+      headers: lodash.merge(BiliApi.BILIBILI_HEADERS, {
+        Cookie: `${cookie}`,
+        Host: `api.bilibili.com`,
+        Origin: 'https://www.bilibili.com',
+        Referer: referer
+      })
+    });
+    return res;
+  }
+
+  /*通过视频短链url获取bvid*/
+  async getBVIDByShortUrl(tvUrlID: string) {
+    const ShortVideoUrlApi = BiliApi.BILIBIL_API.biliShortVideoUrl;
+    const url = `${ShortVideoUrlApi}${tvUrlID}`;
+    let { cookie } = await readSyncCookie();
+    cookie = await cookieWithBiliTicket(cookie);
+    const res = await axios(url, {
+      method: 'GET',
+      timeout: 5000,
+      headers: lodash.merge(BiliApi.BILIBILI_DYNAMIC_SPACE_HEADERS, {
+        Cookie: `${cookie}`
+      })
+    });
+    const htmlContent: string = await res.data;
+    const htmlContentRegex = /itemprop="url"\s*content="https:\/\/www.bilibili.com\/video\/(BV[a-zA-Z0-9]+)\/">/;
+    const BVID = htmlContent.match(htmlContentRegex)?.[1];
+    return `${BVID}`;
+  }
 }

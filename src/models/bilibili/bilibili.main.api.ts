@@ -44,7 +44,12 @@ class BiliApi {
       biliSearchUp: `https://api.bilibili.com/x/web-interface/search/type`,
       //通过关键词${upKeyword}搜索up主 parama = { keyword: 'upKeyword', page: 1, search_type: 'bili_user', order: 'totalrank'  }，需要wbi签名
       biliSearchUpWbi: `https://api.bilibili.com/x/web-interface/wbi/search/type`,
-
+      // 获取视频详情无wbi  parama = { aid: avid } 或 { bvid: bvid }
+      biliVideoInfo: `https://api.bilibili.com/x/web-interface/view`,
+      // 获取视频详情 wbi  parama = { aid: avid } 或 { bvid: bvid }
+      biliVideoInfoWbi: `https://api.bilibili.com/x/web-interface/wbi/view`,
+      //短链
+      biliShortVideoUrl: `https://b23.tv/`,
       biliLiveStatus: 'https://api.live.bilibili.com/room/v1/Room/get_status_info_by_uids',
       biliCard: 'https://api.bilibili.com/x/web-interface/card',
       biliStat: 'https://api.bilibili.com/x/relation/stat',

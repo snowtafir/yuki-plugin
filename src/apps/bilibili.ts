@@ -1,6 +1,7 @@
 import JSON from 'json5';
 import lodash from 'lodash';
-import { Messages, Redis, EventType } from 'yunzaijs';
+import moment from 'moment';
+import { Messages, Redis, EventType, Segment } from 'yunzaijs';
 import { BiliQuery } from '@src/models/bilibili/bilibili.main.query';
 import { BiliTask } from '@src/models/bilibili/bilibili.main.task';
 import Config from '@src/utils/config';
@@ -26,6 +27,7 @@ declare const logger: any;
 const message = new Messages('message');
 
 let biliPushData = Config.getConfigData('config', 'bilibili', 'push');
+let biliConfigData = Config.getConfigData('config', 'bilibili', 'config');
 
 /** 推送任务 函数 */
 async function biliNewPushTask(e?: EventType) {
@@ -621,6 +623,102 @@ message.use(
     e.reply(messages.join('\n'));
   },
   [/^(#|\/)(yuki|优纪)?搜索(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(up|UP)主.*$/]
+);
+
+/** 根据名称搜索up的uid*/
+message.use(
+  async e => {
+    if (biliConfigData?.parseVideoLink && !!biliConfigData.parseVideoLink === false) {
+      logger?.info(`优纪B站视频链接解析配置文件已设置关闭，解析终止。`);
+      return;
+    }
+    const VideoIDStr = e.msg
+      .match(/(b23\.tv\/[a-zA-Z0-9]+)|(www\.bilibili\.com\/video\/)?(av\d+|BV[a-zA-Z0-9]+)/)?.[0]
+      .replace(/^www\.bilibili\.com\/video\//, '');
+    let vedioID;
+    if (VideoIDStr && new RegExp(/^b23\.tv\/[a-zA-Z0-9]+/).test(VideoIDStr)) {
+      const tvUrlID = VideoIDStr.replace(/^b23\.tv\//g, '');
+      const bvidStr = await new BilibiliWebDataFetcher(e).getBVIDByShortUrl(tvUrlID);
+      vedioID = { bvid: bvidStr };
+    } else if (VideoIDStr && new RegExp(/^av\d+/).test(VideoIDStr)) {
+      const aid = VideoIDStr.replace(/^av/g, '');
+      vedioID = { aid: Number(aid) };
+    } else if (VideoIDStr && new RegExp(/|^BV[a-zA-Z0-9]+/).test(VideoIDStr)) {
+      vedioID = { bvid: VideoIDStr };
+    }
+    e.reply('优纪酱解析中，请稍后~');
+    const res = await new BilibiliWebDataFetcher(e).getBiliVideoInfoByAid_BV(vedioID);
+    if (res?.statusText !== 'OK') {
+      e.reply('诶嘿，出了点网络问题，等会再试试吧~');
+      return;
+    }
+
+    const { code, data } = (await res.data) || {};
+
+    function formatNumber(num: number): string {
+      if (num >= 10000) {
+        return `${(num / 10000).toFixed(1)}万`;
+      }
+      return num.toString();
+    }
+
+    function formatDuration(seconds: number): string {
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const secs = seconds % 60;
+
+      const mm = minutes.toString().padStart(2, '0');
+      const ss = secs.toString().padStart(2, '0');
+
+      return `${hours}:${mm}:${ss}`;
+    }
+
+    if (code === -400) {
+      e.reply('视频解析请求错误~');
+      return;
+    } else if (code === -403) {
+      e.reply(`权限不足，视频解析失败。`);
+      return;
+    } else if (code === -404) {
+      e.reply('解析的视频不存在。');
+      return;
+    } else if (code === 62002) {
+      e.reply('解析的视频稿件不可见。');
+      return;
+    } else if (code === 62004) {
+      e.reply('解析的视频稿件审核中。');
+      return;
+    } else if (code === 62012) {
+      e.reply('解析的视频稿件仅up主可见。');
+      return;
+    } else if (code === 0) {
+      const message = [
+        `${data?.title}\n`,
+        Segment.image(data.pic),
+        `\nbvid：${data?.bvid}`,
+        `\n--------------------`,
+        `\n分区：${data?.tname_v2} (${data?.tname})`,
+        `\n投稿：${moment(data?.ctime * 1000).format('YYYY年MM月DD日 HH:mm:ss')}`,
+        `\n发布：${moment(data?.pubdate * 1000).format('YYYY年MM月DD日 HH:mm:ss')}`,
+        `\n时长：${formatDuration(data?.duration)}`,
+        `\n创作：${data?.copyright === 1 ? '原创' : '转载'}`,
+        `\n--------------------`,
+        `\nUP主：${data?.owner?.name}`,
+        `\nUID：${data?.owner?.mid}`,
+        //`\n作者头像：${Segment.image(data?.owner?.face)}`,
+        `\n--------------------`,
+        `\n视频简介：`,
+        `\n${data?.desc}`,
+        `\n--------------------`,
+        `\n${formatNumber(data?.stat?.view)}播放 • ${formatNumber(data?.stat?.danmaku)}弹幕 • ${formatNumber(data?.stat?.reply)}评论 `,
+        `\n${formatNumber(data?.stat?.like)}点赞 • ${formatNumber(data?.stat?.coin)}投币 • ${formatNumber(data?.stat?.favorite)}收藏`,
+        `\n${formatNumber(data?.stat?.share)}分享`
+      ];
+
+      e.reply(message);
+    }
+  },
+  [/(b23\.tv\/[a-zA-Z0-9]+)|(www\.bilibili\.com\/video\/)?(av\d+|BV[a-zA-Z0-9]+)/]
 );
 
 export const YukiBli = message.ok;
