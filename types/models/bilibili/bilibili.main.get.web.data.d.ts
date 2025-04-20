@@ -6,4 +6,9 @@ export declare class BilibiliWebDataFetcher {
     getBilibiUserInfoByUid(uid: any): Promise<import("axios").AxiosResponse<any, any>>;
     /**通过关键词搜索up*/
     searchBiliUserInfoByKeyword(keyword: string): Promise<import("axios").AxiosResponse<any, any>>;
+    getBiliVideoInfoByAid_BV(vedioID: {
+        aid?: number;
+        bvid?: string;
+    }): Promise<import("axios").AxiosResponse<any, any>>;
+    getBVIDByShortUrl(tvUrlID: string): Promise<string>;
 }
