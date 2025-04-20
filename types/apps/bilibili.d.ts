@@ -31,4 +31,6 @@ export default class YukiBili extends plugin {
     getBilibiUserInfoByUid(): Promise<void>;
     /** 根据名称搜索up的uid*/
     searchBiliUserInfoByKeyword(): Promise<void>;
+    /** 根据aid或bvid获解析频信息*/
+    getVideoInfoByAid_BV(): Promise<void>;
 }

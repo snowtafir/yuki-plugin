@@ -83,3 +83,6 @@ liveAtAllCD: 1800
 
 # 直播动态@全体成员失败时是否发送错误消息，默认 1 发送，0 不发送。开启liveAtAll后才会生效。
 liveAtAllErrMsg: 1
+
+#视频链接解析开关 默认 1 开启 0 关闭
+parseVideoLink: 1
