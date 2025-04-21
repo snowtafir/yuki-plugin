@@ -1,4 +1,5 @@
 # 2.0.7
+* 添加白名单关键词过滤功能
 * 新增B站视频解析
 
 # 2.0.6
@@ -20,7 +21,7 @@
 # 2.0.4
 * 增加splitHeight配置项，其他优化
 * 优化B站风控相关，新增bili_tiket参数
-* fix Repeated Instantiation puppeteer
+* fix Repeated Instantiation Puppeteer
 * 优化获取B站登录ck
 * 添加截图列队，优化配置文件注释
 
