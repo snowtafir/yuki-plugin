@@ -661,7 +661,8 @@ export default class YukiBili extends plugin {
 
   /** 根据aid或bvid获解析频信息*/
   async getVideoInfoByAid_BV() {
-    if (this.biliConfigData?.parseVideoLink && !!this.biliConfigData.parseVideoLink === false) {
+    let parseVideoLink = !!this.biliConfigData?.parseVideoLink === false ? false : true;
+    if (parseVideoLink === false) {
       logger?.info(`优纪B站视频链接解析配置文件已设置关闭，解析终止。`);
       return;
     }
