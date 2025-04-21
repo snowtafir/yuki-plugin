@@ -206,7 +206,18 @@ export class WeiboTask {
     if (!!weiboConfigData.pushMsgMode) {
       const { data, uid } = await WeiboQuery.formatDynamicData(pushDynamicData); // 处理动态数据
 
+      const getWhiteWords: string[] | null = weiboConfigData?.whiteWordslist;
       const getBanWords: string[] | null = weiboConfigData?.banWords;
+      if (getWhiteWords && Array.isArray(getWhiteWords) && getWhiteWords.length > 0) {
+        // 构建白名单关键字正则表达式，转义特殊字符
+        const whiteWords = new RegExp(getWhiteWords.map(word => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g');
+        if (!whiteWords.test(`${data?.title}${data?.content}`)) {
+          return; // 如果动态消息不在白名单中，则直接返回
+        }
+      } else if (getWhiteWords && !Array.isArray(getWhiteWords)) {
+        logger.error(`微博动态：Yaml配置文件中，whiteWordslist 字段格式不是数组格式，请检查！`);
+      }
+
       if (getBanWords && Array.isArray(getBanWords) && getBanWords.length > 0) {
         // 构建屏蔽关键字正则表达式，转义特殊字符
         const banWords = new RegExp(getBanWords.map(word => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g');
@@ -259,7 +270,18 @@ export class WeiboTask {
         return 'return'; // 如果动态消息构建失败或内部资源获取失败，则直接返回
       }
 
+      const getWhiteWords: string[] | null = weiboConfigData?.whiteWordslist;
       const getBanWords: string[] | null = weiboConfigData?.banWords;
+      if (getWhiteWords && Array.isArray(getWhiteWords) && getWhiteWords.length > 0) {
+        // 构建白名单关键字正则表达式，转义特殊字符
+        const whiteWords = new RegExp(getWhiteWords.map(word => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g');
+        if (!whiteWords.test(dynamicMsg.msg.join(''))) {
+          return; // 如果动态消息不在白名单中，则直接返回
+        }
+      } else if (getWhiteWords && !Array.isArray(getWhiteWords)) {
+        logger.error(`微博动态：Yaml配置文件中，whiteWordslist 字段格式不是数组格式，请检查！`);
+      }
+
       if (getBanWords && Array.isArray(getBanWords) && getBanWords.length > 0) {
         // 构建屏蔽关键字正则表达式，转义特殊字符
         const banWords = new RegExp(getBanWords.map(word => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g');

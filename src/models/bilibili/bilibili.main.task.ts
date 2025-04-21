@@ -241,12 +241,23 @@ export class BiliTask {
       const { data, uid } = await BiliQuery.formatDynamicData(pushDynamicData); // 处理动态数据
       const extentData = { ...data };
 
+      const getWhiteWords: string[] | null = biliConfigData?.whiteWordslist;
       const getBanWords: string[] | null = biliConfigData?.banWords;
+      if (getWhiteWords && Array.isArray(getWhiteWords) && getWhiteWords.length > 0) {
+        // 构建白名单关键字正则表达式，转义特殊字符
+        const whiteWords = new RegExp(getWhiteWords.map(word => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g');
+        if (!whiteWords.test(`${extentData?.title}${extentData?.content}`)) {
+          return; // 如果动态消息不在白名单中，则直接返回
+        }
+      } else if (getWhiteWords && !Array.isArray(getWhiteWords)) {
+        logger.error(`B站动态：Yaml配置文件中，whiteWordslist 字段格式不是数组格式，请检查！`);
+      }
+
       if (getBanWords && Array.isArray(getBanWords) && getBanWords.length > 0) {
         // 构建屏蔽关键字正则表达式，转义特殊字符
         const banWords = new RegExp(getBanWords.map(word => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g');
         if (banWords.test(`${extentData?.title}${extentData?.content}`)) {
-          return 'return'; // 如果动态消息包含屏蔽关键字，则直接返回
+          return; // 如果动态消息包含屏蔽关键字，则直接返回
         }
       } else if (getBanWords && !Array.isArray(getBanWords)) {
         logger.error(`B站动态：Yaml配置文件中，banWords 字段格式不是数组格式，请检查！`);
@@ -292,8 +303,18 @@ export class BiliTask {
       if (dynamicMsg === undefined || dynamicMsg === 'continue') {
         return 'return'; // 如果动态消息构建失败，则直接返回
       }
-
+      const getWhiteWords: string[] | null = biliConfigData?.whiteWordslist;
       const getBanWords: string[] | null = biliConfigData?.banWords;
+      if (getWhiteWords && Array.isArray(getWhiteWords) && getWhiteWords.length > 0) {
+        // 构建白名单关键字正则表达式，转义特殊字符
+        const whiteWords = new RegExp(getWhiteWords.map(word => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g');
+        if (!whiteWords.test(dynamicMsg.msg.join(''))) {
+          return; // 如果动态消息不在白名单中，则直接返回
+        }
+      } else if (getWhiteWords && !Array.isArray(getWhiteWords)) {
+        logger.error(`B站动态：Yaml配置文件中，whiteWordslist 字段格式不是数组格式，请检查！`);
+      }
+
       if (getBanWords && Array.isArray(getBanWords) && getBanWords.length > 0) {
         // 构建屏蔽关键字正则表达式，转义特殊字符
         const banWords = new RegExp(getBanWords.map(word => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g');
