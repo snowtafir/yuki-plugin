@@ -632,22 +632,26 @@ message.use(
       logger?.info(`优纪B站视频链接解析配置文件已设置关闭，解析终止。`);
       return;
     }
-    const VideoIDStr = e.msg
-      .match(/(b23\.tv\/[a-zA-Z0-9]+)|(www\.bilibili\.com\/video\/)?(av\d+|BV[a-zA-Z0-9]+)/)?.[0]
-      .replace(/^www\.bilibili\.com\/video\//, '');
-    let vedioID;
-    if (VideoIDStr && new RegExp(/^b23\.tv\/[a-zA-Z0-9]+/).test(VideoIDStr)) {
-      const tvUrlID = VideoIDStr.replace(/^b23\.tv\//g, '');
-      const bvidStr = await new BilibiliWebDataFetcher(e).getBVIDByShortUrl(tvUrlID);
-      vedioID = { bvid: bvidStr };
-    } else if (VideoIDStr && new RegExp(/^av\d+/).test(VideoIDStr)) {
-      const aid = VideoIDStr.replace(/^av/g, '');
-      vedioID = { aid: Number(aid) };
-    } else if (VideoIDStr && new RegExp(/|^BV[a-zA-Z0-9]+/).test(VideoIDStr)) {
-      vedioID = { bvid: VideoIDStr };
+    const videoIDMatch = e.msg.match(/(b23\.tv\/([a-zA-Z0-9]+))|(www\.bilibili\.com\/video\/)?(av\d+|BV[a-zA-Z0-9]+)/);
+
+    let videoID;
+    if (videoIDMatch) {
+      if (videoIDMatch[2]) {
+        // 匹配 b23.tv/ 后面的部分
+        const bvidStr = await new BilibiliWebDataFetcher(e).getBVIDByShortUrl(videoIDMatch[2]);
+        videoID = { bvid: bvidStr };
+      } else if (videoIDMatch[4].startsWith('av')) {
+        // 匹配 av 开头的部分
+        const aid = videoIDMatch[4].replace(/^av/, '');
+        videoID = { aid: Number(aid) };
+      } else if (videoIDMatch[4].startsWith('BV')) {
+        // 匹配 BV 开头的部分
+        videoID = { bvid: videoIDMatch[4] };
+      }
     }
+
     e.reply('优纪酱解析中，请稍后~');
-    const res = await new BilibiliWebDataFetcher(e).getBiliVideoInfoByAid_BV(vedioID);
+    const res = await new BilibiliWebDataFetcher(e).getBiliVideoInfoByAid_BV(videoID);
     if (res?.statusText !== 'OK') {
       e.reply('诶嘿，出了点网络问题，等会再试试吧~');
       return;
@@ -712,13 +716,15 @@ message.use(
         `\n--------------------`,
         `\n${formatNumber(data?.stat?.view)}播放 • ${formatNumber(data?.stat?.danmaku)}弹幕 • ${formatNumber(data?.stat?.reply)}评论 `,
         `\n${formatNumber(data?.stat?.like)}点赞 • ${formatNumber(data?.stat?.coin)}投币 • ${formatNumber(data?.stat?.favorite)}收藏`,
-        `\n${formatNumber(data?.stat?.share)}分享`
+        `\n${formatNumber(data?.stat?.share)}分享`,
+        `\n--------------------`,
+        `\n链接：b23.tv/${data?.bvid}`
       ];
 
       e.reply(message);
     }
   },
-  [/(b23\.tv\/[a-zA-Z0-9]+)|(www\.bilibili\.com\/video\/)?(av\d+|BV[a-zA-Z0-9]+)/]
+  [/(b23\.tv\/([a-zA-Z0-9]+))|(www\.bilibili\.com\/video\/)?(av\d+|BV[a-zA-Z0-9]+)/]
 );
 
 export const YukiBli = message.ok;
