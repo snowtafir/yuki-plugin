@@ -628,7 +628,8 @@ message.use(
 /** 根据名称搜索up的uid*/
 message.use(
   async e => {
-    if (biliConfigData?.parseVideoLink && !!biliConfigData.parseVideoLink === false) {
+    let parseVideoLink = !!biliConfigData?.parseVideoLink === false ? false : true;
+    if (parseVideoLink === false) {
       logger?.info(`优纪B站视频链接解析配置文件已设置关闭，解析终止。`);
       return;
     }
