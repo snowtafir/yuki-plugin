@@ -578,7 +578,7 @@ class YukiBili extends plugin {
         let parseVideoLink = !!this.biliConfigData?.parseVideoLink === false ? false : true;
         if (parseVideoLink === false) {
             logger?.info(`优纪B站视频链接解析配置文件已设置关闭，解析终止。`);
-            return;
+            return false;
         }
         const videoIDMatch = this.e.msg.match(/(b23\.tv\/([a-zA-Z0-9]+))|(www\.bilibili\.com\/video\/)?(av\d+|BV[a-zA-Z0-9]+)/);
         let videoID;
