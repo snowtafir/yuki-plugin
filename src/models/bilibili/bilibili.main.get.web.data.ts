@@ -5,7 +5,6 @@ import { EventType } from 'yunzaijs';
 import { cookieWithBiliTicket, readSavedCookieItems, readSavedCookieOtherItems, readSyncCookie } from '@src/models/bilibili/bilibili.main.models';
 import { getWbiSign } from '@src/models/bilibili/bilibili.risk.wbi';
 import { getDmImg } from '@src/models/bilibili/bilibili.risk.dm.img';
-import { getWebId } from '@src/models/bilibili/bilibili.risk.w_webid';
 
 export class BilibiliWebDataFetcher {
   e?: EventType;
@@ -56,21 +55,18 @@ export class BilibiliWebDataFetcher {
     let { cookie } = await readSyncCookie();
     cookie = await cookieWithBiliTicket(cookie);
     const dmImg = await getDmImg();
-    const w_webid = await getWebId(uid);
 
     const data = {
       mid: uid,
       token: '',
       platform: 'web',
       web_location: 1550101,
-      ...dmImg,
-      w_webid: w_webid
+      ...dmImg
     };
     let signCookie = (await readSavedCookieItems(cookie, ['SESSDATA'], false)) || (await readSavedCookieOtherItems(cookie, ['SESSDATA']));
     const { w_rid, time_stamp } = await getWbiSign(data, BiliApi.BILIBILI_HEADERS, signCookie);
     const params = {
       ...data,
-      w_webid: w_webid,
       w_rid: w_rid,
       wts: time_stamp
     };
