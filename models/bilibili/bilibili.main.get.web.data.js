@@ -4,7 +4,6 @@ import BiliApi from './bilibili.main.api.js';
 import { readSyncCookie, cookieWithBiliTicket, readSavedCookieItems, readSavedCookieOtherItems } from './bilibili.main.models.js';
 import { getWbiSign } from './bilibili.risk.wbi.js';
 import { getDmImg } from './bilibili.risk.dm.img.js';
-import { getWebId } from './bilibili.risk.w_webid.js';
 
 class BilibiliWebDataFetcher {
     constructor(e) { }
@@ -51,14 +50,12 @@ class BilibiliWebDataFetcher {
         let { cookie } = await readSyncCookie();
         cookie = await cookieWithBiliTicket(cookie);
         const dmImg = await getDmImg();
-        const w_webid = await getWebId(uid);
         const data = {
             mid: uid,
             token: '',
             platform: 'web',
             web_location: 1550101,
-            ...dmImg,
-            w_webid: w_webid
+            ...dmImg
         };
         let signCookie = (await readSavedCookieItems(cookie, ['SESSDATA'], false)) || (await readSavedCookieOtherItems(cookie, ['SESSDATA']));
         const { w_rid, time_stamp } = await getWbiSign(data, BiliApi.BILIBILI_HEADERS, signCookie);
