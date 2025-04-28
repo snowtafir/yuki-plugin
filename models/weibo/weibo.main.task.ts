@@ -456,14 +456,21 @@ export class WeiboTask {
             }
 
             if (sendMode === 'SINGLE') {
+              let allSent = true;
               for (let i = 0; i < messages.length; i++) {
-                await this.sendMessageApi(chatId, bot_id, chatType, messages[i]);
+                if (!(await this.sendMessageApi(chatId, bot_id, chatType, messages[i]))) {
+                  allSent = false;
+                  break; // 如果有任何一条消息发送失败，停止发送后续消息
+                }
               }
-              await redis.set(sendMarkKey, '1', { EX: 3600 * 72 }); // 发送成功后设置标记
-              await this.randomDelay(1000, 2000); // 随机延时1-2秒
+              if (allSent) {
+                await redis.set(sendMarkKey, '1', { EX: 3600 * 72 }); // 发送成功后设置标记
+                await this.randomDelay(1000, 2000); // 随机延时1-2秒
+              }
             } else if (sendMode === 'MERGE') {
-              await this.sendMessageApi(chatId, bot_id, chatType, messages);
-              await redis.set(sendMarkKey, '1', { EX: 3600 * 72 }); // 发送成功后设置标记
+              if (await this.sendMessageApi(chatId, bot_id, chatType, messages)) {
+                await redis.set(sendMarkKey, '1', { EX: 3600 * 72 }); // 发送成功后设置标记
+              }
             }
           }
         }
@@ -480,20 +487,16 @@ export class WeiboTask {
    * @param message 消息内容
    */
   async sendMessageApi(chatId: string | number, bot_id: string | number, chatType: string, message: any) {
-    if (chatType === 'group') {
-      await (Bot[bot_id] ?? Bot)
-        ?.pickGroup(String(chatId))
-        .sendMsg(message) // 发送群聊
-        .catch(error => {
-          global?.logger?.error(`群组[${chatId}]推送失败：${JSON.stringify(error)}`);
-        });
-    } else if (chatType === 'private') {
-      await (Bot[bot_id] ?? Bot)
-        ?.pickFriend(String(chatId))
-        .sendMsg(message)
-        .catch(error => {
-          global?.logger?.error(`用户[${chatId}]推送失败：${JSON.stringify(error)}`);
-        }); // 发送好友私聊
+    try {
+      if (chatType === 'group') {
+        await (Bot[bot_id] ?? Bot)?.pickGroup(String(chatId)).sendMsg(message); // 发送群聊
+      } else if (chatType === 'private') {
+        await (Bot[bot_id] ?? Bot)?.pickFriend(String(chatId)).sendMsg(message); // 发送好友私聊
+      }
+      return true; // 发送成功
+    } catch (error: any) {
+      global?.logger?.error(`${chatType === 'group' ? '群聊' : '私聊'} ${chatId} 消息发送失败：${JSON.stringify(error)}`);
+      return false; // 发送失败
     }
   }
 
