@@ -118,7 +118,7 @@ export declare class BiliTask {
      * @param chatType 聊天类型
      * @param message 消息内容
      */
-    sendMessageApi(chatId: string | number, bot_id: string | number, chatType: string, message: any): Promise<void>;
+    sendMessageApi(chatId: string | number, bot_id: string | number, chatType: string, message: any): Promise<boolean>;
     /**
      * 随机延时
      * @param min 最小延时时间
