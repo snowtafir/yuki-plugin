@@ -92,7 +92,7 @@ export class BiliTask {
       };
     },
     biliConfigData: any,
-    uidMap: Map<any, Map<string, any>>,
+    uidMap: Map<any, Map<string, Map<string, Map<string, { upName: string; types: string[] }>>>>,
     dynamicList: any
   ) {
     let getDataRandomDelay: number = biliConfigData?.getDataRandomDelay || 8000; // 获取相邻up动态数据的随机延时间隔
@@ -107,40 +107,47 @@ export class BiliTask {
       if (chatTypeMap === undefined) continue; // 如果 chatTypeMap 未定义，跳过此次循环
 
       for (let chatId in biliPushData[chatType]) {
-        const subUpsOfChat: { uid: string; bot_id: string[]; name: string; type: string[] }[] = Array.prototype.slice.call(
-          biliPushData[chatType][chatId] || []
-        );
+        const subUpsOfChat: { uid: string; bot_id: string; name: string; type: string[] }[] = Array.prototype.slice.call(biliPushData[chatType][chatId] || []);
         for (let subInfoOfup of subUpsOfChat) {
+          const { uid, bot_id, name, type } = subInfoOfup;
           let resp: any;
           // 检查是否已经请求过该 uid
-          if (requestedDataOfUids.has(subInfoOfup.uid)) {
-            resp = requestedDataOfUids.get(subInfoOfup.uid); // 从已请求的映射中获取响应数据
+          if (requestedDataOfUids.has(uid)) {
+            resp = requestedDataOfUids.get(uid); // 从已请求的映射中获取响应数据
             const dynamicData = resp.data?.items || [];
-            dynamicList[subInfoOfup.uid] = dynamicData;
+            dynamicList[uid] = dynamicData;
           } else {
-            resp = await this.hendleEventDynamicData(subInfoOfup.uid);
+            resp = await this.hendleEventDynamicData(uid);
             if (resp) {
               if (resp.code === 0) {
-                requestedDataOfUids.set(subInfoOfup.uid, resp); // 将响应数据存储到映射中
+                requestedDataOfUids.set(uid, resp); // 将响应数据存储到映射中
                 const dynamicData = resp.data?.items || [];
-                dynamicList[subInfoOfup.uid] = dynamicData;
+                dynamicList[uid] = dynamicData;
               } else if (resp.code === -352) {
-                logger.error(`获取 ${subInfoOfup.uid} 动态失败，resCode：-352，请待下次任务自动重试`);
+                logger.error(`获取 ${uid} 动态失败，resCode：-352，请待下次任务自动重试`);
                 return;
               } else if (resp.code !== 0) {
-                logger.error(`获取 ${subInfoOfup.uid} 动态失败，resCode：${resp.code}，请待下次任务自动重试`);
+                logger.error(`获取 ${uid} 动态失败，resCode：${resp.code}，请待下次任务自动重试`);
                 return;
               }
             } else {
-              logger.error(`获取 ${subInfoOfup.uid} 动态失败，无响应数据，请待下次任务自动重试`);
+              logger.error(`获取 ${uid} 动态失败，无响应数据，请待下次任务自动重试`);
               return;
             }
           }
 
-          const chatIds: any[] = Array.from(new Set([...Object((chatTypeMap.get(subInfoOfup.uid) && chatTypeMap.get(subInfoOfup.uid).chatIds) || []), chatId]));
-          const bot_id: string[] | number[] = subInfoOfup.bot_id || [];
-          const { name, type } = subInfoOfup;
-          chatTypeMap.set(subInfoOfup.uid, { chatIds, bot_id, upName: name, type });
+          if (!chatTypeMap.has(uid)) {
+            chatTypeMap.set(uid, new Map());
+          }
+
+          const botChatMap = chatTypeMap.get(uid);
+          if (!botChatMap?.has(bot_id)) {
+            botChatMap?.set(bot_id, new Map());
+          }
+
+          const chatMap = botChatMap?.get(bot_id);
+          chatMap?.set(chatId, { upName: name, types: type });
+
           await this.randomDelay(2000, getDataRandomDelay); // 随机延时
         }
       }
@@ -157,19 +164,19 @@ export class BiliTask {
    * @param biliConfigData Bilibili配置数据
    */
   async makeUidDynamicDataMap(
-    uidMap: Map<any, Map<string, any>>,
+    uidMap: Map<any, Map<string, Map<string, Map<string, { upName: string; types: string[] }>>>>,
     dynamicList: any,
     now: number,
     dynamicTimeRange: number,
     biliConfigData: any,
     messageMap: Map<string, Map<string | number, Map<string | number, { sendMode: string; dynamicUUid_str: string; dynamicType: string; messages: any[] }[]>>>
   ) {
+    const printedList = new Set(); // 已打印的动态列表
     for (let [chatType, chatTypeMap] of uidMap) {
-      for (let [key, value] of chatTypeMap) {
-        const tempDynamicList = dynamicList[key] || [];
+      for (let [upUid, bot_idMap] of chatTypeMap) {
+        const tempDynamicList = dynamicList[upUid] || [];
         const willPushDynamicList: any[] = [];
 
-        const printedList = new Set(); // 已打印的动态列表
         for (let dynamicItem of tempDynamicList) {
           let author = dynamicItem?.modules?.module_author || {};
           if (!printedList.has(author?.mid)) {
@@ -184,17 +191,13 @@ export class BiliTask {
           if (dynamicItem.type === 'DYNAMIC_TYPE_FORWARD' && !biliConfigData.pushTransmit) continue; // 如果关闭了转发动态的推送，跳过当前循环
           willPushDynamicList.push(dynamicItem);
         }
-        printedList.clear();
-
-        const pushMapInfo = value || {}; // 获取当前 uid 对应的推送信息
-
-        const { chatIds, bot_id, upName, type } = pushMapInfo;
 
         // 遍历待推送的动态数组，发送动态消息
-        for (let pushDynamicData of willPushDynamicList) {
-          if (chatIds && chatIds.length) {
-            for (let chatId of chatIds) {
-              if (type && type.length && !type.includes(pushDynamicData.type)) continue; // 如果禁用了某类型的动态推送，跳过当前循环
+        for (let [bot_id, chatIdMap] of bot_idMap) {
+          for (let [chatId, subUpInfo] of chatIdMap) {
+            const { upName, types } = subUpInfo;
+            for (let pushDynamicData of willPushDynamicList) {
+              if (types && types.length && !types.includes(pushDynamicData.type)) continue; // 如果禁用了某类型的动态推送，跳过当前循环
               await this.makeDynamicMessageMap(chatId, bot_id, upName, pushDynamicData, biliConfigData, chatType, messageMap); // 发送动态消息
               await this.randomDelay(1000, 2000); // 随机延时1-2秒
             }
@@ -202,6 +205,7 @@ export class BiliTask {
         }
       }
     }
+    printedList.clear(); // 清空已打印的动态列表
   }
 
   /**
