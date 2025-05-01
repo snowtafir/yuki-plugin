@@ -35,7 +35,10 @@ export declare class BiliTask {
                 type: string[];
             }[];
         };
-    }, biliConfigData: any, uidMap: Map<any, Map<string, any>>, dynamicList: any): Promise<void>;
+    }, biliConfigData: any, uidMap: Map<any, Map<string, Map<string, Map<string, {
+        upName: string;
+        types: string[];
+    }>>>>, dynamicList: any): Promise<void>;
     /**
      * 构建uid对应动态数据映射
      * @param uidMap uid 映射
@@ -44,7 +47,10 @@ export declare class BiliTask {
      * @param dynamicTimeRange 筛选何时发布的动态
      * @param biliConfigData Bilibili配置数据
      */
-    makeUidDynamicDataMap(uidMap: Map<any, Map<string, any>>, dynamicList: any, now: number, dynamicTimeRange: number, biliConfigData: any, messageMap: Map<string, Map<string | number, Map<string | number, {
+    makeUidDynamicDataMap(uidMap: Map<any, Map<string, Map<string, Map<string, {
+        upName: string;
+        types: string[];
+    }>>>>, dynamicList: any, now: number, dynamicTimeRange: number, biliConfigData: any, messageMap: Map<string, Map<string | number, Map<string | number, {
         sendMode: string;
         dynamicUUid_str: string;
         dynamicType: string;
