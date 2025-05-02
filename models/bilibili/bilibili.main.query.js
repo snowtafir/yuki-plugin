@@ -12,7 +12,7 @@ class BiliQuery {
      */
     static async formatDynamicData(data) {
         const BiliDrawDynamicLinkUrl = 'https://m.bilibili.com/dynamic/';
-        let desc, pics = [], majorType;
+        let desc, pics = [], majorType, additional;
         let formatData = { data: {} };
         const author = data?.modules?.module_author || {};
         formatData.data.face = author.face; // 作者头像
@@ -40,7 +40,8 @@ class BiliQuery {
                         pics.map((item) => {
                             return { url: item?.url, width: item?.width, height: item?.height };
                         }) || [];
-                    formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || '';
+                    additional = data?.modules?.module_dynamic?.additional;
+                    formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text, additional) || '';
                 }
                 else {
                     desc = data?.modules?.module_dynamic?.desc || {};
@@ -62,7 +63,8 @@ class BiliQuery {
                     pics = pics.map((item) => {
                         return { url: item?.url, width: item?.width, height: item?.height };
                     });
-                    formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || '';
+                    additional = data?.modules?.module_dynamic?.additional;
+                    formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text, additional) || '';
                 }
                 else if (majorType === 'MAJOR_TYPE_DRAW') {
                     desc = data?.modules?.module_dynamic?.desc;
@@ -97,6 +99,7 @@ class BiliQuery {
                             return { url: item?.url, width: item?.width, height: item?.height };
                         }) || [];
                     formatData.data.title = desc?.title;
+                    additional = data?.modules?.module_dynamic?.additional;
                     // 文章内容过长，则尝试获取全文
                     if (String(desc?.summary?.text).length >= 480) {
                         const fullArticleContent = await this.getFullArticleContent(this.formatUrl(desc?.jump_url));
@@ -106,7 +109,7 @@ class BiliQuery {
                             if (articleType === 'cv') {
                                 formatData.data.content = this.praseFullOldTypeArticleContent(readInfo?.content);
                                 if (String(formatData.data.content).length < 100) {
-                                    formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || '';
+                                    formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text, additional) || '';
                                     formatData.data.pics = pics;
                                 }
                                 else {
@@ -118,17 +121,17 @@ class BiliQuery {
                                 formatData.data.content = content;
                                 formatData.data.pics = img && img.length > 0 ? img : pics;
                                 if (content && content.length < 100) {
-                                    formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || '';
+                                    formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text, additional) || '';
                                 }
                             }
                             else {
-                                formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || '';
+                                formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text, additional) || '';
                                 formatData.data.pics = pics;
                             }
                         }
                     }
                     else {
-                        formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text) || '';
+                        formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text, additional) || '';
                         formatData.data.pics = pics;
                     }
                 }
@@ -191,7 +194,7 @@ class BiliQuery {
      * @param nodes - 动态内容富文本节点
      * @returns 解析后的动态内容富文本
      */
-    static parseRichTextNodes = (nodes) => {
+    static parseRichTextNodes = (nodes, additional) => {
         if (typeof nodes === 'string') {
             // 将\t 替换为&nbsp;实现空格，\n 替换为 <br> 以实现换行
             nodes = nodes.replace(/\t/g, '&nbsp;');
@@ -228,6 +231,9 @@ class BiliQuery {
                         // 处理商品推广类型，使用官方的HTML标签写法
                         const goods_url = node?.jump_url;
                         return `<span data-module="desc" data-type="goods" data-url="${goods_url}" data-oid="${node?.rid}" class="bili-rich-text-module goods ${node?.icon_name}">&ZeroWidthSpace;${node?.text}</span>`;
+                    case 'RICH_TEXT_NODE_TYPE_VOTE':
+                        // 处理投票类型，使用官方的HTML标签写法
+                        return `<div data-module="additional" data-orig="0" class="bili-dyn-content__orig__additional"><div class="bili-dyn-card-vote"><div class="bili-dyn-card-vote__header"><div class="bili-dyn-card-vote__cover"></div></div> <div class="bili-dyn-card-vote__body"><div class="bili-dyn-card-vote__detail"><div class="bili-dyn-card-vote__detail__title">${node?.text}</div> <div class="bili-dyn-card-vote__detail__desc">${additional && additional?.type === 'ADDITIONAL_TYPE_VOTE' ? additional?.vote?.desc : ''}</div></div> <div class="bili-dyn-card-vote__action"><button class="bili-dyn-card-vote__action__btn_normal">${additional && additional.type === 'ADDITIONAL_TYPE_VOTE' ? additional?.vote?.button?.jump_style?.text : ''}</button></div></div></div></div>`;
                     default:
                         return node;
                 }

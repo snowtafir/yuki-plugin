@@ -15,7 +15,7 @@ export declare class BiliQuery {
      * @param nodes - 动态内容富文本节点
      * @returns 解析后的动态内容富文本
      */
-    static parseRichTextNodes: (nodes: any[] | string | any) => any;
+    static parseRichTextNodes: (nodes: any[] | string | any, additional?: any) => any;
     /**获取完整B站文章内容
      * @param postUrl - 文章链接: https://www.bilibili.com/read/cvxxxx 或者 https://www.bilibili.com/opus/xxxx
      * @returns {JSON} 完整的B站文章内容json数据
