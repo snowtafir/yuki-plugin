@@ -91,11 +91,7 @@ export class WeiboTask {
           const { uid, bot_id, name, type } = subInfoOfup;
           let resp: any;
           // 检查是否已经请求过该 uid
-          if (requestedDataOfUids.has(uid)) {
-            resp = requestedDataOfUids.get(uid); // 从已请求的映射中获取响应数据
-            const dynamicData = resp || [];
-            dynamicList[uid] = dynamicData;
-          } else {
+          if (!requestedDataOfUids.has(uid)) {
             resp = await new WeiboWebDataFetcher().getBloggerDynamicList(uid); // 获取指定 uid 的动态列表
             if (resp) {
               requestedDataOfUids.set(uid, resp); // 将响应数据存储到映射中
@@ -157,7 +153,9 @@ export class WeiboTask {
             logger.debug(`超过间隔，跳过   [ ${user?.screen_name} : ${user?.id} ] ${raw_post?.mblog?.created_at} 的动态`);
             continue;
           } // 如果超过推送时间间隔，跳过当前循环
-          if (dynamicItem.type === 'DYNAMIC_TYPE_FORWARD' && !weiboConfigData.pushTransmit) continue; // 如果关闭了转发动态的推送，跳过当前循环
+          if (dynamicItem?.type === 'DYNAMIC_TYPE_FORWARD' && !weiboConfigData.pushTransmit) {
+            continue;
+          } // 如果关闭了转发动态的推送，跳过当前循环
           willPushDynamicList.push(dynamicItem);
         }
 
@@ -166,7 +164,9 @@ export class WeiboTask {
           for (let [chatId, subUpInfo] of chatIdMap) {
             const { upName, types } = subUpInfo;
             for (let pushDynamicData of willPushDynamicList) {
-              if (types && types.length && !types.includes(pushDynamicData.type)) continue; // 如果禁用了某类型的动态推送，跳过当前循环
+              if (types && types.length > 0 && !types.includes(pushDynamicData.type)) {
+                continue;
+              } // 如果禁用了某类型的动态推送，跳过当前循环
               await this.makeDynamicMessageMap(chatId, bot_id, upName, pushDynamicData, weiboConfigData, chatType, messageMap); // 发送动态消息
               await this.randomDelay(1000, 2000); // 随机延时1-2秒
             }
