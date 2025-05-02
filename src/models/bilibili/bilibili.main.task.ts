@@ -47,7 +47,7 @@ export class BiliTask {
     let biliPushData = await Config.getUserConfig('bilibili', 'push');
     let dynamicTimeRange: number = biliConfigData?.dynamicTimeRange || 7200; // 筛选何时发布的动态，单位为秒，默认2小时内发布的动态
     logger.debug(`当前B站功能配置：${JSON.stringify(biliConfigData)}`);
-    const uidMap: Map<any, Map<string, any>> = new Map(); // 存放group 和 private 对应所属 uid 与推送信息的映射
+    const uidMap: Map<any, Map<string, Map<string, Map<string, { upName: string; types: string[] }>>>> = new Map(); // 存放group 和 private 对应所属 uid 与推送信息的映射
     const dynamicList = {}; // 存放获取的所有动态，键为 uid，值为动态数组
 
     await this.processBiliData(biliPushData, biliConfigData, uidMap, dynamicList);
@@ -112,11 +112,7 @@ export class BiliTask {
           const { uid, bot_id, name, type } = subInfoOfup;
           let resp: any;
           // 检查是否已经请求过该 uid
-          if (requestedDataOfUids.has(uid)) {
-            resp = requestedDataOfUids.get(uid); // 从已请求的映射中获取响应数据
-            const dynamicData = resp.data?.items || [];
-            dynamicList[uid] = dynamicData;
-          } else {
+          if (!requestedDataOfUids.has(uid)) {
             resp = await this.hendleEventDynamicData(uid);
             if (resp) {
               if (resp.code === 0) {
@@ -188,7 +184,9 @@ export class BiliTask {
             logger.debug(`超过间隔，跳过  [ ${author?.name} : ${author?.mid} ] ${author?.pub_time} 的动态`);
             continue;
           } // 如果超过推送时间间隔，跳过当前循环
-          if (dynamicItem.type === 'DYNAMIC_TYPE_FORWARD' && !biliConfigData.pushTransmit) continue; // 如果关闭了转发动态的推送，跳过当前循环
+          if (dynamicItem?.type === 'DYNAMIC_TYPE_FORWARD' && !biliConfigData.pushTransmit) {
+            continue;
+          } // 如果关闭了转发动态的推送，跳过当前循环
           willPushDynamicList.push(dynamicItem);
         }
 
@@ -197,7 +195,9 @@ export class BiliTask {
           for (let [chatId, subUpInfo] of chatIdMap) {
             const { upName, types } = subUpInfo;
             for (let pushDynamicData of willPushDynamicList) {
-              if (types && types.length && !types.includes(pushDynamicData.type)) continue; // 如果禁用了某类型的动态推送，跳过当前循环
+              if (types && types.length > 0 && !types.includes(pushDynamicData.type)) {
+                continue;
+              } // 如果禁用了某类型的动态推送，跳过当前循环
               await this.makeDynamicMessageMap(chatId, bot_id, upName, pushDynamicData, biliConfigData, chatType, messageMap); // 发送动态消息
               await this.randomDelay(1000, 2000); // 随机延时1-2秒
             }
