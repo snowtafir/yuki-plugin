@@ -222,7 +222,7 @@ class BiliQuery {
                         return `<span data-module="desc" data-type="lottery" data-oid="${node?.rid}" class="bili-rich-text-module lottery">${node?.text}</span>`;
                     case 'RICH_TEXT_NODE_TYPE_WEB':
                         // 处理 RICH_TEXT_NODE_TYPE_WEB 类型，直接拼接 text 属性
-                        return node.text;
+                        return node?.orig_text || node.text;
                     case 'RICH_TEXT_NODE_TYPE_EMOJI':
                         // 处理表情类型，使用 img 标签显示表情
                         const emoji = node.emoji;
