@@ -59,7 +59,24 @@ message.use(
       }
 
       // 获取或初始化推送数据
-      let subData = biliPushData || { group: {}, private: {} };
+      let subData: {
+        group?: {
+          [chatId: string]: {
+            bot_id: string;
+            uid: string;
+            name: string;
+            type: string[];
+          }[];
+        };
+        private?: {
+          [chatId: string]: {
+            bot_id: string;
+            uid: string;
+            name: string;
+            type: string[];
+          }[];
+        };
+      } = biliPushData || { group: {}, private: {} };
 
       // 根据聊天类型初始化数据
       let chatType = e.isGroup ? 'group' : 'private';
@@ -168,7 +185,24 @@ message.use(
       }
 
       // 获取或初始化B站推送数据
-      let subData = Config.getConfigData('config', 'bilibili', 'push') || { group: {}, private: {} };
+      let subData: {
+        group?: {
+          [chatId: string]: {
+            bot_id: string;
+            uid: string;
+            name: string;
+            type: string[];
+          }[];
+        };
+        private?: {
+          [chatId: string]: {
+            bot_id: string;
+            uid: string;
+            name: string;
+            type: string[];
+          }[];
+        };
+      } = Config.getConfigData('config', 'bilibili', 'push') || { group: {}, private: {} };
 
       // 根据聊天类型初始化数据
       let chatType = e.isGroup ? 'group' : 'private';
@@ -438,7 +472,36 @@ message.use(
     if (!e.isMaster) {
       e.reply('未取得bot主人身份，无权限查看Bot的全部B站订阅列表');
     } else {
-      let subData = Config.getConfigData('config', 'bilibili', 'push') || { group: {}, private: {} };
+      let subData: {
+        group?: {
+          [chatId: string]: {
+            bot_id: string;
+            uid: string;
+            name: string;
+            type: string[];
+          }[];
+        };
+        private?: {
+          [chatId: string]: {
+            bot_id: string;
+            uid: string;
+            name: string;
+            type: string[];
+          }[];
+        };
+      } = Config.getConfigData('config', 'bilibili', 'push') || { group: {}, private: {} };
+
+      // 如果聊天ID没有订阅数据，则删除该聊天ID
+      for (let chatType in subData) {
+        if (subData.hasOwnProperty(chatType)) {
+          subData[chatType] = Object.keys(subData[chatType]).reduce((nonEmptyData, chatId) => {
+            if (subData[chatType][chatId].length > 0) {
+              nonEmptyData[chatId] = subData[chatType][chatId];
+            }
+            return nonEmptyData;
+          }, {});
+        }
+      }
 
       const messages: string[] = [];
 
@@ -453,9 +516,9 @@ message.use(
 
       // 处理群组订阅
       if (subData.group && Object.keys(subData.group).length > 0) {
-        messages.push('------群组B站订阅------\n');
+        messages.push('\n>>>>>>群组B站订阅<<<<<<');
         Object.keys(subData.group).forEach(groupId => {
-          messages.push(`群组ID：${groupId}：`);
+          messages.push(`\n<群组${groupId}>：`);
           subData.group[groupId].forEach((item: { type: any[]; uid: any; name: any }) => {
             const types = new Set();
 
@@ -467,16 +530,18 @@ message.use(
               });
             }
 
-            messages.push(`${item.name}：${item.uid}  ${types.size ? `[${Array.from(types).join('、')}]` : ' [全部动态]'}`);
+            messages.push(`${item.uid}：${item.name}  ${types.size ? `[${Array.from(types).join('、')}]` : ' [全部动态]'}`);
           });
         });
+      } else {
+        messages.push('\n>>>>>>群组B站订阅<<<<<<\n当前没有任何群组订阅数据~');
       }
 
       // 处理私聊订阅
       if (subData.private && Object.keys(subData.private).length > 0) {
-        messages.push('\n------私聊B站订阅------');
+        messages.push('\n>>>>>>私聊B站订阅<<<<<<');
         Object.keys(subData.private).forEach(userId => {
-          messages.push(`用户ID：${userId}：`);
+          messages.push(`\n<用户${userId}>：`);
           subData.private[userId].forEach((item: { type: any[]; uid: any; name: any }) => {
             const types = new Set();
 
@@ -488,9 +553,11 @@ message.use(
               });
             }
 
-            messages.push(`${item.name}：${item.uid}  ${types.size ? `[${Array.from(types).join('、')}]` : ' [全部动态]'}`);
+            messages.push(`${item.uid}：${item.name}  ${types.size ? `[${Array.from(types).join('、')}]` : ' [全部动态]'}`);
           });
         });
+      } else {
+        messages.push('\n>>>>>>私聊B站订阅<<<<<<\n当前没有任何私聊订阅数据~');
       }
 
       e.reply(`推送列表如下：\n${messages.join('\n')}`);
@@ -502,7 +569,36 @@ message.use(
 /** 单独群聊或私聊的订阅的b站推送列表 */
 message.use(
   async e => {
-    let subData = Config.getConfigData('config', 'bilibili', 'push') || { group: {}, private: {} };
+    let subData: {
+      group?: {
+        [chatId: string]: {
+          bot_id: string;
+          uid: string;
+          name: string;
+          type: string[];
+        }[];
+      };
+      private?: {
+        [chatId: string]: {
+          bot_id: string;
+          uid: string;
+          name: string;
+          type: string[];
+        }[];
+      };
+    } = Config.getConfigData('config', 'bilibili', 'push') || { group: {}, private: {} };
+
+    // 如果聊天ID没有订阅数据，则删除该聊天ID
+    for (let chatType in subData) {
+      if (subData.hasOwnProperty(chatType)) {
+        subData[chatType] = Object.keys(subData[chatType]).reduce((nonEmptyData, chatId) => {
+          if (subData[chatType][chatId].length > 0) {
+            nonEmptyData[chatId] = subData[chatType][chatId];
+          }
+          return nonEmptyData;
+        }, {});
+      }
+    }
 
     const messages: string[] = [];
 
@@ -534,7 +630,7 @@ message.use(
         });
       }
 
-      messages.push(`${item.name}：${item.uid}  ${types.size ? `[${Array.from(types).join('、')}]` : ' [全部动态]'}`);
+      messages.push(`${item.uid}：${item.name}  ${types.size ? `[${Array.from(types).join('、')}]` : ' [全部动态]'}`);
     });
 
     e.reply(`推送列表如下：\n${messages.join('\n')}`);
