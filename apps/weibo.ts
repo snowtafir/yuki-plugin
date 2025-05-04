@@ -78,7 +78,24 @@ export default class YukiWeibo extends plugin {
       }
 
       // 获取或初始化推送数据
-      let subData = this.weiboPushData || { group: {}, private: {} };
+      let subData: {
+        group?: {
+          [chatId: string]: {
+            bot_id: string;
+            uid: string;
+            name: string;
+            type: string[];
+          }[];
+        };
+        private?: {
+          [chatId: string]: {
+            bot_id: string;
+            uid: string;
+            name: string;
+            type: string[];
+          }[];
+        };
+      } = this.weiboPushData || { group: {}, private: {} };
 
       // 根据聊天类型初始化数据
       let chatType = this.e.isGroup ? 'group' : 'private';
@@ -150,19 +167,36 @@ export default class YukiWeibo extends plugin {
       }
 
       // 获取或初始化微博推送数据
-      let data = this.weiboPushData || { group: {}, private: {} };
+      let subData: {
+        group?: {
+          [chatId: string]: {
+            bot_id: string;
+            uid: string;
+            name: string;
+            type: string[];
+          }[];
+        };
+        private?: {
+          [chatId: string]: {
+            bot_id: string;
+            uid: string;
+            name: string;
+            type: string[];
+          }[];
+        };
+      } = this.weiboPushData || { group: {}, private: {} };
 
       // 根据聊天类型初始化数据
       let chatType = this.e.isGroup ? 'group' : 'private';
       let chatId = this.e.isGroup ? this.e.group_id : this.e.user_id;
 
       // 初始化群组或私聊数据
-      if (!data[chatType][chatId]) {
-        data[chatType][chatId] = [];
+      if (!subData[chatType][chatId]) {
+        subData[chatType][chatId] = [];
       }
 
       // 查找指定UID的订阅数据
-      const upData = data[chatType][chatId].find((item: { uid: string }) => item.uid == uid);
+      const upData = subData[chatType][chatId].find((item: { uid: string }) => item.uid == uid);
       if (!upData) {
         this.e.reply(`订阅列表中没有找到该UID~\n${uid}可能是无效的`);
         return;
@@ -174,7 +208,7 @@ export default class YukiWeibo extends plugin {
 
       if (newType.length) {
         // 更新订阅类型
-        data[chatType][chatId] = data[chatType][chatId].map(item => {
+        subData[chatType][chatId] = subData[chatType][chatId].map(item => {
           if (item.uid == uid) {
             item.type = newType;
           }
@@ -183,12 +217,12 @@ export default class YukiWeibo extends plugin {
       } else {
         // 删除订阅
         isDel = true;
-        data[chatType][chatId] = data[chatType][chatId].filter((item: { uid: string }) => item.uid !== uid);
+        subData[chatType][chatId] = subData[chatType][chatId].filter((item: { uid: string }) => item.uid !== uid);
       }
 
       // 保存更新后的数据
-      this.weiboPushData = data;
-      Config.saveConfig('config', 'weibo', 'push', data);
+      this.weiboPushData = subData;
+      Config.saveConfig('config', 'weibo', 'push', subData);
 
       // 回复用户操作结果
       this.e.reply(`${isDel ? '删除' : '修改'}微博推送成功~\n${uid}`);
@@ -200,7 +234,36 @@ export default class YukiWeibo extends plugin {
     if (!this.e.isMaster) {
       this.e.reply('未取得bot主人身份，无权限查看Bot的全部微博推送列表');
     } else {
-      let subData = this.weiboPushData || { group: {}, private: {} };
+      let subData: {
+        group?: {
+          [chatId: string]: {
+            bot_id: string;
+            uid: string;
+            name: string;
+            type: string[];
+          }[];
+        };
+        private?: {
+          [chatId: string]: {
+            bot_id: string;
+            uid: string;
+            name: string;
+            type: string[];
+          }[];
+        };
+      } = this.weiboPushData || { group: {}, private: {} };
+
+      // 如果聊天ID没有订阅数据，则删除该聊天ID
+      for (let chatType in subData) {
+        if (subData.hasOwnProperty(chatType)) {
+          subData[chatType] = Object.keys(subData[chatType]).reduce((nonEmptyData, chatId) => {
+            if (subData[chatType][chatId].length > 0) {
+              nonEmptyData[chatId] = subData[chatType][chatId];
+            }
+            return nonEmptyData;
+          }, {});
+        }
+      }
 
       const messages: string[] = [];
 
@@ -214,9 +277,9 @@ export default class YukiWeibo extends plugin {
 
       // 处理群组订阅
       if (subData.group && Object.keys(subData.group).length > 0) {
-        messages.push('------群组微博订阅------');
+        messages.push('\n>>>>>>群组微博订阅<<<<<<');
         Object.keys(subData.group).forEach(groupId => {
-          messages.push(`群组ID：${groupId}：`);
+          messages.push(`\n<群组${groupId}>：`);
           subData.group[groupId].forEach((item: { type: any[]; uid: any; name: any }) => {
             const types = new Set();
 
@@ -228,16 +291,18 @@ export default class YukiWeibo extends plugin {
               });
             }
 
-            messages.push(`${item.name}：${item.uid}  ${types.size ? `[${Array.from(types).join('、')}]` : ' [全部动态]'}`);
+            messages.push(`${item.uid}：${item.name}  ${types.size ? `[${Array.from(types).join('、')}]` : ' [全部动态]'}`);
           });
         });
+      } else {
+        messages.push('\n>>>>>>群组微博订阅<<<<<<\n当前没有任何群组订阅数据~');
       }
 
       // 处理私聊订阅
       if (subData.private && Object.keys(subData.private).length > 0) {
-        messages.push('------私聊微博订阅------');
+        messages.push('\n>>>>>>私聊微博订阅<<<<<<');
         Object.keys(subData.private).forEach(userId => {
-          messages.push(`用户ID：${userId}：`);
+          messages.push(`\n<用户${userId}>：`);
           subData.private[userId].forEach((item: { type: any[]; uid: any; name: any }) => {
             const types = new Set();
 
@@ -249,9 +314,11 @@ export default class YukiWeibo extends plugin {
               });
             }
 
-            messages.push(`${item.name}：${item.uid}  ${types.size ? `[${Array.from(types).join('、')}]` : ' [全部动态]'}`);
+            messages.push(`${item.uid}：${item.name}  ${types.size ? `[${Array.from(types).join('、')}]` : ' [全部动态]'}`);
           });
         });
+      } else {
+        messages.push('\n>>>>>>私聊微博订阅<<<<<<\n当前没有任何私聊订阅数据~');
       }
 
       this.e.reply(`推送列表如下：\n${messages.join('\n')}`);
@@ -260,7 +327,36 @@ export default class YukiWeibo extends plugin {
 
   /** 单独群聊或私聊的订阅的b站推送列表 */
   async singelSubDynamicPushList() {
-    let subData = this.weiboPushData || { group: {}, private: {} };
+    let subData: {
+      group?: {
+        [chatId: string]: {
+          bot_id: string;
+          uid: string;
+          name: string;
+          type: string[];
+        }[];
+      };
+      private?: {
+        [chatId: string]: {
+          bot_id: string;
+          uid: string;
+          name: string;
+          type: string[];
+        }[];
+      };
+    } = this.weiboPushData || { group: {}, private: {} };
+
+    // 如果聊天ID没有订阅数据，则删除该聊天ID
+    for (let chatType in subData) {
+      if (subData.hasOwnProperty(chatType)) {
+        subData[chatType] = Object.keys(subData[chatType]).reduce((nonEmptyData, chatId) => {
+          if (subData[chatType][chatId].length > 0) {
+            nonEmptyData[chatId] = subData[chatType][chatId];
+          }
+          return nonEmptyData;
+        }, {});
+      }
+    }
 
     const messages: string[] = [];
 
@@ -291,7 +387,7 @@ export default class YukiWeibo extends plugin {
         });
       }
 
-      messages.push(`${item.name}：${item.uid}  ${types.size ? `[${Array.from(types).join('、')}]` : ' [全部动态]'}`);
+      messages.push(`${item.uid}：${item.name}  ${types.size ? `[${Array.from(types).join('、')}]` : ' [全部动态]'}`);
     });
 
     this.e.reply(`推送列表如下：\n${messages.join('\n')}`);
