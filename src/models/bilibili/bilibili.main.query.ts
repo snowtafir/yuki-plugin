@@ -108,38 +108,27 @@ export class BiliQuery {
           formatData.data.title = desc?.title;
           additional = data?.modules?.module_dynamic?.additional;
           // 文章内容过长，则尝试获取全文
+          let content: String = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text, additional) || '';
           if (String(desc?.summary?.text).length >= 480) {
             const fullArticleContent = await this.getFullArticleContent(this.formatUrl(desc?.jump_url));
             if (fullArticleContent) {
               const { readInfo, articleType } = fullArticleContent;
-              // 文章链接类型为 cv（旧类型） 或者 opus（新类型）
-              if (articleType === 'cv') {
-                formatData.data.content = this.praseFullOldTypeArticleContent(readInfo?.content);
-                if (String(formatData.data.content).length < 100) {
-                  formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text, additional) || '';
-                  formatData.data.pics = pics;
-                } else {
-                  formatData.data.pics = [];
+              // 文章类型为 cv（旧类型） 或者 opus（新类型）
+              if (articleType === 'opus') {
+                const newTypeContent = this.praseFullNewTypeArticleContent(readInfo?.paragraphs);
+                if (newTypeContent) {
+                  content = newTypeContent.content || content;
+                  pics = newTypeContent.img && newTypeContent.img.length > 0 ? newTypeContent.img : pics;
                 }
-              } else if (articleType === 'opus') {
-                const FullNewTypeArticleContent = this.praseFullNewTypeArticleContent(readInfo?.paragraphs);
-                if (FullNewTypeArticleContent) {
-                  const { content, img } = FullNewTypeArticleContent;
-                  formatData.data.content = content;
-                  formatData.data.pics = img && img.length > 0 ? img : pics;
-                  if (content && content.length < 100) {
-                    formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text, additional);
-                  }
-                }
-              } else {
-                formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text, additional) || '';
-                formatData.data.pics = pics;
+              } else if (articleType === 'cv') {
+                const oldTypeContent = this.praseFullOldTypeArticleContent(readInfo?.content);
+                content = oldTypeContent || content;
               }
+              content = String(content).length < 100 ? this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text, additional) : content;
             }
-          } else {
-            formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text, additional) || '';
-            formatData.data.pics = pics;
           }
+          formatData.data.content = content;
+          formatData.data.pics = pics;
         } else if (majorType === 'MAJOR_TYPE_ARTICLE') {
           desc = data?.modules?.module_dynamic?.major?.article || {};
           pics = desc?.covers;
@@ -268,7 +257,7 @@ export class BiliQuery {
 
   /**获取完整B站文章内容
    * @param postUrl - 文章链接: https://www.bilibili.com/read/cvxxxx 或者 https://www.bilibili.com/opus/xxxx
-   * @returns {JSON} 完整的B站文章内容json数据
+   * @returns  完整的B站文章内容json数据
    */
   static async getFullArticleContent(postUrl: string) {
     let { cookie } = await readSyncCookie();
@@ -279,23 +268,21 @@ export class BiliQuery {
         responseType: 'text'
       });
       const text = response.data;
-      let match: any, readInfo: any, articleType: string;
-      if (/^https:\/\/www.bilibili.com\/read\/cv/.test(postUrl)) {
-        match = String(text).match(/"readInfo":([\s\S]+?),"readViewInfo":/);
-        if (match) {
-          const full_json_text = match[1];
-          readInfo = JSON.parse(full_json_text);
-          articleType = 'cv';
-          return { readInfo, articleType };
-        }
-      } else if (/^https:\/\/www.bilibili.com\/opus\//.test(postUrl)) {
-        match = String(text).match(/"module_content":([\s\S]+?),\s*"module_type":"MODULE_TYPE_CONTENT"/);
-        if (match) {
-          const full_json_text = match[1];
-          readInfo = JSON.parse(full_json_text);
-          articleType = 'opus';
-          return { readInfo, articleType };
-        }
+      let matchCV: RegExpMatchArray | null, matchOPUS: RegExpMatchArray | null, readInfo: any, articleType: string;
+      matchCV = String(text).match(/"readInfo":([\s\S]+?),"readViewInfo":/);
+      matchOPUS = String(text).match(/"module_content"\s*:\s*([\s\S]+?)\s*,\s*"module_type"\s*:\s*"MODULE_TYPE_CONTENT"/);
+      if (matchOPUS) {
+        logger.info(`文章内容新`);
+        const full_json_text = matchOPUS[1];
+        readInfo = JSON.parse(full_json_text);
+        articleType = 'opus';
+        return { readInfo, articleType };
+      } else if (matchCV) {
+        logger.info(`文章内容旧`);
+        const full_json_text = matchCV[1];
+        readInfo = JSON.parse(full_json_text);
+        articleType = 'cv';
+        return { readInfo, articleType };
       }
     } catch (err) {
       logger?.error(`优纪插件：获取B站完整文章内容失败 [ ${postUrl} ] : ${err}`);
