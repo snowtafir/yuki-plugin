@@ -18,7 +18,7 @@ export declare class BiliQuery {
     static parseRichTextNodes: (nodes: any[] | string | any, additional?: any) => any;
     /**获取完整B站文章内容
      * @param postUrl - 文章链接: https://www.bilibili.com/read/cvxxxx 或者 https://www.bilibili.com/opus/xxxx
-     * @returns {JSON} 完整的B站文章内容json数据
+     * @returns  完整的B站文章内容json数据
      */
     static getFullArticleContent(postUrl: string): Promise<{
         readInfo: any;

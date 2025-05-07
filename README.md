@@ -2,7 +2,7 @@
 
 # YUKI-PLUGIN
 
-- 一个适用于 `Yunzai 系列机器人框架` 的B站动态、B站视频链接解析和微博动态订阅推送的插件
+- 一个适用于 `Yunzai 系列机器人框架` 的B站动态、微博动态订阅推送和B站视频链接解析的插件
 
 - 支持 群聊/私聊 订阅B站动态和微博动态，支持定时推送，支持手动触发推送，支持简单查询B站/微博用户信息。
 
@@ -36,7 +36,27 @@ chromium-browser --version
 ## 选择安装方式
 按照网络情况以及使用的bot框架是`Yunzaijs`还是`Yunzai-V3`，选择对应的安装方式。
 
-### ***（一）YunzaiJS***
+### ***（一）Yunzai-V3***
+
+> 仅支持Yunzai-V3（TRSS/Miao）的分支，选择仓库，安装到 `yunzai/plugins`：
+
+gitee仓库：
+```
+git clone --branch main3 https://gitee.com/snowtafir/yuki-plugin.git ./plugins/yuki-plugin
+```
+
+github仓库：
+```
+git clone --branch main3 https://github.com/snowtafir/yuki-plugin.git ./plugins/yuki-plugin
+```
+
+* 安装依赖
+
+```shell
+pnpm install --filter=yuki-plugin
+```
+
+### ***（二）YunzaiJS***
 > 选择其中一种方式安装插件：
 
 1. npm包安装到`yunzaijs/node_modules`的方式，仅YunzaiJS支持：
@@ -84,26 +104,6 @@ git clone --branch main https://github.com/snowtafir/yuki-plugin.git ./plugins/y
 * 依赖安装：
 ```shell
 yarn install
-```
-
-### ***（二）Yunzai-V3***
-
-> 仅支持Yunzai-V3（TRSS/Miao）的分支，选择仓库，安装到 `yunzai/plugins`：
-
-gitee仓库：
-```
-git clone --branch main3 https://gitee.com/snowtafir/yuki-plugin.git ./plugins/yuki-plugin
-```
-
-github仓库：
-```
-git clone --branch main3 https://github.com/snowtafir/yuki-plugin.git ./plugins/yuki-plugin
-```
-
-* 安装依赖
-
-```shell
-pnpm install --filter=yuki-plugin
 ```
 
 # 📦二、插件配置
