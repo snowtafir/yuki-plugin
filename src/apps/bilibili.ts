@@ -519,19 +519,21 @@ message.use(
         messages.push('\n>>>>>>群组B站订阅<<<<<<');
         Object.keys(subData.group).forEach(groupId => {
           messages.push(`\n<群组${groupId}>：`);
-          subData.group[groupId].forEach((item: { type: any[]; uid: any; name: any }) => {
-            const types = new Set();
+          if (subData.group) {
+            subData.group[groupId].forEach((item: { type: any[]; uid: any; name: any }) => {
+              const types = new Set();
 
-            if (item.type && item.type.length) {
-              item.type.forEach((typeItem: string | number) => {
-                if (typeMap[typeItem]) {
-                  types.add(typeMap[typeItem]);
-                }
-              });
-            }
+              if (item.type && item.type.length) {
+                item.type.forEach((typeItem: string | number) => {
+                  if (typeMap[typeItem]) {
+                    types.add(typeMap[typeItem]);
+                  }
+                });
+              }
 
-            messages.push(`${item.uid}：${item.name}  ${types.size ? `[${Array.from(types).join('、')}]` : ' [全部动态]'}`);
-          });
+              messages.push(`${item.uid}：${item.name}  ${types.size ? `[${Array.from(types).join('、')}]` : ' [全部动态]'}`);
+            });
+          }
         });
       } else {
         messages.push('\n>>>>>>群组B站订阅<<<<<<\n当前没有任何群组订阅数据~');
@@ -542,19 +544,21 @@ message.use(
         messages.push('\n>>>>>>私聊B站订阅<<<<<<');
         Object.keys(subData.private).forEach(userId => {
           messages.push(`\n<用户${userId}>：`);
-          subData.private[userId].forEach((item: { type: any[]; uid: any; name: any }) => {
-            const types = new Set();
+          if (subData.private) {
+            subData.private[userId].forEach((item: { type: any[]; uid: any; name: any }) => {
+              const types = new Set();
 
-            if (item.type && item.type.length) {
-              item.type.forEach((typeItem: string | number) => {
-                if (typeMap[typeItem]) {
-                  types.add(typeMap[typeItem]);
-                }
-              });
-            }
+              if (item.type && item.type.length) {
+                item.type.forEach((typeItem: string | number) => {
+                  if (typeMap[typeItem]) {
+                    types.add(typeMap[typeItem]);
+                  }
+                });
+              }
 
-            messages.push(`${item.uid}：${item.name}  ${types.size ? `[${Array.from(types).join('、')}]` : ' [全部动态]'}`);
-          });
+              messages.push(`${item.uid}：${item.name}  ${types.size ? `[${Array.from(types).join('、')}]` : ' [全部动态]'}`);
+            });
+          }
         });
       } else {
         messages.push('\n>>>>>>私聊B站订阅<<<<<<\n当前没有任何私聊订阅数据~');
@@ -662,15 +666,15 @@ message.use(
       e.reply('用户不存在，输入的uid无效。');
       return;
     }
-    const message = [`昵称：${data?.name}`, `\n性别：${data?.sex}`, `\n等级：${data?.level}`];
+    const message = [`--------------------`, `\n昵称：${data?.name}`, `\n性别：${data?.sex}`, `\n等级：${data?.level}`, `\n--------------------`];
 
     if (data.live_room) {
       message.push(
-        `\n***********\n---直播信息---`,
-        `\n直播标题：${data?.live_room?.title}`,
-        `\n直播房间：${data?.live_room?.roomid}`,
-        `\n直播状态：${data?.live_room?.liveStatus ? '直播中' : '未开播'}`,
-        `\n观看人数：${data?.live_room?.watched_show?.num}人`
+        `\n>>>>>直播间信息<<<<<`,
+        `\n标题：${data?.live_room?.title}`,
+        `\n房间：${data?.live_room?.roomid}`,
+        `\n状态：${data?.live_room?.liveStatus ? '直播中' : '未开播'}`,
+        `\n观看人数：${data?.live_room?.watched_show?.num}`
       );
       e.reply(`直播链接：${data?.live_room?.url}`);
     }

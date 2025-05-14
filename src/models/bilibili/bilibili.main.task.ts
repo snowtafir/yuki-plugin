@@ -97,6 +97,7 @@ export class BiliTask {
   ) {
     let getDataRandomDelay: number = biliConfigData?.getDataRandomDelay || 8000; // 获取相邻up动态数据的随机延时间隔
     const requestedDataOfUids = new Map<string, any>(); // 存放已请求的 uid 映射
+    const printedList = new Set(); // 已打印的动态列表
     for (let chatType in biliPushData) {
       // 遍历 group 和 private
 
@@ -113,6 +114,10 @@ export class BiliTask {
           let resp: any;
           // 检查是否已经请求过该 uid
           if (!requestedDataOfUids.has(uid)) {
+            if (!printedList.has(uid)) {
+              logger.info(`正在检测B站动态 [ ${name} : ${uid} ]`);
+              printedList.add(uid);
+            }
             resp = await this.hendleEventDynamicData(uid);
             if (resp) {
               if (resp.code === 0) {
@@ -149,6 +154,7 @@ export class BiliTask {
       }
     }
     requestedDataOfUids.clear(); // 清空已请求的 uid 映射
+    printedList.clear(); // 清空已打印的动态列表
   }
 
   /**
@@ -160,14 +166,13 @@ export class BiliTask {
    * @param biliConfigData Bilibili配置数据
    */
   async makeUidDynamicDataMap(
-    uidMap: Map<any, Map<string, Map<string, Map<string, { upName: string; types: string[] }>>>>,
+    uidMap: Map<string, Map<string, Map<string, Map<string, { upName: string; types: string[] }>>>>,
     dynamicList: any,
     now: number,
     dynamicTimeRange: number,
     biliConfigData: any,
     messageMap: Map<string, Map<string | number, Map<string | number, { sendMode: string; dynamicUUid_str: string; dynamicType: string; messages: any[] }[]>>>
   ) {
-    const printedList = new Set(); // 已打印的动态列表
     for (let [chatType, chatTypeMap] of uidMap) {
       for (let [upUid, bot_idMap] of chatTypeMap) {
         const tempDynamicList = dynamicList[upUid] || [];
@@ -175,10 +180,6 @@ export class BiliTask {
 
         for (let dynamicItem of tempDynamicList) {
           let author = dynamicItem?.modules?.module_author || {};
-          if (!printedList.has(author?.mid)) {
-            logger.info(`正在检测B站动态 [ ${author?.name} : ${author?.mid} ]`);
-            printedList.add(author?.mid);
-          }
           if (!author?.pub_ts) continue; // 如果动态没有发布时间，跳过当前循环
           if (Number(now - author.pub_ts) > dynamicTimeRange) {
             logger.debug(`超过间隔，跳过  [ ${author?.name} : ${author?.mid} ] ${author?.pub_time} 的动态`);
@@ -205,7 +206,6 @@ export class BiliTask {
         }
       }
     }
-    printedList.clear(); // 清空已打印的动态列表
   }
 
   /**
