@@ -383,7 +383,7 @@ class BiliQuery {
     static async formatTextDynamicData(upName, data, isForward, setData) {
         const BiliDrawDynamicLinkUrl = 'https://m.bilibili.com/dynamic/';
         let desc, msg = [], pics = [], author, majorType, content, dynamicTitle, module_stat;
-        let msg_meta = `B站【${upName}】动态推送：\n`;
+        let msg_meta = `B站【${upName}】动态推送：`;
         let dynamicType = data.type;
         function formatNumber(num) {
             if (num >= 10000) {
@@ -399,16 +399,16 @@ class BiliQuery {
                 if (!desc && !author)
                     return;
                 module_stat = data?.modules?.module_stat;
-                msg_meta = `B站【${upName}】视频动态推送：\n`;
+                msg_meta = `B站【${upName}】视频动态推送：`;
                 msg = [
                     msg_meta,
                     `\n--------------------`,
                     `\n${desc.title}`, // 标题
                     `\n--------------------`,
                     `\n视频简介：`,
-                    `${desc.desc}\n`,
+                    `\n${desc.desc}`,
                     `\n--------------------`,
-                    `投稿：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}`,
+                    `\n投稿：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}`,
                     `\n--------------------`,
                     `\n${desc?.stat?.danmaku}弹幕 • ${desc?.stat?.play}播放`,
                     `\n${formatNumber(module_stat?.like?.count)}点赞 • ${formatNumber(module_stat?.comment?.count)}评论 • ${formatNumber(module_stat?.forward?.count)}转发`,
@@ -439,7 +439,7 @@ class BiliQuery {
                 if (!desc && !author)
                     return;
                 module_stat = data?.modules?.module_stat;
-                msg_meta = `B站【${upName}】图文动态推送：\n`;
+                msg_meta = `B站【${upName}】图文动态推送：`;
                 msg = [
                     msg_meta,
                     `\n--------------------`,
@@ -491,7 +491,7 @@ class BiliQuery {
                 pics = pics.map((item) => {
                     return segment.image(item);
                 });
-                msg_meta = `B站【${upName}】图文动态推送：\n`;
+                msg_meta = `B站【${upName}】图文动态推送：`;
                 msg = [
                     msg_meta,
                     `\n--------------------`,
@@ -540,7 +540,7 @@ class BiliQuery {
                 pics = pics.map((item) => {
                     return segment.image(item);
                 });
-                msg_meta = `B站【${upName}】文章动态推送：\n`;
+                msg_meta = `B站【${upName}】文章动态推送：`;
                 msg = [
                     msg_meta,
                     `\n--------------------`,
@@ -576,7 +576,7 @@ class BiliQuery {
                 else {
                     return 'continue';
                 }
-                msg_meta = `B站【${upName}】转发动态推送：\n`;
+                msg_meta = `B站【${upName}】转发动态推送：`;
                 msg = [
                     msg_meta,
                     `\n--------------------`,

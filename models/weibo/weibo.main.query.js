@@ -209,7 +209,7 @@ class WeiboQuery {
         /**动态发布时间 */
         let created_time = this.getDynamicCreatetDate(raw_post);
         let detail_url = `https://weibo.com/${info?.user?.id}/${info?.bid}`;
-        let msg_meta = `微博【${upName}】动态推送：\n`;
+        let msg_meta = `微博【${upName}】动态推送：`;
         const dynamicPicCountLimit = setData.pushPicCountLimit || 3;
         function formatNumber(num) {
             if (num >= 10000) {
@@ -227,7 +227,7 @@ class WeiboQuery {
                     const temp = segment.image(pic_url, false, 15000, { referer: 'https://weibo.com' });
                     pics.push(temp);
                 }
-                msg_meta = `微博【${upName}】视频动态推送：\n`;
+                msg_meta = `微博【${upName}】视频动态推送：`;
                 msg = [
                     msg_meta,
                     `\n--------------------`,
@@ -254,7 +254,7 @@ class WeiboQuery {
                     const temp = segment.image(pic_url, false, 15000, { referer: 'https://weibo.com' });
                     pics.push(temp);
                 }
-                msg_meta = `微博【${upName}】图文动态推送：\n`;
+                msg_meta = `微博【${upName}】图文动态推送：`;
                 msg = [
                     msg_meta,
                     `\n--------------------`,
@@ -279,7 +279,7 @@ class WeiboQuery {
                     const temp = segment.image(pic_url, false, 15000, { referer: 'https://weibo.com' });
                     pics.push(temp);
                 }
-                msg_meta = `微博【${upName}】文章动态推送：\n`;
+                msg_meta = `微博【${upName}】文章动态推送：`;
                 msg = [
                     msg_meta,
                     `\n--------------------`,
@@ -309,7 +309,7 @@ class WeiboQuery {
                 else {
                     return 'continue';
                 }
-                msg_meta = `微博【${upName}】转发动态推送：\n`;
+                msg_meta = `微博【${upName}】转发动态推送：`;
                 msg = [
                     msg_meta,
                     `\n--------------------`,
