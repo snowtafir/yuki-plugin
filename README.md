@@ -255,3 +255,4 @@ yarn install
 |       [TRSS-Yunzai](https://gitee.com/TimeRainStarSky/Yunzai)       | 时雨🌌星空的 TRSS-Yunzai |
 |     [Miao-Yunzai](https://gitee.com/yoimiya-kokomi/Miao-Yunzai)     | 喵喵的 Miao-Yunzai      |
 |         [Yunzai-Bot](https://gitee.com/Le-niao/Yunzai-Bot)          | 乐神的 Yunzai-Bot       |
+|[jsxp](https://github.com/lemonade-lab/lvyjs/tree/main/packages/jsxp) | 一个可以在 tsx 环境中,使用 puppeteer 对 tsx 组件进行截图的库 |
