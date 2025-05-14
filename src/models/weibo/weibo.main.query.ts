@@ -232,7 +232,7 @@ export class WeiboQuery {
 
     let detail_url = `https://weibo.com/${info?.user?.id}/${info?.bid}`;
 
-    let msg_meta = `微博【${upName}】动态推送：\n`;
+    let msg_meta = `微博【${upName}】动态推送：`;
 
     const dynamicPicCountLimit = setData.pushPicCountLimit || 3;
 
@@ -255,7 +255,7 @@ export class WeiboQuery {
           pics.push(temp);
         }
 
-        msg_meta = `微博【${upName}】视频动态推送：\n`;
+        msg_meta = `微博【${upName}】视频动态推送：`;
         msg = [
           msg_meta,
           `\n--------------------`,
@@ -286,7 +286,7 @@ export class WeiboQuery {
           pics.push(temp);
         }
 
-        msg_meta = `微博【${upName}】图文动态推送：\n`;
+        msg_meta = `微博【${upName}】图文动态推送：`;
         msg = [
           msg_meta,
           `\n--------------------`,
@@ -315,7 +315,7 @@ export class WeiboQuery {
           pics.push(temp);
         }
 
-        msg_meta = `微博【${upName}】文章动态推送：\n`;
+        msg_meta = `微博【${upName}】文章动态推送：`;
         msg = [
           msg_meta,
           `\n--------------------`,
@@ -345,7 +345,7 @@ export class WeiboQuery {
           return 'continue';
         }
 
-        msg_meta = `微博【${upName}】转发动态推送：\n`;
+        msg_meta = `微博【${upName}】转发动态推送：`;
         msg = [
           msg_meta,
           `\n--------------------`,
