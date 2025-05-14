@@ -76,6 +76,7 @@ export class WeiboTask {
     dynamicList: any
   ) {
     const requestedDataOfUids = new Map<string, any>(); // 存放已请求的 uid 映射
+    const printedList = new Set(); // 已打印的动态列表
     for (let chatType in weiboPushData) {
       // 遍历 group 和 private
 
@@ -92,6 +93,10 @@ export class WeiboTask {
           let resp: any;
           // 检查是否已经请求过该 uid
           if (!requestedDataOfUids.has(uid)) {
+            if (!printedList.has(uid)) {
+              logger.info(`正在检测微博动态 [ ${name} : ${uid} ]`);
+              printedList.add(uid);
+            }
             resp = await new WeiboWebDataFetcher().getBloggerDynamicList(uid); // 获取指定 uid 的动态列表
             if (resp) {
               requestedDataOfUids.set(uid, resp); // 将响应数据存储到映射中
@@ -117,6 +122,7 @@ export class WeiboTask {
       }
     }
     requestedDataOfUids.clear(); // 清空已请求的映射
+    printedList.clear(); // 清空已打印的动态列表
   }
 
   /**
@@ -128,14 +134,13 @@ export class WeiboTask {
    * @param weiboConfigData 微博配置数据
    */
   async makeUidDynamicDataMap(
-    uidMap: Map<any, Map<string, Map<string, Map<string, { upName: string; types: string[] }>>>>,
+    uidMap: Map<string, Map<string, Map<string, Map<string, { upName: string; types: string[] }>>>>,
     dynamicList: any,
     now: number,
     dynamicTimeRange: number,
     weiboConfigData: any,
     messageMap: Map<string, Map<string | number, Map<string | number, { sendMode: string; dynamicUUid_str: string; dynamicType: string; messages: any[] }[]>>>
   ) {
-    const printedList = new Set(); // 已打印的动态列表
     for (let [chatType, chatTypeMap] of uidMap) {
       for (let [upUid, bot_idMap] of chatTypeMap) {
         const tempDynamicList = dynamicList[upUid] || [];
@@ -144,10 +149,6 @@ export class WeiboTask {
         for (let dynamicItem of tempDynamicList) {
           let raw_post = dynamicItem || {};
           let user = raw_post?.mblog?.user || {};
-          if (!printedList.has(user?.id)) {
-            logger.info(`正在检测微博动态 [ ${user?.screen_name} : ${user?.id} ]`);
-            printedList.add(user?.id);
-          }
           if (!raw_post?.mblog?.created_at) continue;
           if (Number(now - WeiboQuery.getDynamicCreatetDate(raw_post) / 1000) > dynamicTimeRange) {
             logger.debug(`超过间隔，跳过   [ ${user?.screen_name} : ${user?.id} ] ${raw_post?.mblog?.created_at} 的动态`);
@@ -174,7 +175,6 @@ export class WeiboTask {
         }
       }
     }
-    printedList.clear(); // 清空已打印的动态列表
   }
 
   /**
