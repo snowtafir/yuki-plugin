@@ -429,7 +429,7 @@ export class BiliQuery {
       dynamicTitle: any,
       module_stat: any;
 
-    let msg_meta = `B站【${upName}】动态推送：\n`;
+    let msg_meta = `B站【${upName}】动态推送：`;
     let dynamicType:
       | 'DYNAMIC_TYPE_AV'
       | 'DYNAMIC_TYPE_WORD'
@@ -454,16 +454,16 @@ export class BiliQuery {
 
         module_stat = data?.modules?.module_stat;
 
-        msg_meta = `B站【${upName}】视频动态推送：\n`;
+        msg_meta = `B站【${upName}】视频动态推送：`;
         msg = [
           msg_meta,
           `\n--------------------`,
           `\n${desc.title}`, // 标题
           `\n--------------------`,
           `\n视频简介：`,
-          `${desc.desc}\n`,
+          `\n${desc.desc}`,
           `\n--------------------`,
-          `投稿：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}`,
+          `\n投稿：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}`,
           `\n--------------------`,
           `\n${desc?.stat?.danmaku}弹幕 • ${desc?.stat?.play}播放`,
           `\n${formatNumber(module_stat?.like?.count)}点赞 • ${formatNumber(module_stat?.comment?.count)}评论 • ${formatNumber(module_stat?.forward?.count)}转发`,
@@ -498,7 +498,7 @@ export class BiliQuery {
 
         module_stat = data?.modules?.module_stat;
 
-        msg_meta = `B站【${upName}】图文动态推送：\n`;
+        msg_meta = `B站【${upName}】图文动态推送：`;
         msg = [
           msg_meta,
           `\n--------------------`,
@@ -555,7 +555,7 @@ export class BiliQuery {
           return segment.image(item);
         });
 
-        msg_meta = `B站【${upName}】图文动态推送：\n`;
+        msg_meta = `B站【${upName}】图文动态推送：`;
         msg = [
           msg_meta,
           `\n--------------------`,
@@ -607,7 +607,7 @@ export class BiliQuery {
           return segment.image(item);
         });
 
-        msg_meta = `B站【${upName}】文章动态推送：\n`;
+        msg_meta = `B站【${upName}】文章动态推送：`;
         msg = [
           msg_meta,
           `\n--------------------`,
@@ -647,7 +647,7 @@ export class BiliQuery {
           return 'continue';
         }
 
-        msg_meta = `B站【${upName}】转发动态推送：\n`;
+        msg_meta = `B站【${upName}】转发动态推送：`;
         msg = [
           msg_meta,
           `\n--------------------`,
