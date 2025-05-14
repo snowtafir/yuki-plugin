@@ -382,9 +382,15 @@ class BiliQuery {
      */
     static async formatTextDynamicData(upName, data, isForward, setData) {
         const BiliDrawDynamicLinkUrl = 'https://m.bilibili.com/dynamic/';
-        let desc, msg = [], pics = [], author, majorType, content, dynamicTitle;
-        let title = `B站【${upName}】动态推送：\n`;
+        let desc, msg = [], pics = [], author, majorType, content, dynamicTitle, module_stat;
+        let msg_meta = `B站【${upName}】动态推送：\n`;
         let dynamicType = data.type;
+        function formatNumber(num) {
+            if (num >= 10000) {
+                return `${(num / 10000).toFixed(1)}万`;
+            }
+            return num.toString();
+        }
         switch (dynamicType) {
             case 'DYNAMIC_TYPE_AV':
                 // 处理视频动态
@@ -392,14 +398,22 @@ class BiliQuery {
                 author = data?.modules?.module_author;
                 if (!desc && !author)
                     return;
-                title = `B站【${upName}】视频动态推送：\n`;
+                module_stat = data?.modules?.module_stat;
+                msg_meta = `B站【${upName}】视频动态推送：\n`;
                 msg = [
-                    title,
-                    `-----------------------------\n`,
-                    `标题：${desc.title}\n`,
+                    msg_meta,
+                    `\n--------------------`,
+                    `\n${desc.title}`, // 标题
+                    `\n--------------------`,
+                    `\n视频简介：`,
                     `${desc.desc}\n`,
-                    `链接：${this.formatUrl(desc.jump_url)}\n`,
-                    `时间：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}`
+                    `\n--------------------`,
+                    `投稿：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}`,
+                    `\n--------------------`,
+                    `\n${desc?.stat?.danmaku}弹幕 • ${desc?.stat?.play}播放`,
+                    `\n${formatNumber(module_stat?.like?.count)}点赞 • ${formatNumber(module_stat?.comment?.count)}评论 • ${formatNumber(module_stat?.forward?.count)}转发`,
+                    `\n--------------------`,
+                    `\n链接：${this.formatUrl(desc.jump_url)}`
                 ];
                 pics = [segment.image(desc?.cover)];
                 return { msg, pics, dynamicType };
@@ -424,13 +438,19 @@ class BiliQuery {
                 }
                 if (!desc && !author)
                     return;
-                title = `B站【${upName}】动态推送：\n`;
+                module_stat = data?.modules?.module_stat;
+                msg_meta = `B站【${upName}】图文动态推送：\n`;
                 msg = [
-                    title,
-                    `-----------------------------\n`,
-                    `内容：${this.dynamicContentLimit(content, setData)}\n`,
-                    `链接：${BiliDrawDynamicLinkUrl}${data.id_str}\n`,
-                    `时间：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}`
+                    msg_meta,
+                    `\n--------------------`,
+                    `\n正文：`,
+                    `\n${this.dynamicContentLimit(content, setData)}`,
+                    `\n--------------------`,
+                    `\n投稿：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}`,
+                    `\n--------------------`,
+                    `\n${formatNumber(module_stat?.like?.count)}点赞 • ${formatNumber(module_stat?.comment?.count)}评论 • ${formatNumber(module_stat?.forward?.count)}转发`,
+                    `\n--------------------`,
+                    `\n链接：${BiliDrawDynamicLinkUrl}${data.id_str}\n`
                 ];
                 return { msg, pics, dynamicType };
             case 'DYNAMIC_TYPE_DRAW':
@@ -463,6 +483,7 @@ class BiliQuery {
                 }
                 if (!desc && !pics && !author)
                     return;
+                module_stat = data?.modules?.module_stat;
                 const dynamicPicCountLimit = setData.pushPicCountLimit || 3;
                 if (pics.length > dynamicPicCountLimit) {
                     pics.length = dynamicPicCountLimit;
@@ -470,13 +491,18 @@ class BiliQuery {
                 pics = pics.map((item) => {
                     return segment.image(item);
                 });
-                title = `B站【${upName}】图文动态推送：\n`;
+                msg_meta = `B站【${upName}】图文动态推送：\n`;
                 msg = [
-                    title,
-                    `-----------------------------\n`,
-                    `${this.dynamicContentLimit(content, setData)}\n`,
-                    `链接：${BiliDrawDynamicLinkUrl}${data.id_str}\n`,
-                    `时间：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}`
+                    msg_meta,
+                    `\n--------------------`,
+                    `\n正文：`,
+                    `\n${this.dynamicContentLimit(content, setData)}`,
+                    `\n--------------------`,
+                    `\n投稿：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}`,
+                    `\n--------------------`,
+                    `\n${formatNumber(module_stat?.like?.count)}点赞 • ${formatNumber(module_stat?.comment?.count)}评论 • ${formatNumber(module_stat?.forward?.count)}转发`,
+                    `\n--------------------`,
+                    `\n链接：${BiliDrawDynamicLinkUrl}${data.id_str}`
                 ];
                 return { msg, pics, dynamicType };
             case 'DYNAMIC_TYPE_ARTICLE':
@@ -510,16 +536,24 @@ class BiliQuery {
                 }
                 if (!desc && !author)
                     return;
+                module_stat = data?.modules?.module_stat;
                 pics = pics.map((item) => {
                     return segment.image(item);
                 });
-                title = `B站【${upName}】文章动态推送：\n`;
+                msg_meta = `B站【${upName}】文章动态推送：\n`;
                 msg = [
-                    title,
-                    `-----------------------------\n`,
-                    `标题：${dynamicTitle}\n`,
-                    `链接：${this.formatUrl(desc.jump_url)}\n`,
-                    `时间：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}`
+                    msg_meta,
+                    `\n--------------------`,
+                    `\n${dynamicTitle}`,
+                    `\n--------------------`,
+                    `\n正文：`,
+                    `\n${this.dynamicContentLimit(content, setData)}`,
+                    `\n--------------------`,
+                    `\n投稿：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}`,
+                    `\n--------------------`,
+                    `\n${formatNumber(module_stat?.like?.count)}点赞 • ${formatNumber(module_stat?.comment?.count)}评论 • ${formatNumber(module_stat?.forward?.count)}转发`,
+                    `\n--------------------`,
+                    `\n链接：${this.formatUrl(desc.jump_url)}`
                 ];
                 return { msg, pics, dynamicType };
             case 'DYNAMIC_TYPE_FORWARD':
@@ -531,6 +565,7 @@ class BiliQuery {
                     return;
                 if (!data.orig)
                     return;
+                module_stat = data?.modules?.module_stat;
                 isForward = true;
                 let orig = await this.formatTextDynamicData(upName, data.orig, isForward, setData);
                 let origContent = [];
@@ -541,14 +576,19 @@ class BiliQuery {
                 else {
                     return 'continue';
                 }
-                title = `B站【${upName}】转发动态推送：\n`;
+                msg_meta = `B站【${upName}】转发动态推送：\n`;
                 msg = [
-                    title,
-                    `-----------------------------\n`,
-                    `${this.dynamicContentLimit(content, setData)}\n`,
-                    `链接：${BiliDrawDynamicLinkUrl}${data.id_str}\n`,
-                    `时间：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}\n`,
-                    '\n---以下为转发内容---\n',
+                    msg_meta,
+                    `\n--------------------`,
+                    `\n正文：`,
+                    `\n${this.dynamicContentLimit(content, setData)}`,
+                    `\n--------------------`,
+                    `\n投稿：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}`,
+                    `\n--------------------`,
+                    `\n${formatNumber(module_stat?.like?.count)}点赞 • ${formatNumber(module_stat?.comment?.count)}评论 • ${formatNumber(module_stat?.forward?.count)}转发`,
+                    `\n--------------------`,
+                    `\n链接：${BiliDrawDynamicLinkUrl}${data.id_str}\n`,
+                    '\n>>>>以下为转发内容<<<<\n',
                     ...origContent
                 ];
                 return { msg, pics, dynamicType };
@@ -561,13 +601,23 @@ class BiliQuery {
                 desc = desc?.live_play_info;
                 if (!desc)
                     return;
-                title = `B站【${upName}】直播动态推送：\n`;
-                msg = [title, `-----------------------------\n`, `标题：${desc.title}\n`, `链接：https:${desc.link}`];
+                msg_meta = `B站【${upName}】直播动态推送：\n`;
+                msg = [
+                    msg_meta,
+                    `\n--------------------`,
+                    `\n${desc.title}`,
+                    `\n--------------------`,
+                    `\n分区：${desc?.parent_area_name} (${desc?.area_name})`,
+                    `\n开播：${moment(desc.live_start_time * 1000).format('YYYY年MM月DD日 HH:mm:ss')}`,
+                    `\n--------------------`,
+                    `\n${formatNumber(desc?.watched_show?.num)}人看过`,
+                    `\n链接：https:${desc.link}`
+                ];
                 pics = [segment.image(desc.cover)];
                 return { msg, pics, dynamicType };
             default:
                 // 处理未定义的动态类型
-                (Bot.logger ?? logger)?.mark(`未处理的B站推送【${upName}】：${data.type}`);
+                global?.logger?.mark(`未处理的B站推送【${upName}】：${data.type}`);
                 return 'continue';
         }
     }

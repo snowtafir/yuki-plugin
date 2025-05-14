@@ -47,7 +47,7 @@ export declare class BiliTask {
      * @param dynamicTimeRange 筛选何时发布的动态
      * @param biliConfigData Bilibili配置数据
      */
-    makeUidDynamicDataMap(uidMap: Map<any, Map<string, Map<string, Map<string, {
+    makeUidDynamicDataMap(uidMap: Map<string, Map<string, Map<string, Map<string, {
         upName: string;
         types: string[];
     }>>>>, dynamicList: any, now: number, dynamicTimeRange: number, biliConfigData: any, messageMap: Map<string, Map<string | number, Map<string | number, {

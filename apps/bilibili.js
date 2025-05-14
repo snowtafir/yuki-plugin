@@ -563,9 +563,9 @@ class YukiBili extends plugin {
             this.e.reply('用户不存在，输入的uid无效。');
             return;
         }
-        const message = [`昵称：${data?.name}`, `\n性别：${data?.sex}`, `\n等级：${data?.level}`];
+        const message = [`--------------------`, `\n昵称：${data?.name}`, `\n性别：${data?.sex}`, `\n等级：${data?.level}`, `\n--------------------`];
         if (data.live_room) {
-            message.push(`\n***********\n---直播信息---`, `\n直播标题：${data?.live_room?.title}`, `\n直播房间：${data?.live_room?.roomid}`, `\n直播状态：${data?.live_room?.liveStatus ? '直播中' : '未开播'}`, `\n观看人数：${data?.live_room?.watched_show?.num}人`);
+            message.push(`\n>>>>>直播间信息<<<<<`, `\n标题：${data?.live_room?.title}`, `\n房间：${data?.live_room?.roomid}`, `\n状态：${data?.live_room?.liveStatus ? '直播中' : '未开播'}`, `\n观看人数：${data?.live_room?.watched_show?.num}`);
             this.e.reply(`直播链接：${data?.live_room?.url}`);
         }
         this.e.reply(message);
