@@ -83,9 +83,9 @@ const Content = ({ data }) => {
                 contentCss,
                 boxGrid,
                 React.createElement("div", { className: "content" },
-                    picItems,
                     React.createElement("div", { className: "content-text-title", style: { marginBottom: '10px' } }, data.title && React.createElement("h1", null, data.title)),
-                    React.createElement("div", { className: "content-text", dangerouslySetInnerHTML: { __html: data.content || '' } }))));
+                    React.createElement("div", { className: "content-text", dangerouslySetInnerHTML: { __html: data.content || '' } }),
+                    picItems)));
         case 'DYNAMIC_TYPE_WORD':
             return (React.createElement(React.Fragment, null,
                 contentCss,
