@@ -77,7 +77,8 @@ export class WeiboQuery {
     let detail_url = `https://weibo.com/${info?.user?.id}/${info?.bid}`;
 
     /* 构造动态渲染数据 *************************** */
-    let pics: any = [];
+    let pics: any = [],
+      video_pics_list: any[];
     let formatData: { data: { [key: string]: any } } = { data: {} };
 
     /**头像 */
@@ -93,12 +94,17 @@ export class WeiboQuery {
     formatData.data.type = type;
     switch (type) {
       case 'DYNAMIC_TYPE_AV':
+        video_pics_list = info?.pics ? info?.pics : info?.page_info?.page_pic?.url ? [{ large: { url: info.page_info.page_pic.url } }] : [];
+        pics =
+          video_pics_list.map((img: any) => {
+            return { url: img?.large?.url, width: Number(img?.large?.geo?.width), height: Number(img?.large?.geo?.height) };
+          }) || [];
         formatData.data.title = info?.page_info?.title || '';
         formatData.data.content = this.parseRichTextNodes(info?.text);
         formatData.data.url = detail_url;
         formatData.data.pubTs = moment(created_time).format('YYYY年MM月DD日 HH:mm:ss');
         formatData.data.category = '视频动态';
-        formatData.data.pics = info?.page_info?.page_pic?.url ? [{ url: info.page_info.page_pic.url }] : [];
+        formatData.data.pics = pics;
         break;
       case 'DYNAMIC_TYPE_DRAW':
         let raw_pics_list: any[] = retweeted ? info?.retweeted_status?.pics || [] : info?.pics || [];
@@ -198,7 +204,8 @@ export class WeiboQuery {
       /**图片高清资源链接*/
       pic_urls: string[] = [],
       /**图片*/
-      pics: any[] = [];
+      pics: any[] = [],
+      video_pics_list: any[];
 
     let info = raw_post?.mblog || raw_post;
     let retweeted = info && info.retweeted_status ? true : false; //是否为转发动态
@@ -225,29 +232,44 @@ export class WeiboQuery {
 
     let detail_url = `https://weibo.com/${info?.user?.id}/${info?.bid}`;
 
-    let title = `微博【${upName}】动态推送：\n`;
+    let msg_meta = `微博【${upName}】动态推送：\n`;
 
     const dynamicPicCountLimit = setData.pushPicCountLimit || 3;
+
+    function formatNumber(num: number): string {
+      if (num >= 10000) {
+        return `${(num / 10000).toFixed(1)}万`;
+      }
+      return num.toString();
+    }
 
     switch (dynamicType) {
       case 'DYNAMIC_TYPE_AV':
         if (!info) return;
 
-        let cover_img_url = info?.page_info?.page_pic?.url;
+        video_pics_list = info?.pics ? info?.pics : info?.page_info?.page_pic?.url ? [{ large: { url: info.page_info.page_pic.url } }] : [];
 
-        let cover_img = Segment.image(cover_img_url, false, 15000, { referer: 'https://weibo.com' });
+        pic_urls = video_pics_list.map(img => img?.large?.url);
+        for (const pic_url of pic_urls) {
+          const temp = Segment.image(pic_url, false, 15000, { referer: 'https://weibo.com' });
+          pics.push(temp);
+        }
 
-        title = `微博【${upName}】视频动态推送：\n`;
+        msg_meta = `微博【${upName}】视频动态推送：\n`;
         msg = [
-          title,
-          `-----------------------------\n`,
-          `标题：${info?.page_info?.title || ''}\n`,
-          `${this.filterText(info?.text)}\n`,
-          `链接：${detail_url}\n`,
-          `时间：${created_time ? moment(created_time).format('YYYY年MM月DD日 HH:mm:ss') : ''}`
+          msg_meta,
+          `\n--------------------`,
+          `\n${info?.page_info?.title || ''}`, //标题
+          `\n--------------------`,
+          `\n正文：`,
+          `\n${this.filterText(info?.text)}`,
+          `\n--------------------`,
+          `\n投稿：${created_time ? moment(created_time).format('YYYY年MM月DD日 HH:mm:ss') : ''}`,
+          `\n--------------------`,
+          `\n${formatNumber(info?.attitudes_count)}点赞 • ${formatNumber(info?.comments_count)}评论 • ${formatNumber(info?.reposts_count)}转发 `,
+          `\n--------------------`,
+          `\n链接：${detail_url}`
         ];
-
-        pics = [cover_img];
 
         return { msg, pics, dynamicType };
       case 'DYNAMIC_TYPE_DRAW':
@@ -264,13 +286,18 @@ export class WeiboQuery {
           pics.push(temp);
         }
 
-        title = `微博【${upName}】图文动态推送：\n`;
+        msg_meta = `微博【${upName}】图文动态推送：\n`;
         msg = [
-          title,
-          `-----------------------------\n`,
-          `${this.dynamicContentLimit(this.filterText(info?.text), setData)}\n`,
-          `链接：${detail_url}\n`,
-          `时间：${created_time ? moment(created_time).format('YYYY年MM月DD日 HH:mm:ss') : ''}`
+          msg_meta,
+          `\n--------------------`,
+          `\n正文：`,
+          `\n${this.dynamicContentLimit(this.filterText(info?.text), setData)}`,
+          `\n--------------------`,
+          `\n投稿：${created_time ? moment(created_time).format('YYYY年MM月DD日 HH:mm:ss') : ''}`,
+          `\n--------------------`,
+          `\n${formatNumber(info?.attitudes_count)}点赞 • ${formatNumber(info?.comments_count)}评论 • ${formatNumber(info?.reposts_count)}转发 `,
+          `\n--------------------`,
+          `\n链接：${detail_url}`
         ];
 
         return { msg, pics, dynamicType };
@@ -288,13 +315,18 @@ export class WeiboQuery {
           pics.push(temp);
         }
 
-        title = `微博【${upName}】文章动态推送：\n`;
+        msg_meta = `微博【${upName}】文章动态推送：\n`;
         msg = [
-          title,
-          `-----------------------------\n`,
-          `正文：${this.dynamicContentLimit(this.filterText(info?.text), setData)}\n`,
-          `链接：${detail_url}\n`,
-          `时间：${created_time ? moment(created_time).format('YYYY年MM月DD日 HH:mm:ss') : ''}`
+          msg_meta,
+          `\n--------------------`,
+          `\n正文：`,
+          `\n${this.dynamicContentLimit(this.filterText(info?.text), setData)}`,
+          `\n--------------------`,
+          `\n投稿：${created_time ? moment(created_time).format('YYYY年MM月DD日 HH:mm:ss') : ''}`,
+          `\n--------------------`,
+          `\n${formatNumber(info?.attitudes_count)}点赞 • ${formatNumber(info?.comments_count)}评论 • ${formatNumber(info?.reposts_count)}转发 `,
+          `\n--------------------`,
+          `\n链接：${detail_url}`
         ];
 
         return { msg, pics, dynamicType };
@@ -313,14 +345,19 @@ export class WeiboQuery {
           return 'continue';
         }
 
-        title = `微博【${upName}】转发动态推送：\n`;
+        msg_meta = `微博【${upName}】转发动态推送：\n`;
         msg = [
-          title,
-          `-----------------------------\n`,
-          `${this.dynamicContentLimit(this.filterText(info?.text), setData)}\n`,
-          `链接：${detail_url}\n`,
-          `时间：${created_time ? moment(created_time).format('YYYY年MM月DD日 HH:mm:ss') : ''}\n`,
-          '\n---以下为转发内容---\n',
+          msg_meta,
+          `\n--------------------`,
+          `\n正文：`,
+          `\n${this.dynamicContentLimit(this.filterText(info?.text), setData)}`,
+          `\n--------------------`,
+          `\n投稿：${created_time ? moment(created_time).format('YYYY年MM月DD日 HH:mm:ss') : ''}`,
+          `\n--------------------`,
+          `\n${formatNumber(info?.attitudes_count)}点赞 • ${formatNumber(info?.comments_count)}评论 • ${formatNumber(info?.reposts_count)}转发 `,
+          `\n--------------------`,
+          `\n链接：${detail_url}\n`,
+          '\n>>>>以下为转发内容<<<<\n',
           ...origContent
         ];
 
