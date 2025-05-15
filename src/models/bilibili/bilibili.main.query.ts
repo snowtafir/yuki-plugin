@@ -463,7 +463,11 @@ export class BiliQuery {
           `\n投稿：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}`,
           `\n--------------------`,
           `\n${desc?.stat?.danmaku}弹幕 • ${desc?.stat?.play}播放`,
-          `\n${formatNumber(module_stat?.like?.count)}点赞 • ${formatNumber(module_stat?.comment?.count)}评论 • ${formatNumber(module_stat?.forward?.count)}转发`,
+          ...(module_stat
+            ? [
+                `\n${formatNumber(module_stat.like?.count)}点赞 • ${formatNumber(module_stat.comment?.count)}评论 • ${formatNumber(module_stat.forward?.count)}转发`
+              ]
+            : []),
           `\n--------------------`,
           `\n链接：${this.formatUrl(desc.jump_url)}`
         ];
@@ -504,9 +508,12 @@ export class BiliQuery {
           `\n--------------------`,
           `\n投稿：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}`,
           `\n--------------------`,
-          `\n${formatNumber(module_stat?.like?.count)}点赞 • ${formatNumber(module_stat?.comment?.count)}评论 • ${formatNumber(module_stat?.forward?.count)}转发`,
-          `\n--------------------`,
-          `\n链接：${BiliDrawDynamicLinkUrl}${data.id_str}\n`
+          ...(module_stat
+            ? [
+                `\n${formatNumber(module_stat.like?.count)}点赞 • ${formatNumber(module_stat.comment?.count)}评论 • ${formatNumber(module_stat.forward?.count)}转发\n--------------------`
+              ]
+            : []),
+          `\n链接：${BiliDrawDynamicLinkUrl}${data.id_str}`
         ];
 
         return { msg, pics, dynamicType };
@@ -561,8 +568,11 @@ export class BiliQuery {
           `\n--------------------`,
           `\n投稿：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}`,
           `\n--------------------`,
-          `\n${formatNumber(module_stat?.like?.count)}点赞 • ${formatNumber(module_stat?.comment?.count)}评论 • ${formatNumber(module_stat?.forward?.count)}转发`,
-          `\n--------------------`,
+          ...(module_stat
+            ? [
+                `\n${formatNumber(module_stat.like?.count)}点赞 • ${formatNumber(module_stat.comment?.count)}评论 • ${formatNumber(module_stat.forward?.count)}转发\n--------------------`
+              ]
+            : []),
           `\n链接：${BiliDrawDynamicLinkUrl}${data.id_str}`
         ];
 
@@ -615,8 +625,11 @@ export class BiliQuery {
           `\n--------------------`,
           `\n投稿：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}`,
           `\n--------------------`,
-          `\n${formatNumber(module_stat?.like?.count)}点赞 • ${formatNumber(module_stat?.comment?.count)}评论 • ${formatNumber(module_stat?.forward?.count)}转发`,
-          `\n--------------------`,
+          ...(module_stat
+            ? [
+                `\n${formatNumber(module_stat.like?.count)}点赞 • ${formatNumber(module_stat.comment?.count)}评论 • ${formatNumber(module_stat.forward?.count)}转发\n--------------------`
+              ]
+            : []),
           `\n链接：${this.formatUrl(desc.jump_url)}`
         ];
 
@@ -653,8 +666,11 @@ export class BiliQuery {
           `\n--------------------`,
           `\n投稿：${author ? moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss') : ''}`,
           `\n--------------------`,
-          `\n${formatNumber(module_stat?.like?.count)}点赞 • ${formatNumber(module_stat?.comment?.count)}评论 • ${formatNumber(module_stat?.forward?.count)}转发`,
-          `\n--------------------`,
+          ...(module_stat
+            ? [
+                `\n${formatNumber(module_stat.like?.count)}点赞 • ${formatNumber(module_stat.comment?.count)}评论 • ${formatNumber(module_stat.forward?.count)}转发\n--------------------`
+              ]
+            : []),
           `\n链接：${BiliDrawDynamicLinkUrl}${data.id_str}\n`,
           '\n>>>>以下为转发内容<<<<\n',
           ...origContent
