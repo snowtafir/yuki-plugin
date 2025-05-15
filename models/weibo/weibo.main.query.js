@@ -238,8 +238,11 @@ class WeiboQuery {
                     `\n--------------------`,
                     `\n投稿：${created_time ? moment(created_time).format('YYYY年MM月DD日 HH:mm:ss') : ''}`,
                     `\n--------------------`,
-                    `\n${formatNumber(info?.attitudes_count)}点赞 • ${formatNumber(info?.comments_count)}评论 • ${formatNumber(info?.reposts_count)}转发 `,
-                    `\n--------------------`,
+                    ...(info?.comments_count != null
+                        ? [
+                            `\n${formatNumber(info?.attitudes_count)}点赞 • ${formatNumber(info?.comments_count)}评论 • ${formatNumber(info?.reposts_count)}转发\n--------------------`
+                        ]
+                        : []),
                     `\n链接：${detail_url}`
                 ];
                 return { msg, pics, dynamicType };
@@ -263,8 +266,11 @@ class WeiboQuery {
                     `\n--------------------`,
                     `\n投稿：${created_time ? moment(created_time).format('YYYY年MM月DD日 HH:mm:ss') : ''}`,
                     `\n--------------------`,
-                    `\n${formatNumber(info?.attitudes_count)}点赞 • ${formatNumber(info?.comments_count)}评论 • ${formatNumber(info?.reposts_count)}转发 `,
-                    `\n--------------------`,
+                    ...(info?.comments_count != null
+                        ? [
+                            `\n${formatNumber(info?.attitudes_count)}点赞 • ${formatNumber(info?.comments_count)}评论 • ${formatNumber(info?.reposts_count)}转发\n--------------------`
+                        ]
+                        : []),
                     `\n链接：${detail_url}`
                 ];
                 return { msg, pics, dynamicType };
@@ -288,8 +294,11 @@ class WeiboQuery {
                     `\n--------------------`,
                     `\n投稿：${created_time ? moment(created_time).format('YYYY年MM月DD日 HH:mm:ss') : ''}`,
                     `\n--------------------`,
-                    `\n${formatNumber(info?.attitudes_count)}点赞 • ${formatNumber(info?.comments_count)}评论 • ${formatNumber(info?.reposts_count)}转发 `,
-                    `\n--------------------`,
+                    ...(info?.comments_count != null
+                        ? [
+                            `\n${formatNumber(info?.attitudes_count)}点赞 • ${formatNumber(info?.comments_count)}评论 • ${formatNumber(info?.reposts_count)}转发\n--------------------`
+                        ]
+                        : []),
                     `\n链接：${detail_url}`
                 ];
                 return { msg, pics, dynamicType };
@@ -318,8 +327,11 @@ class WeiboQuery {
                     `\n--------------------`,
                     `\n投稿：${created_time ? moment(created_time).format('YYYY年MM月DD日 HH:mm:ss') : ''}`,
                     `\n--------------------`,
-                    `\n${formatNumber(info?.attitudes_count)}点赞 • ${formatNumber(info?.comments_count)}评论 • ${formatNumber(info?.reposts_count)}转发 `,
-                    `\n--------------------`,
+                    ...(info?.comments_count != null
+                        ? [
+                            `\n${formatNumber(info?.attitudes_count)}点赞 • ${formatNumber(info?.comments_count)}评论 • ${formatNumber(info?.reposts_count)}转发\n--------------------`
+                        ]
+                        : []),
                     `\n链接：${detail_url}\n`,
                     '\n>>>>以下为转发内容<<<<\n',
                     ...origContent
