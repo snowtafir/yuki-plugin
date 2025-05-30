@@ -388,19 +388,18 @@ class BiliTask {
                     // 遍历组合消息
                     for (const messageCombination of messageCombinationList) {
                         const { sendMode, dynamicUUid_str, dynamicType, messages } = messageCombination;
-                        let sended = null;
                         let markKey = '';
                         if (chatType === 'group') {
                             markKey = this.groupKey;
-                            sended = await redis.get(`${markKey}${chatId}:${dynamicUUid_str}`);
                         }
                         else if (chatType === 'private') {
                             markKey = this.privateKey;
-                            sended = await redis.get(`${markKey}${chatId}:${dynamicUUid_str}`);
                         }
                         const sendMarkKey = `${markKey}${chatId}:${dynamicUUid_str}`;
-                        if (sended) {
-                            continue; // 如果已经发送过，则直接跳过
+                        // 原子性设置标记，防止并发重复
+                        const setResult = await redis.set(sendMarkKey, '1', { NX: true, EX: 3600 * 72 });
+                        if (!setResult) {
+                            continue; // 已有标记，跳过
                         }
                         if (!LogMark.has('1')) {
                             global?.logger?.mark('优纪插件: B站动态执行推送');
@@ -421,23 +420,26 @@ class BiliTask {
                                 }
                             }
                         }
+                        let sendSuccess = true;
                         if (sendMode === 'SINGLE') {
-                            let allSent = true;
                             for (let i = 0; i < messages.length; i++) {
                                 if (!(await this.sendMessageApi(chatId, bot_id, chatType, messages[i]))) {
-                                    allSent = false;
-                                    break; // 如果有任何一条消息发送失败，停止发送后续消息
+                                    sendSuccess = false;
+                                    break;
                                 }
                             }
-                            if (allSent) {
-                                await redis.set(sendMarkKey, '1', { EX: 3600 * 72 }); // 发送成功后设置标记
-                                await this.randomDelay(1000, 2000); // 随机延时1-2秒
+                            if (!sendSuccess) {
+                                await redis.del(sendMarkKey); // 失败删除标记
+                            }
+                            else {
+                                await this.randomDelay(1000, 2000);
                             }
                         }
                         else if (sendMode === 'MERGE') {
-                            if (await this.sendMessageApi(chatId, bot_id, chatType, messages)) {
-                                await redis.set(sendMarkKey, '1', { EX: 3600 * 72 }); // 发送成功后设置标记
+                            if (!(await this.sendMessageApi(chatId, bot_id, chatType, messages))) {
+                                await redis.del(sendMarkKey); // 失败删除标记
                             }
+                            await this.randomDelay(1000, 2000);
                         }
                     }
                 }
