@@ -10,6 +10,7 @@ node_modules
 /temp
 yarn.lock
 /lib
+/dist
 package-lock.json
 npm-debug.log*
 yarn-debug.log*

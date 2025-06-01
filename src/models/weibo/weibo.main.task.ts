@@ -439,7 +439,7 @@ export class WeiboTask {
           let markKey: string = chatType === 'group' ? this.groupKey : this.privateKey;
 
           if (!LogMark.has('1')) {
-            global?.logger?.mark('优纪插件: B站动态执行推送');
+            global?.logger?.mark('优纪插件: 微博动态执行推送');
             LogMark.add('1');
           }
 
