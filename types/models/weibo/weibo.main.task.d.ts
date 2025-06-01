@@ -123,7 +123,16 @@ export declare class WeiboTask {
      * @param chatType 聊天类型
      * @param message 消息内容
      */
-    sendMessageApi(chatId: string | number, bot_id: string | number, chatType: string, message: any): Promise<boolean>;
+    sendMsgApi(chatId: string | number, bot_id: string | number, chatType: string, message: any): Promise<boolean>;
+    /**
+     * 发送合并转发消息
+     * @param chatId 聊天 ID
+     * @param bot_id 机器人 ID
+     * @param chatType 聊天类型
+     * @param message 消息内容
+     * @returns 是否发送成功
+     */
+    sendForwardMsgApi(chatId: string | number, bot_id: string | number, chatType: string, forwardNodes: Array<any>): Promise<boolean>;
     /**
      * 随机延时
      * @param min 最小延时时间

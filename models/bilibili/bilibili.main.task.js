@@ -379,51 +379,103 @@ class BiliTask {
     async sendDynamicMessage(messageMap, biliConfigData) {
         let liveAtAll = !!biliConfigData.liveAtAll === true ? true : false; // 直播动态是否@全体成员，默认false
         let liveAtAllCD = biliConfigData.liveAtAllCD || 1800; // 直播动态@全体成员 冷却时间CD，默认 30 分钟
+        let forwardSendDynamic = biliConfigData.forwardSendDynamic === 0 || biliConfigData.forwardSendDynamic === false ? false : true; // 转发动态是否合并发送，默认 true
         // 直播动态@全体成员的群组/好友列表，默认空数组，为空则不进行@全体成员操作
         let liveAtAllGroupList = new Set(Array.isArray(biliConfigData?.liveAtAllGroupList) ? Array.from(biliConfigData.liveAtAllGroupList).map(item => String(item)) : []);
         const LogMark = new Set(); // 日志mark
         for (const [chatType, botMap] of messageMap) {
             for (const [bot_id, chatMap] of botMap) {
                 for (const [chatId, messageCombinationList] of chatMap) {
-                    // 遍历组合消息
+                    // 区分群聊和私聊
+                    let markKey = chatType === 'group' ? this.groupKey : this.privateKey;
+                    if (!LogMark.has('1')) {
+                        global?.logger?.mark('优纪插件: B站动态执行推送');
+                        LogMark.add('1');
+                    }
+                    let liveAtAllMark = await redis.get(`${markKey}${chatId}:liveAtAllMark`); // 直播动态@全体成员标记，默认 0
+                    const hasLiveDynamic = messageCombinationList.some(m => m.dynamicType === 'DYNAMIC_TYPE_LIVE_RCMD');
+                    // 如果开启了直播动态@全体成员
+                    if (liveAtAll && !liveAtAllMark && hasLiveDynamic && liveAtAllGroupList.has(String(chatId))) {
+                        try {
+                            await this.sendMsgApi(chatId, bot_id, chatType, [segment.at('all')]);
+                            await redis.set(`${markKey}${chatId}:liveAtAllMark`, 1, { EX: liveAtAllCD }); // 设置直播动态@全体成员标记为 1
+                        }
+                        catch (error) {
+                            logger.error(`直播动态发送@全体成员失败，请检查 <机器人> 是否有 [管理员权限] 或 [聊天平台是否支持] ：${error}`);
+                            let liveAtAllErrMsg = !!biliConfigData.liveAtAllErrMsg === false ? false : true; // 直播动态@全体成员失败是否发送错误提示消息，默认 false
+                            if (liveAtAllErrMsg) {
+                                await this.sendMsgApi(chatId, bot_id, chatType, ['直播动态发送@全体成员失败，请检查权限或平台是否支持']);
+                            }
+                        }
+                    }
+                    // 统计图片数量和文字长度
+                    let imageCount = 0;
+                    let textLength = 0;
+                    for (const messageCombination of messageCombinationList) {
+                        const { messages } = messageCombination;
+                        for (const msg of messages) {
+                            if (typeof msg === 'object' && msg.type === 'image') {
+                                imageCount++;
+                            }
+                            else if (typeof msg === 'string') {
+                                textLength += msg.length;
+                            }
+                        }
+                    }
+                    // 满足条件才使用合并转发
+                    const useForward = imageCount > 2 || textLength > 300;
+                    if (forwardSendDynamic && useForward) {
+                        const forwardNodes = [];
+                        // 合并所有消息
+                        const forwardSendMardKeyList = [];
+                        forwardNodes.push({
+                            name: '优纪酱通知',
+                            uin: String(80000000),
+                            message: ['有新的B站动态了~'],
+                            time: Date.now()
+                        });
+                        for (const messageCombination of messageCombinationList) {
+                            const { sendMode, dynamicUUid_str, dynamicType, messages } = messageCombination;
+                            const sendMarkKey = `${markKey}${chatId}:${dynamicUUid_str}`;
+                            // 原子性设置标记，防止并发重复
+                            const setResult = await redis.set(sendMarkKey, '1', { NX: true, EX: 3600 * 72 });
+                            if (!setResult) {
+                                continue; // 已有标记，跳过
+                            }
+                            forwardSendMardKeyList.push(sendMarkKey); // 收集合并转发的标记键
+                            // 每条动态一个 node
+                            forwardNodes.push({
+                                name: '匿名消息',
+                                uin: String(80000000),
+                                message: messages,
+                                time: Date.now()
+                            });
+                        }
+                        // 尝试合并转发动态
+                        if ((await this.sendMsgApi(chatId, bot_id, chatType, '优纪酱B站动态通知~')) &&
+                            (await this.sendForwardMsgApi(chatId, bot_id, chatType, forwardNodes))) {
+                            await this.randomDelay(1000, 2000);
+                            continue; // 合并转发成功，跳过后续单条发送逻辑
+                        }
+                        else {
+                            for (const sendMarkKey of forwardSendMardKeyList) {
+                                await redis.del(sendMarkKey); // 发送消息失败，删除合并转发成功标记
+                            }
+                        }
+                    }
+                    // 合并转发失败，回退为原有方式
                     for (const messageCombination of messageCombinationList) {
                         const { sendMode, dynamicUUid_str, dynamicType, messages } = messageCombination;
-                        let markKey = '';
-                        if (chatType === 'group') {
-                            markKey = this.groupKey;
-                        }
-                        else if (chatType === 'private') {
-                            markKey = this.privateKey;
-                        }
                         const sendMarkKey = `${markKey}${chatId}:${dynamicUUid_str}`;
                         // 原子性设置标记，防止并发重复
                         const setResult = await redis.set(sendMarkKey, '1', { NX: true, EX: 3600 * 72 });
                         if (!setResult) {
                             continue; // 已有标记，跳过
                         }
-                        if (!LogMark.has('1')) {
-                            global?.logger?.mark('优纪插件: B站动态执行推送');
-                            LogMark.add('1');
-                        }
-                        let liveAtAllMark = await redis.get(`${markKey}${chatId}:liveAtAllMark`); // 直播动态@全体成员标记，默认 0
-                        // 如果开启了直播动态@全体成员
-                        if (liveAtAll && !liveAtAllMark && dynamicType === 'DYNAMIC_TYPE_LIVE_RCMD' && liveAtAllGroupList.has(String(chatId))) {
-                            try {
-                                await this.sendMessageApi(chatId, bot_id, chatType, [segment.at('all')]);
-                                await redis.set(`${markKey}${chatId}:liveAtAllMark`, 1, { EX: liveAtAllCD }); // 设置直播动态@全体成员标记为 1
-                            }
-                            catch (error) {
-                                logger.error(`直播动态发送@全体成员失败，请检查 <机器人> 是否有 [管理员权限] 或 [聊天平台是否支持] ：${error}`);
-                                let liveAtAllErrMsg = !!biliConfigData.liveAtAllErrMsg === false ? false : true; // 直播动态@全体成员失败是否发送错误提示消息，默认 false
-                                if (liveAtAllErrMsg) {
-                                    await this.sendMessageApi(chatId, bot_id, chatType, ['直播动态发送@全体成员失败，请检查权限或平台是否支持']);
-                                }
-                            }
-                        }
                         let sendSuccess = true;
                         if (sendMode === 'SINGLE') {
                             for (let i = 0; i < messages.length; i++) {
-                                if (!(await this.sendMessageApi(chatId, bot_id, chatType, messages[i]))) {
+                                if (!(await this.sendMsgApi(chatId, bot_id, chatType, messages[i]))) {
                                     sendSuccess = false;
                                     break;
                                 }
@@ -436,7 +488,7 @@ class BiliTask {
                             }
                         }
                         else if (sendMode === 'MERGE') {
-                            if (!(await this.sendMessageApi(chatId, bot_id, chatType, messages))) {
+                            if (!(await this.sendMsgApi(chatId, bot_id, chatType, messages))) {
                                 await redis.del(sendMarkKey); // 失败删除标记
                             }
                             await this.randomDelay(1000, 2000);
@@ -454,7 +506,7 @@ class BiliTask {
      * @param chatType 聊天类型
      * @param message 消息内容
      */
-    async sendMessageApi(chatId, bot_id, chatType, message) {
+    async sendMsgApi(chatId, bot_id, chatType, message) {
         try {
             if (chatType === 'group') {
                 await (Bot[bot_id] ?? Bot)?.pickGroup(String(chatId)).sendMsg(message); // 发送群聊
@@ -466,6 +518,30 @@ class BiliTask {
         }
         catch (error) {
             global?.logger?.error(`${chatType === 'group' ? '群聊' : '私聊'} ${chatId} 消息发送失败：${JSON.stringify(error)}`);
+            return false; // 发送失败
+        }
+    }
+    /**
+     * 发送合并转发消息
+     * @param chatId 聊天 ID
+     * @param bot_id 机器人 ID
+     * @param chatType 聊天类型
+     * @param message 消息内容
+     * @returns 是否发送成功
+     */
+    async sendForwardMsgApi(chatId, bot_id, chatType, forwardNodes) {
+        const forwardMsg = await Bot.makeForwardMsg(forwardNodes);
+        try {
+            if (chatType === 'group') {
+                await (Bot[bot_id] ?? Bot)?.pickGroup(String(chatId)).sendMsg(forwardMsg); // 发送群聊合并转发
+            }
+            else if (chatType === 'private') {
+                await (Bot[bot_id] ?? Bot)?.pickFriend(String(chatId)).sendMsg(forwardMsg); // 发送好友私聊合并转发
+            }
+            return true; // 发送成功
+        }
+        catch (error) {
+            global?.logger?.error(`${chatType === 'group' ? '群聊' : '私聊'} ${chatId} 合并转发消息发送失败：${JSON.stringify(error)}`);
             return false; // 发送失败
         }
     }
