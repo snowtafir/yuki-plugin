@@ -430,20 +430,81 @@ export class WeiboTask {
     messageMap: Map<string, Map<string | number, Map<string | number, { sendMode: string; dynamicUUid_str: string; dynamicType: string; messages: any[] }[]>>>,
     weiboConfigData: { [key: string]: string | number | boolean | any[] }
   ) {
+    let forwardSendDynamic = weiboConfigData.forwardSendDynamic === 0 || weiboConfigData.forwardSendDynamic === false ? false : true; // 转发动态是否合并发送，默认 true
     const LogMark = new Set(); // 日志mark
     for (const [chatType, botMap] of messageMap) {
       for (const [bot_id, chatMap] of botMap) {
         for (const [chatId, messageCombinationList] of chatMap) {
-          // 遍历组合消息
+          // 区分群聊和私聊
+          let markKey: string = chatType === 'group' ? this.groupKey : this.privateKey;
+
+          if (!LogMark.has('1')) {
+            global?.logger?.mark('优纪插件: B站动态执行推送');
+            LogMark.add('1');
+          }
+
+          // 统计图片数量和文字长度
+          let imageCount = 0;
+          let textLength = 0;
+          for (const messageCombination of messageCombinationList) {
+            const { messages } = messageCombination;
+            for (const msg of messages) {
+              if (typeof msg === 'object' && msg.type === 'image') {
+                imageCount++;
+              } else if (typeof msg === 'string') {
+                textLength += msg.length;
+              }
+            }
+          }
+
+          // 满足条件才使用合并转发
+          const useForward = imageCount > 2 || textLength > 300;
+
+          if (forwardSendDynamic && useForward) {
+            const forwardNodes: any[] = [];
+            // 合并所有消息
+            const forwardSendMardKeyList: string[] = [];
+            forwardNodes.push({
+              name: '优纪酱通知',
+              uin: String(80000000),
+              message: ['有新的微博动态了~'],
+              time: Date.now()
+            });
+            for (const messageCombination of messageCombinationList) {
+              const { sendMode, dynamicUUid_str, dynamicType, messages } = messageCombination;
+              const sendMarkKey = `${markKey}${chatId}:${dynamicUUid_str}`;
+              // 原子性设置标记，防止并发重复
+              const setResult = await Redis.set(sendMarkKey, '1', { NX: true, EX: 3600 * 72 });
+              if (!setResult) {
+                continue; // 已有标记，跳过
+              }
+              forwardSendMardKeyList.push(sendMarkKey); // 收集合并转发的标记键
+              // 每条动态一个 node
+              forwardNodes.push({
+                name: '匿名消息',
+                uin: String(80000000),
+                message: messages,
+                time: Date.now()
+              });
+            }
+
+            // 尝试合并转发动态
+            if (
+              (await this.sendMsgApi(chatId, bot_id, chatType, '优纪酱微博动态通知~')) &&
+              (await this.sendForwardMsgApi(chatId, bot_id, chatType, forwardNodes))
+            ) {
+              await this.randomDelay(1000, 2000);
+              continue; // 合并转发成功，跳过后续单条发送逻辑
+            } else {
+              for (const sendMarkKey of forwardSendMardKeyList) {
+                await Redis.del(sendMarkKey); // 发送消息失败，删除合并转发成功标记
+              }
+            }
+          }
+
+          // 合并转发失败，回退为原有方式
           for (const messageCombination of messageCombinationList) {
             const { sendMode, dynamicUUid_str, dynamicType, messages } = messageCombination;
-
-            let markKey: string = '';
-            if (chatType === 'group') {
-              markKey = this.groupKey;
-            } else if (chatType === 'private') {
-              markKey = this.privateKey;
-            }
             const sendMarkKey = `${markKey}${chatId}:${dynamicUUid_str}`;
             // 原子性设置标记，防止并发重复
             const setResult = await Redis.set(sendMarkKey, '1', { NX: true, EX: 3600 * 72 });
@@ -451,15 +512,10 @@ export class WeiboTask {
               continue; // 已有标记，跳过
             }
 
-            if (!LogMark.has('1')) {
-              global?.logger?.mark('优纪插件: B站动态执行推送');
-              LogMark.add('1');
-            }
-
             let sendSuccess = true;
             if (sendMode === 'SINGLE') {
               for (let i = 0; i < messages.length; i++) {
-                if (!(await this.sendMessageApi(chatId, bot_id, chatType, messages[i]))) {
+                if (!(await this.sendMsgApi(chatId, bot_id, chatType, messages[i]))) {
                   sendSuccess = false;
                   break;
                 }
@@ -470,7 +526,7 @@ export class WeiboTask {
                 await this.randomDelay(1000, 2000);
               }
             } else if (sendMode === 'MERGE') {
-              if (!(await this.sendMessageApi(chatId, bot_id, chatType, messages))) {
+              if (!(await this.sendMsgApi(chatId, bot_id, chatType, messages))) {
                 await Redis.del(sendMarkKey); // 失败删除标记
               }
               await this.randomDelay(1000, 2000);
@@ -489,7 +545,7 @@ export class WeiboTask {
    * @param chatType 聊天类型
    * @param message 消息内容
    */
-  async sendMessageApi(chatId: string | number, bot_id: string | number, chatType: string, message: any) {
+  async sendMsgApi(chatId: string | number, bot_id: string | number, chatType: string, message: any) {
     try {
       if (chatType === 'group') {
         await (Bot[bot_id] ?? Bot)?.pickGroup(String(chatId)).sendMsg(message); // 发送群聊
@@ -499,6 +555,29 @@ export class WeiboTask {
       return true; // 发送成功
     } catch (error: any) {
       global?.logger?.error(`${chatType === 'group' ? '群聊' : '私聊'} ${chatId} 消息发送失败：${JSON.stringify(error)}`);
+      return false; // 发送失败
+    }
+  }
+
+  /**
+   * 发送合并转发消息
+   * @param chatId 聊天 ID
+   * @param bot_id 机器人 ID
+   * @param chatType 聊天类型
+   * @param message 消息内容
+   * @returns 是否发送成功
+   */
+  async sendForwardMsgApi(chatId: string | number, bot_id: string | number, chatType: string, forwardNodes: Array<any>) {
+    const forwardMsg = await Bot.makeForwardMsg(forwardNodes);
+    try {
+      if (chatType === 'group') {
+        await (Bot[bot_id] ?? Bot)?.pickGroup(String(chatId)).sendMsg(forwardMsg); // 发送群聊合并转发
+      } else if (chatType === 'private') {
+        await (Bot[bot_id] ?? Bot)?.pickFriend(String(chatId)).sendMsg(forwardMsg); // 发送好友私聊合并转发
+      }
+      return true; // 发送成功
+    } catch (error: any) {
+      global?.logger?.error(`${chatType === 'group' ? '群聊' : '私聊'} ${chatId} 合并转发消息发送失败：${JSON.stringify(error)}`);
       return false; // 发送失败
     }
   }
