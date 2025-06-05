@@ -518,8 +518,8 @@ export class BiliTask {
             // 合并所有消息
             const forwardSendMardKeyList: string[] = [];
             forwardNodes.push({
-              name: '优纪酱通知',
-              uin: String(80000000),
+              nickname: '优纪酱',
+              user_id: String(80000000),
               message: ['有新的B站动态了~'],
               time: Date.now()
             });
@@ -534,8 +534,8 @@ export class BiliTask {
               forwardSendMardKeyList.push(sendMarkKey); // 收集合并转发的标记键
               // 每条动态一个 node
               forwardNodes.push({
-                name: '匿名消息',
-                uin: String(80000000),
+                nickname: '匿名消息',
+                user_id: String(80000000),
                 message: messages,
                 time: Date.now()
               });
