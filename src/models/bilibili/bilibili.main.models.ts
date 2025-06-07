@@ -175,6 +175,8 @@ export async function checkBiliLogin(e: EventType) {
       e.reply(
         `~B站账号已登陆~\n有效期至：${LoginCookieTTLStr}。\n昵称：${uname}\nuid：${mid}\n硬币：${money}\n经验等级：${current_level}\n当前经验值exp：${current_exp}\n下一等级所需exp：${next_exp}`
       );
+    } else if (resData.code === -101) {
+      e.reply('B站登录CK已失效，请重新扫码登录');
     } else {
       // 处理其他情况
       e.reply('意外情况，未能成功获取登录ck的有效状态');
