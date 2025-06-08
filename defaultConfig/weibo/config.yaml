@@ -27,13 +27,13 @@ dynamicTimeRange: 7200
 pushTransmit: 1
 
 # 推送动态时，限制发送多少张图片
-pushPicCountLimit: 3
+pushPicCountLimit: 9
 
 # 推送文字和图文动态时，限制字数是多少
-pushContentLenLimit: 100
+pushContentLenLimit: 1000
 
 # 推送文字和图文动态时，限制多少行文本
-pushContentLineLimit: 5
+pushContentLineLimit: 100
 
 # 是否展示定时任务的日志，0 不显示 1 显示
 pushTaskLog: 1
