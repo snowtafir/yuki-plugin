@@ -210,7 +210,7 @@ class WeiboQuery {
         let created_time = this.getDynamicCreatetDate(raw_post);
         let detail_url = `https://weibo.com/${info?.user?.id}/${info?.bid}`;
         let msg_meta = `微博【${upName}】动态推送：`;
-        const dynamicPicCountLimit = setData.pushPicCountLimit || 3;
+        const dynamicPicCountLimit = setData.pushPicCountLimit || 9;
         function formatNumber(num) {
             if (num >= 10000) {
                 return `${(num / 10000).toFixed(1)}万`;
@@ -344,9 +344,9 @@ class WeiboQuery {
     }
     // 限制文字模式下动态内容的字数和行数
     static dynamicContentLimit(content, setData) {
-        const lines = content.split('\n');
-        const lengthLimit = setData.pushContentLenLimit || 100;
-        const lineLimit = setData.pushContentLineLimit || 5;
+        const lines = String(content).split('\n');
+        const lengthLimit = setData.pushContentLenLimit || 1000;
+        const lineLimit = setData.pushContentLineLimit || 100;
         // 限制行数
         if (lines.length > lineLimit) {
             lines.length = lineLimit;

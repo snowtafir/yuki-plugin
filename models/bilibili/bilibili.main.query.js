@@ -491,7 +491,7 @@ class BiliQuery {
                 if (!desc && !pics && !author)
                     return;
                 module_stat = data?.modules?.module_stat;
-                const dynamicPicCountLimit = setData.pushPicCountLimit || 3;
+                const dynamicPicCountLimit = setData.pushPicCountLimit || 9;
                 if (pics.length > dynamicPicCountLimit) {
                     pics.length = dynamicPicCountLimit;
                 }
@@ -639,9 +639,9 @@ class BiliQuery {
     }
     // 限制文字模式下动态内容的字数和行数
     static dynamicContentLimit(content, setData) {
-        const lines = content.split('\n');
-        const lengthLimit = setData.pushContentLenLimit || 100;
-        const lineLimit = setData.pushContentLineLimit || 5;
+        const lines = String(content).split('\n');
+        const lengthLimit = setData.pushContentLenLimit || 1000;
+        const lineLimit = setData.pushContentLineLimit || 100;
         // 限制行数
         if (lines.length > lineLimit) {
             lines.length = lineLimit;
