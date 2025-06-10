@@ -216,6 +216,9 @@ class BiliQuery {
                         // 处理表情类型，使用 img 标签显示表情
                         const emoji = node.emoji;
                         return `<img src="${emoji?.icon_url}" alt="${emoji?.text}" title="${emoji?.text}" style="vertical-align: middle; width: ${emoji?.size ? Number(emoji?.size) * 1.5 : 1.5}em; height: ${emoji?.size ? Number(emoji?.size) * 1.5 : 1.5}em;">`;
+                    case 'RICH_TEXT_NODE_TYPE_BV':
+                        // 处理视频类型，使用官方的HTML标签写法
+                        return `<span class="bili-rich-text-link video">${node?.text}</span>`;
                     case 'RICH_TEXT_NODE_TYPE_GOODS':
                         // 处理商品推广类型，使用官方的HTML标签写法
                         const goods_url = node?.jump_url;
@@ -336,6 +339,9 @@ class BiliQuery {
                                             // 处理表情类型，使用 img 标签显示表情
                                             const emoji = node?.rich?.emoji;
                                             return `<img src="${emoji?.icon_url}" alt="${emoji?.text}" title="${emoji?.text}" style="vertical-align: middle; width: ${emoji?.size ? Number(emoji?.size) * 1.5 : 1.5}em; height: ${emoji?.size ? Number(emoji?.size) * 1.5 : 1.5}em;">`;
+                                        case 'RICH_TEXT_NODE_TYPE_BV':
+                                            // 处理视频类型，使用官方的HTML标签写法
+                                            return `<span class="bili-rich-text-link video">${node?.rich?.text}</span>`;
                                         case 'RICH_TEXT_NODE_TYPE_GOODS':
                                             // 处理商品推广类型，使用官方的HTML标签写法
                                             const goods_url = node?.rich?.jump_url;
