@@ -171,3 +171,18 @@
   min-width: 72px;
   outline: none;
 }
+
+/* 定义B站图文内视频链接标签样式 */
+.bili-rich-text-link.video {
+  display: inline-block;
+  padding-left: 20px;
+  color: #008ac5;
+  /* 为图标留出空间 */
+  position: relative;
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: 20px 20px;
+  /* 根据你的SVG图标大小调整 */
+  background-image: url('./../../img/icon/dynamic/bili-rich-text-link-video.svg');
+  /* 引入SVG图标 */
+}
