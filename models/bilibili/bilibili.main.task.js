@@ -423,7 +423,7 @@ class BiliTask {
                         }
                     }
                     // 满足条件才使用合并转发
-                    const useForward = imageCount > 2 || textLength > 300;
+                    const useForward = imageCount > biliConfigData.imageCount || textLength > biliConfigData.textLength;
                     if (forwardSendDynamic && useForward) {
                         const forwardNodes = [];
                         // 合并所有消息
