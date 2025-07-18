@@ -114,7 +114,7 @@ export declare class WeiboTask {
         dynamicType: string;
         messages: any[];
     }[]>>>, weiboConfigData: {
-        [key: string]: string | number | boolean | any[];
+        [key: string]: any;
     }): Promise<void>;
     /**
      * 发送消息api
