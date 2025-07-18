@@ -429,7 +429,7 @@ export class WeiboTask {
    */
   async sendDynamicMessage(
     messageMap: Map<string, Map<string | number, Map<string | number, { sendMode: string; dynamicUUid_str: string; dynamicType: string; messages: any[] }[]>>>,
-    weiboConfigData: { [key: string]: string | number | boolean | any[] }
+    weiboConfigData: { [key: string]: any }
   ) {
     let forwardSendDynamic = weiboConfigData.forwardSendDynamic === 0 || weiboConfigData.forwardSendDynamic === false ? false : true; // 转发动态是否合并发送，默认 true
     const LogMark = new Set(); // 日志mark
@@ -459,7 +459,7 @@ export class WeiboTask {
           }
 
           // 满足条件才使用合并转发
-          const useForward = imageCount > 2 || textLength > 300;
+          const useForward = imageCount > (weiboConfigData?.maxPicsForSingleMsg ?? 2) || textLength > (weiboConfigData?.maxTextLengthForSingleMsg ?? 300);
 
           if (forwardSendDynamic && useForward) {
             const forwardNodes: any[] = [];
