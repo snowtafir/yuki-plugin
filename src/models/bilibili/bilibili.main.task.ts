@@ -511,7 +511,7 @@ export class BiliTask {
           }
 
           // 满足条件才使用合并转发
-          const useForward = imageCount > 2 || textLength > 300;
+          const useForward = imageCount > (biliConfigData?.maxPicsForSingleMsg ?? 2) || textLength > (biliConfigData?.maxTextLengthForSingleMsg ?? 300);
 
           if (forwardSendDynamic && useForward) {
             const forwardNodes: any[] = [];
