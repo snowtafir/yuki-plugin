@@ -1,21 +1,13 @@
 import chalk from 'chalk';
 import Config from './utils/config.js';
-import path from 'path';
+import path__default from 'path';
 import { _paths } from './utils/paths.js';
 import YukiBili from './apps/bilibili.js';
 import YukiHelp from './apps/help.js';
 import YukiVersion from './apps/version.js';
 import YukiWeibo from './apps/weibo.js';
 
-const yukiPluginVersion = Config.getPackageJsonKey('version', path.join(_paths.pluginPath, 'package.json'));
-if (!global.segment) {
-    try {
-        global.segment = (await import('oicq')).segment;
-    }
-    catch (err) {
-        global.segment = (await import('icqq')).segment;
-    }
-}
+const yukiPluginVersion = Config.getPackageJsonKey('version', path__default.join(_paths.pluginPath, 'package.json'));
 let apps = { YukiBili, YukiHelp, YukiVersion, YukiWeibo };
 let rules = {};
 let count = 0;

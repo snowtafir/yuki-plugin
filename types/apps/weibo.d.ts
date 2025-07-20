@@ -1,5 +1,5 @@
-import plugin from '../../../lib/plugins/plugin.js';
-export default class YukiWeibo extends plugin {
+import { Plugin } from '@/utils/host';
+export default class YukiWeibo extends Plugin {
     constructor();
     weiboConfigData: any;
     weiboPushData: any;

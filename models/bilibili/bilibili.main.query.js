@@ -3,6 +3,7 @@ import { readSyncCookie, cookieWithBiliTicket } from './bilibili.main.models.js'
 import BiliApi from './bilibili.main.api.js';
 import axios from 'axios';
 import lodash from 'lodash';
+import { logger, Segment } from '../../utils/host.js';
 
 class BiliQuery {
     /**
@@ -425,7 +426,7 @@ class BiliQuery {
                     `\n--------------------`,
                     `\n链接：${this.formatUrl(desc.jump_url)}`
                 ];
-                pics = [segment.image(desc?.cover)];
+                pics = [Segment.image(desc?.cover)];
                 return { msg, pics, dynamicType };
             case 'DYNAMIC_TYPE_WORD':
                 // 处理文字动态
@@ -502,7 +503,7 @@ class BiliQuery {
                     pics.length = dynamicPicCountLimit;
                 }
                 pics = pics.map((item) => {
-                    return segment.image(item);
+                    return Segment.image(item);
                 });
                 msg_meta = `B站【${upName}】图文动态推送：`;
                 msg = [
@@ -554,7 +555,7 @@ class BiliQuery {
                     return;
                 module_stat = data?.modules?.module_stat;
                 pics = pics.map((item) => {
-                    return segment.image(item);
+                    return Segment.image(item);
                 });
                 msg_meta = `B站【${upName}】文章动态推送：`;
                 msg = [
@@ -635,7 +636,7 @@ class BiliQuery {
                     `\n${formatNumber(desc?.watched_show?.num)}人看过`,
                     `\n链接：https:${desc.link}`
                 ];
-                pics = [segment.image(desc.cover)];
+                pics = [Segment.image(desc.cover)];
                 return { msg, pics, dynamicType };
             default:
                 // 处理未定义的动态类型

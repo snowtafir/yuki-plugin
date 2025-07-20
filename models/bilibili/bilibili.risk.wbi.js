@@ -1,6 +1,7 @@
 import md5 from 'md5';
 import fetch from 'node-fetch';
 import BiliApi from './bilibili.main.api.js';
+import { Redis } from '../../utils/host.js';
 
 const mixinKeyEncTab = [
     46, 47, 18, 2, 53, 8, 23, 32, 15, 50, 10, 31, 58, 3, 45, 35, 27, 43, 5, 49, 33, 9, 42, 19, 29, 28, 14, 39, 12, 38, 41, 13, 37, 48, 7, 16, 24, 55, 40, 61, 26,
@@ -35,7 +36,7 @@ function encWbi(params, img_key, sub_key) {
 // 获取最新的 img_key 和 sub_key
 async function getWbiKeys(headers, cookie) {
     const IMG_SUB_KEY = 'Yz:yuki:bili:wbi_img_key';
-    const wbi_img_data = await redis.get(IMG_SUB_KEY);
+    const wbi_img_data = await Redis.get(IMG_SUB_KEY);
     if (wbi_img_data) {
         const wbi_img_data_json = JSON.parse(wbi_img_data);
         return {
@@ -69,7 +70,7 @@ async function getWbiKeys(headers, cookie) {
         // 计算剩余秒数
         const secondsUntilTomorrow = Math.floor((tomorrow.getTime() - current_zh_cn_Time.getTime()) / 1000);
         console.log(`距离明天还剩: ${secondsUntilTomorrow} 秒`);
-        await redis.set(IMG_SUB_KEY, JSON.stringify(wbi_img_data), { EX: secondsUntilTomorrow - 2 }); // 设置缓存，过期时间为第二天0点前2秒
+        await Redis.set(IMG_SUB_KEY, JSON.stringify(wbi_img_data), { EX: secondsUntilTomorrow - 2 }); // 设置缓存，过期时间为第二天0点前2秒
         return wbi_img_data;
     }
 }

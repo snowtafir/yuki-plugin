@@ -3,7 +3,7 @@ import fs__default from 'fs';
 import lodash from 'lodash';
 import fetch from 'node-fetch';
 import { promisify } from 'node:util';
-import path from 'path';
+import path__default from 'path';
 import QRCode from 'qrcode';
 import YAML from 'yaml';
 import { renderPage } from '../../utils/image.js';
@@ -11,6 +11,7 @@ import { _paths } from '../../utils/paths.js';
 import BiliApi from './bilibili.main.api.js';
 import { gen_buvid_fp } from './bilibili.risk.buid.fp.js';
 import { getBiliTicket } from './bilibili.risk.ticket.js';
+import { Redis, Segment, logger } from '../../utils/host.js';
 
 /**
  * *******************************************************************
@@ -51,7 +52,7 @@ async function applyLoginQRCode(e) {
             msg.push('渲染二维码图片失败，请查看终端输出的实时日志，\n复制哔哩登陆二维码URL，使用在线或本地二维码生成工具生成二维码并扫码。');
         }
         else {
-            msg.push(segment.image(qrCodeBufferArray[0]));
+            msg.push(Segment.image(qrCodeBufferArray[0]));
         }
         e.reply('请在3分钟内扫码以完成B站登陆绑定');
         e.reply(msg);
@@ -220,7 +221,7 @@ async function exitBiliLogin(e) {
 async function saveLoginCookie(e, biliLoginCk) {
     if (biliLoginCk && biliLoginCk.length > 0) {
         const LoginCkKey = 'Yz:yuki:bili:loginCookie';
-        redis.set(LoginCkKey, biliLoginCk, { EX: 3600 * 24 * 360 });
+        Redis.set(LoginCkKey, biliLoginCk, { EX: 3600 * 24 * 360 });
     }
     else {
         e.reply('扫码超时');
@@ -229,15 +230,15 @@ async function saveLoginCookie(e, biliLoginCk) {
 /** 读取扫码登陆后缓存的cookie */
 async function readLoginCookie() {
     const CK_KEY = 'Yz:yuki:bili:loginCookie';
-    const tempCk = await redis.get(CK_KEY);
+    const tempCk = await Redis.get(CK_KEY);
     return tempCk ? tempCk : '';
 }
 /** 读取扫码登陆后缓存的cookie的有效时间 */
 async function readLoginCookieTTL() {
     const CK_KEY = 'Yz:yuki:bili:loginCookie';
-    const tempCk = await redis.get(CK_KEY);
+    const tempCk = await Redis.get(CK_KEY);
     if (tempCk) {
-        const LoginCookieTTL = await redis.ttl(CK_KEY);
+        const LoginCookieTTL = await Redis.ttl(CK_KEY);
         return LoginCookieTTL;
     }
     else {
@@ -246,21 +247,21 @@ async function readLoginCookieTTL() {
 }
 /** 读取手动绑定的B站ck */
 async function readLocalBiliCk() {
-    const dir = path.join(_paths.root, 'data/yuki-plugin/');
+    const dir = path__default.join(_paths.root, 'data/yuki-plugin/');
     if (!fs__default.existsSync(dir)) {
         fs__default.mkdirSync(dir, { recursive: true }); // 创建目录，包括父目录
     }
     const files = fs__default.readdirSync(dir).filter((file) => file.endsWith('.yaml'));
     const readFile = promisify(fs__default.readFile);
-    const promises = files.map((file) => readFile(path.join(dir, file), 'utf8'));
+    const promises = files.map((file) => readFile(path__default.join(dir, file), 'utf8'));
     const contents = await Promise.all(promises);
     const Bck = contents.map((content) => YAML.parse(content));
     return Bck[0];
 }
 /** 覆盖保存手动获取绑定的B站ck */
 async function saveLocalBiliCk(data) {
-    const dirPath = path.join(_paths.root, 'data/yuki-plugin/');
-    const filePath = path.join(dirPath, 'biliCookie.yaml');
+    const dirPath = path__default.join(_paths.root, 'data/yuki-plugin/');
+    const filePath = path__default.join(dirPath, 'biliCookie.yaml');
     const cleanedData = String(data).replace(/\s/g, '').trim();
     if (lodash.isEmpty(cleanedData)) {
         fs__default.existsSync(filePath) && fs__default.unlinkSync(filePath);
@@ -276,7 +277,7 @@ async function saveLocalBiliCk(data) {
 /** 读取缓存的tempCK */
 async function readTempCk() {
     const CK_KEY = 'Yz:yuki:bili:tempCookie';
-    const tempCk = await redis.get(CK_KEY);
+    const tempCk = await Redis.get(CK_KEY);
     if (!tempCk) {
         const newTempCk = await getNewTempCk();
         await saveTempCk(newTempCk);
@@ -297,7 +298,7 @@ async function readTempCk() {
 /**保存tempCK*/
 async function saveTempCk(newTempCk) {
     const CK_KEY = 'Yz:yuki:bili:tempCookie';
-    await redis.set(CK_KEY, newTempCk, { EX: 3600 * 24 * 180 });
+    await Redis.set(CK_KEY, newTempCk, { EX: 3600 * 24 * 180 });
 }
 /** 综合获取ck，返回优先级：localCK > loginCK > tempCK */
 async function readSyncCookie() {
@@ -466,14 +467,14 @@ async function get_buvid_fp(cookie) {
 async function cookieWithBiliTicket(cookie) {
     const BiliJctKey = 'Yz:yuki:bili:bili_ticket';
     cookie = await readSavedCookieItems(cookie, ['bili_ticket'], true);
-    const biliTicket = await redis.get(BiliJctKey);
+    const biliTicket = await Redis.get(BiliJctKey);
     if (!biliTicket) {
         try {
             const csrf = await readSavedCookieItems(cookie, ['bili_jct'], false);
             const { ticket, ttl } = await getBiliTicket(csrf);
-            await redis.set(BiliJctKey, ticket, { EX: ttl });
+            await Redis.set(BiliJctKey, ticket, { EX: ttl });
             if (ticket && ttl) {
-                await redis.set(BiliJctKey, ticket, { EX: ttl });
+                await Redis.set(BiliJctKey, ticket, { EX: ttl });
                 return cookie + `;bili_ticket=${ticket};`;
             }
             else {

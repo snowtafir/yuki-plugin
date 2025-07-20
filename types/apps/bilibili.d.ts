@@ -1,5 +1,5 @@
-import plugin from '../../../lib/plugins/plugin.js';
-export default class YukiBili extends plugin {
+import { Plugin } from '@/utils/host';
+export default class YukiBili extends Plugin {
     constructor();
     biliConfigData: any;
     biliPushData: any;

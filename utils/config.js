@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import YAML from 'yaml';
 import * as chokidar from 'chokidar';
 import lodash from 'lodash';
-import path from 'path';
+import path__default from 'path';
 import { _paths } from './paths.js';
 
 /**
@@ -16,10 +16,10 @@ class Config {
     watcher;
     constructor() {
         /** 默认设置 */
-        this.defaultConfigPath = path.join(_paths.pluginPath, 'defaultConfig');
+        this.defaultConfigPath = path__default.join(_paths.pluginPath, 'defaultConfig');
         this.defaultConfig = {};
         /** 用户设置 */
-        this.userConfigPath = path.join(_paths.pluginPath, 'config');
+        this.userConfigPath = path__default.join(_paths.pluginPath, 'config');
         this.userConfig = {};
         /** 监听文件 */
         this.watcher = {};
@@ -29,29 +29,29 @@ class Config {
     initConfigFiles() {
         const configFiles = [
             {
-                configFile: path.join(_paths.botYukiData, 'config/bilibili/config.yaml'),
-                defaultFile: path.join(_paths.pluginPath, 'defaultConfig/bilibili/config.yaml'),
+                configFile: path__default.join(_paths.botYukiData, 'config/bilibili/config.yaml'),
+                defaultFile: path__default.join(_paths.pluginPath, 'defaultConfig/bilibili/config.yaml'),
                 dir: 'config/bilibili'
             },
             {
-                configFile: path.join(_paths.botYukiData, 'config/bilibili/push.yaml'),
-                defaultFile: path.join(_paths.pluginPath, 'defaultConfig/bilibili/push.yaml'),
+                configFile: path__default.join(_paths.botYukiData, 'config/bilibili/push.yaml'),
+                defaultFile: path__default.join(_paths.pluginPath, 'defaultConfig/bilibili/push.yaml'),
                 dir: 'config/bilibili'
             },
             {
-                configFile: path.join(_paths.botYukiData, 'config/weibo/config.yaml'),
-                defaultFile: path.join(_paths.pluginPath, 'defaultConfig/weibo/config.yaml'),
+                configFile: path__default.join(_paths.botYukiData, 'config/weibo/config.yaml'),
+                defaultFile: path__default.join(_paths.pluginPath, 'defaultConfig/weibo/config.yaml'),
                 dir: 'config/weibo'
             },
             {
-                configFile: path.join(_paths.botYukiData, 'config/weibo/push.yaml'),
-                defaultFile: path.join(_paths.pluginPath, 'defaultConfig/weibo/push.yaml'),
+                configFile: path__default.join(_paths.botYukiData, 'config/weibo/push.yaml'),
+                defaultFile: path__default.join(_paths.pluginPath, 'defaultConfig/weibo/push.yaml'),
                 dir: 'config/weibo'
             }
         ];
         for (const { configFile, defaultFile, dir } of configFiles) {
             if (!fs.existsSync(configFile)) {
-                const configDir = path.join(_paths.botYukiData, dir);
+                const configDir = path__default.join(_paths.botYukiData, dir);
                 if (!fs.existsSync(configDir)) {
                     fs.mkdirSync(configDir, { recursive: true });
                 }
@@ -84,10 +84,10 @@ class Config {
      */
     getConfigFilePath(typeDir, appDir, functionName) {
         if (typeDir === 'defaultConfig') {
-            return path.join(_paths.pluginPath, `${typeDir}`, `${appDir}`, `${functionName}.yaml`);
+            return path__default.join(_paths.pluginPath, `${typeDir}`, `${appDir}`, `${functionName}.yaml`);
         }
         else {
-            return path.join(_paths.botYukiData, `${typeDir}`, `${appDir}`, `${functionName}.yaml`);
+            return path__default.join(_paths.botYukiData, `${typeDir}`, `${appDir}`, `${functionName}.yaml`);
         }
     }
     /**

@@ -3,6 +3,7 @@ import Config from '../../utils/config.js';
 import { renderPage } from '../../utils/image.js';
 import { WeiboWebDataFetcher } from './weibo.main.get.web.data.js';
 import { WeiboQuery } from './weibo.main.query.js';
+import { logger, Redis, Segment } from '../../utils/host.js';
 
 class WeiboTask {
     taskName;
@@ -140,11 +141,11 @@ class WeiboTask {
         let sended = null, markKey = '';
         if (chatType === 'group') {
             markKey = this.groupKey;
-            sended = await redis.get(`${markKey}${chatId}:${id_str}`);
+            sended = await Redis.get(`${markKey}${chatId}:${id_str}`);
         }
         else if (chatType === 'private') {
             markKey = this.privateKey;
-            sended = await redis.get(`${markKey}${chatId}:${id_str}`);
+            sended = await Redis.get(`${markKey}${chatId}:${id_str}`);
         }
         if (sended)
             return; // 如果已经发送过，则直接返回
@@ -194,7 +195,7 @@ class WeiboTask {
             let imgs = await this.renderDynamicCard(uid, renderData, ScreenshotOptionsData);
             if (!imgs)
                 return; // 如果渲染失败，则直接返回
-            await this.addMessageToMap(messageMap, chatType, bot_id, chatId, 'SINGLE', id_str, extentData?.type, imgs.map(img => segment.image(img)));
+            await this.addMessageToMap(messageMap, chatType, bot_id, chatId, 'SINGLE', id_str, extentData?.type, imgs.map(img => Segment.image(img)));
         }
         else {
             const dynamicMsg = await WeiboQuery.formatTextDynamicData(upName, pushDynamicData, false, weiboConfigData); //构建文字动态消息
@@ -384,7 +385,7 @@ class WeiboTask {
                             const { sendMode, dynamicUUid_str, dynamicType, messages } = messageCombination;
                             const sendMarkKey = `${markKey}${chatId}:${dynamicUUid_str}`;
                             // 原子性设置标记，防止并发重复
-                            const setResult = await redis.set(sendMarkKey, '1', { NX: true, EX: 3600 * 72 });
+                            const setResult = await Redis.set(sendMarkKey, '1', { NX: true, EX: 3600 * 72 });
                             if (!setResult) {
                                 continue; // 已有标记，跳过
                             }
@@ -405,7 +406,7 @@ class WeiboTask {
                         }
                         else {
                             for (const sendMarkKey of forwardSendMardKeyList) {
-                                await redis.del(sendMarkKey); // 发送消息失败，删除合并转发成功标记
+                                await Redis.del(sendMarkKey); // 发送消息失败，删除合并转发成功标记
                             }
                         }
                     }
@@ -414,7 +415,7 @@ class WeiboTask {
                         const { sendMode, dynamicUUid_str, dynamicType, messages } = messageCombination;
                         const sendMarkKey = `${markKey}${chatId}:${dynamicUUid_str}`;
                         // 原子性设置标记，防止并发重复
-                        const setResult = await redis.set(sendMarkKey, '1', { NX: true, EX: 3600 * 72 });
+                        const setResult = await Redis.set(sendMarkKey, '1', { NX: true, EX: 3600 * 72 });
                         if (!setResult) {
                             continue; // 已有标记，跳过
                         }
@@ -427,7 +428,7 @@ class WeiboTask {
                                 }
                             }
                             if (!sendSuccess) {
-                                await redis.del(sendMarkKey); // 失败删除标记
+                                await Redis.del(sendMarkKey); // 失败删除标记
                             }
                             else {
                                 await this.randomDelay(1000, 2000);
@@ -435,7 +436,7 @@ class WeiboTask {
                         }
                         else if (sendMode === 'MERGE') {
                             if (!(await this.sendMsgApi(chatId, bot_id, chatType, messages))) {
-                                await redis.del(sendMarkKey); // 失败删除标记
+                                await Redis.del(sendMarkKey); // 失败删除标记
                             }
                             await this.randomDelay(1000, 2000);
                         }

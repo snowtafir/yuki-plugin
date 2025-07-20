@@ -1,5 +1,5 @@
-import plugin from '../../../lib/plugins/plugin.js';
-export default class YukiVersion extends plugin {
+import { Plugin } from '@/utils/host';
+export default class YukiVersion extends Plugin {
     constructor();
     /**
      * 优纪版本

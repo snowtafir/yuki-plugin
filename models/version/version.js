@@ -1,5 +1,5 @@
 import fs__default from 'fs';
-import path from 'path';
+import path__default from 'path';
 import { _paths } from '../../utils/paths.js';
 
 class VersionData {
@@ -9,7 +9,7 @@ class VersionData {
     constructor() {
         this.model = 'versionData';
         this.cache = {};
-        this.versionPath = path.resolve(_paths.pluginPath, 'CHANGELOG.md');
+        this.versionPath = path__default.resolve(_paths.pluginPath, 'CHANGELOG.md');
     }
     /**
      * CHANGELOG.md内容支持示例：

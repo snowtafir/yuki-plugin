@@ -1,5 +1,5 @@
-import plugin from '../../../lib/plugins/plugin.js';
-export default class YukiHelp extends plugin {
+import { Plugin } from '@/utils/host';
+export default class YukiHelp extends Plugin {
     constructor();
     /**
      * 优纪帮助

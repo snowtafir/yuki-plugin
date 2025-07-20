@@ -1,6 +1,7 @@
 import axios from 'axios';
 import WeiboApi from './weibo.main.api.js';
 import { WeiboQuery } from './weibo.main.query.js';
+import { logger } from '../../utils/host.js';
 
 class WeiboWebDataFetcher {
     e;
@@ -50,7 +51,7 @@ class WeiboWebDataFetcher {
             return data.cards.filter(WeiboQuery.filterCardTypeCustom);
         }
         catch (error) {
-            (logger ?? Bot.logger)?.mark('微博推送：Error fetching sub list:', error);
+            logger?.mark('微博推送：Error fetching sub list:', error);
             return [];
         }
     }

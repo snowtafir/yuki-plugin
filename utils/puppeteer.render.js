@@ -1,5 +1,5 @@
 import fs__default from 'fs';
-import path from 'path';
+import path__default from 'path';
 import { _paths } from './paths.js';
 
 class YukiPuppeteerRender {
@@ -57,7 +57,7 @@ class YukiPuppeteerRender {
             // 是否保存 html 文件
             if (Options?.saveHtmlfile === true) {
                 const htmlContent = await page.content();
-                const Dir = path.join(_paths.root, `/temp/html/yuki-plugin/${name}/`);
+                const Dir = path__default.join(_paths.root, `/temp/html/yuki-plugin/${name}/`);
                 if (!fs__default.existsSync(Dir)) {
                     fs__default.mkdirSync(Dir, { recursive: true });
                 }

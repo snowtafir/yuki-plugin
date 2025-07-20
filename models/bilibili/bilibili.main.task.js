@@ -4,6 +4,7 @@ import { renderPage } from '../../utils/image.js';
 import { BilibiliWebDataFetcher } from './bilibili.main.get.web.data.js';
 import { readSyncCookie, postGateway } from './bilibili.main.models.js';
 import { BiliQuery } from './bilibili.main.query.js';
+import { logger, Redis, Segment } from '../../utils/host.js';
 
 class BiliTask {
     taskName;
@@ -172,11 +173,11 @@ class BiliTask {
         let sended = null, markKey = '';
         if (chatType === 'group') {
             markKey = this.groupKey;
-            sended = await redis.get(`${markKey}${chatId}:${id_str}`);
+            sended = await Redis.get(`${markKey}${chatId}:${id_str}`);
         }
         else if (chatType === 'private') {
             markKey = this.privateKey;
-            sended = await redis.get(`${markKey}${chatId}:${id_str}`);
+            sended = await Redis.get(`${markKey}${chatId}:${id_str}`);
         }
         if (sended)
             return; // 如果已经发送过，则直接返回
@@ -228,7 +229,7 @@ class BiliTask {
             let imgs = await this.renderDynamicCard(uid, renderData, ScreenshotOptionsData);
             if (!imgs)
                 return; // 如果渲染失败，则直接返回
-            await this.addMessageToMap(messageMap, chatType, bot_id, chatId, 'SINGLE', id_str, extentData?.type, imgs.map(img => segment.image(img)));
+            await this.addMessageToMap(messageMap, chatType, bot_id, chatId, 'SINGLE', id_str, extentData?.type, imgs.map(img => Segment.image(img)));
         }
         else {
             const dynamicMsg = await BiliQuery.formatTextDynamicData(upName, pushDynamicData, false, biliConfigData); // 构建图文动态消息
@@ -392,13 +393,13 @@ class BiliTask {
                         global?.logger?.mark('优纪插件: B站动态执行推送');
                         LogMark.add('1');
                     }
-                    let liveAtAllMark = await redis.get(`${markKey}${chatId}:liveAtAllMark`); // 直播动态@全体成员标记，默认 0
+                    let liveAtAllMark = await Redis.get(`${markKey}${chatId}:liveAtAllMark`); // 直播动态@全体成员标记，默认 0
                     const hasLiveDynamic = messageCombinationList.some(m => m.dynamicType === 'DYNAMIC_TYPE_LIVE_RCMD');
                     // 如果开启了直播动态@全体成员
                     if (liveAtAll && !liveAtAllMark && hasLiveDynamic && liveAtAllGroupList.has(String(chatId))) {
                         try {
-                            await this.sendMsgApi(chatId, bot_id, chatType, [segment.at('all')]);
-                            await redis.set(`${markKey}${chatId}:liveAtAllMark`, 1, { EX: liveAtAllCD }); // 设置直播动态@全体成员标记为 1
+                            await this.sendMsgApi(chatId, bot_id, chatType, [Segment.at('all')]);
+                            await Redis.set(`${markKey}${chatId}:liveAtAllMark`, 1, { EX: liveAtAllCD }); // 设置直播动态@全体成员标记为 1
                         }
                         catch (error) {
                             logger.error(`直播动态发送@全体成员失败，请检查 <机器人> 是否有 [管理员权限] 或 [聊天平台是否支持] ：${error}`);
@@ -438,7 +439,7 @@ class BiliTask {
                             const { sendMode, dynamicUUid_str, dynamicType, messages } = messageCombination;
                             const sendMarkKey = `${markKey}${chatId}:${dynamicUUid_str}`;
                             // 原子性设置标记，防止并发重复
-                            const setResult = await redis.set(sendMarkKey, '1', { NX: true, EX: 3600 * 72 });
+                            const setResult = await Redis.set(sendMarkKey, '1', { NX: true, EX: 3600 * 72 });
                             if (!setResult) {
                                 continue; // 已有标记，跳过
                             }
@@ -459,7 +460,7 @@ class BiliTask {
                         }
                         else {
                             for (const sendMarkKey of forwardSendMardKeyList) {
-                                await redis.del(sendMarkKey); // 发送消息失败，删除合并转发成功标记
+                                await Redis.del(sendMarkKey); // 发送消息失败，删除合并转发成功标记
                             }
                         }
                     }
@@ -468,7 +469,7 @@ class BiliTask {
                         const { sendMode, dynamicUUid_str, dynamicType, messages } = messageCombination;
                         const sendMarkKey = `${markKey}${chatId}:${dynamicUUid_str}`;
                         // 原子性设置标记，防止并发重复
-                        const setResult = await redis.set(sendMarkKey, '1', { NX: true, EX: 3600 * 72 });
+                        const setResult = await Redis.set(sendMarkKey, '1', { NX: true, EX: 3600 * 72 });
                         if (!setResult) {
                             continue; // 已有标记，跳过
                         }
@@ -481,7 +482,7 @@ class BiliTask {
                                 }
                             }
                             if (!sendSuccess) {
-                                await redis.del(sendMarkKey); // 失败删除标记
+                                await Redis.del(sendMarkKey); // 失败删除标记
                             }
                             else {
                                 await this.randomDelay(1000, 2000);
@@ -489,7 +490,7 @@ class BiliTask {
                         }
                         else if (sendMode === 'MERGE') {
                             if (!(await this.sendMsgApi(chatId, bot_id, chatType, messages))) {
-                                await redis.del(sendMarkKey); // 失败删除标记
+                                await Redis.del(sendMarkKey); // 失败删除标记
                             }
                             await this.randomDelay(1000, 2000);
                         }

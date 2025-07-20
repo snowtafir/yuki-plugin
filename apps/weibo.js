@@ -1,51 +1,51 @@
+import { WeiboWebDataFetcher } from '../models/weibo/weibo.main.get.web.data.js';
 import { WeiboQuery } from '../models/weibo/weibo.main.query.js';
 import { WeiboTask } from '../models/weibo/weibo.main.task.js';
 import Config from '../utils/config.js';
-import { WeiboWebDataFetcher } from '../models/weibo/weibo.main.get.web.data.js';
-import plugin from '../../../lib/plugins/plugin.js';
+import { Plugin, hostType } from '../utils/host.js';
 
-class YukiWeibo extends plugin {
+class YukiWeibo extends Plugin {
     constructor() {
-        super({
-            name: 'yuki-plugin-weibo',
-            dsc: '微博相关指令',
-            event: 'message',
-            priority: 0,
-            rule: [
-                {
-                    reg: '^(#|/)(yuki|优纪)?执行(微博|weibo|WEIBO)任务$',
-                    fnc: 'newPushTask',
-                    permission: 'master'
-                },
-                {
-                    reg: '^(#|/)(yuki|优纪)?(订阅|添加|add|ADD)(微博|weibo|WEIBO)推送\\s*(视频\\s*|图文\\s*|文章\\s*|转发\\s*)*.*$',
-                    fnc: 'addDynamicSub'
-                },
-                {
-                    reg: '^(#|/)(yuki|优纪)?(取消|删除|del|DEL)(微博|weibo|WEIBO)推送\\s*(视频\\s*|图文\\s*|文章\\s*|转发\\s*)*.*$',
-                    fnc: 'delDynamicSub'
-                },
-                {
-                    reg: '^(#|/)(yuki|优纪)?(微博|weibo|WEIBO)全部(推送|动态|订阅)列表$',
-                    fnc: 'allSubDynamicPushList'
-                },
-                {
-                    reg: '^(#|/)(yuki|优纪)?(微博|weibo|WEIBO)(推送|动态|订阅)列表$',
-                    fnc: 'singelSubDynamicPushList'
-                },
-                {
-                    reg: '^(#|/)(yuki|优纪)?(微博|weibo|WEIBO)(博|bo|BO)主.*$',
-                    fnc: 'getWeiboUserInfoByUid'
-                },
-                {
-                    reg: '^(#|/)(yuki|优纪)?搜索(微博|weibo|WEIBO)(博|bo|BO)主.*$',
-                    fnc: 'searchWeiboUserInfoByKeyword'
-                }
-            ]
-        });
+        const rules = [
+            {
+                reg: '^(#|/)(yuki|优纪)?执行(微博|weibo|WEIBO)任务$',
+                fnc: 'newPushTask',
+                permission: 'master'
+            },
+            {
+                reg: '^(#|/)(yuki|优纪)?(订阅|添加|add|ADD)(微博|weibo|WEIBO)推送\\s*(视频\\s*|图文\\s*|文章\\s*|转发\\s*)*.*$',
+                fnc: 'addDynamicSub'
+            },
+            {
+                reg: '^(#|/)(yuki|优纪)?(取消|删除|del|DEL)(微博|weibo|WEIBO)推送\\s*(视频\\s*|图文\\s*|文章\\s*|转发\\s*)*.*$',
+                fnc: 'delDynamicSub'
+            },
+            {
+                reg: '^(#|/)(yuki|优纪)?(微博|weibo|WEIBO)全部(推送|动态|订阅)列表$',
+                fnc: 'allSubDynamicPushList'
+            },
+            {
+                reg: '^(#|/)(yuki|优纪)?(微博|weibo|WEIBO)(推送|动态|订阅)列表$',
+                fnc: 'singelSubDynamicPushList'
+            },
+            {
+                reg: '^(#|/)(yuki|优纪)?(微博|weibo|WEIBO)(博|bo|BO)主.*$',
+                fnc: 'getWeiboUserInfoByUid'
+            },
+            {
+                reg: '^(#|/)(yuki|优纪)?搜索(微博|weibo|WEIBO)(博|bo|BO)主.*$',
+                fnc: 'searchWeiboUserInfoByKeyword'
+            }
+        ];
+        if (hostType === 'yunzaijs') {
+            super();
+            this.rule = rules.map(r => ({ ...r, fnc: this[r.fnc].name }));
+        }
+        else {
+            super({ rule: rules });
+        }
         this.weiboConfigData = Config.getConfigData('config', 'weibo', 'config');
         this.weiboPushData = Config.getConfigData('config', 'weibo', 'push');
-        /** 定时任务 */
         this.task = {
             cron: !!this.weiboConfigData.pushStatus ? (this.weiboConfigData.checkDynamicCD ? this.weiboConfigData.checkDynamicCD : '*/23  * * * *') : '',
             name: 'yuki插件---微博动态推送定时任务',

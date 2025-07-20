@@ -1,13 +1,13 @@
 import React from 'react';
 import Config from '../../utils/config.js';
-import path from 'path';
+import path__default from 'path';
 import { createRequire, _paths } from '../../utils/paths.js';
 
 const require = createRequire(import.meta.url);
-const botPackageJsonPath = path.join(_paths.root, 'package.json');
+const botPackageJsonPath = path__default.join(_paths.root, 'package.json');
 const BOT_NAME = Config.getPackageJsonKey('name', botPackageJsonPath);
 const botVersion = Config.getPackageJsonKey('version', botPackageJsonPath);
-const yukiPluginVersion = Config.getPackageJsonKey('version', path.join(_paths.pluginPath, 'package.json'));
+const yukiPluginVersion = Config.getPackageJsonKey('version', path__default.join(_paths.pluginPath, 'package.json'));
 const VersionCss = require('./../../resources/css/version/version.css');
 function App({ data }) {
     return (React.createElement(React.Fragment, null,

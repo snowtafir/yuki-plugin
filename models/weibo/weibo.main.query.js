@@ -2,6 +2,7 @@ import moment from 'moment';
 import fetch from 'node-fetch';
 import WeiboApi from './weibo.main.api.js';
 import { JSDOM } from 'jsdom';
+import { logger, Segment } from '../../utils/host.js';
 
 class WeiboQuery {
     /**获取文章id */
@@ -224,7 +225,7 @@ class WeiboQuery {
                 video_pics_list = info?.pics ? info?.pics : info?.page_info?.page_pic?.url ? [{ large: { url: info.page_info.page_pic.url } }] : [];
                 pic_urls = video_pics_list.map(img => img?.large?.url);
                 for (const pic_url of pic_urls) {
-                    const temp = segment.image(pic_url, false, 15000, { referer: 'https://weibo.com' });
+                    const temp = Segment.image(pic_url, false, 15000, { referer: 'https://weibo.com' });
                     pics.push(temp);
                 }
                 msg_meta = `微博【${upName}】视频动态推送：`;
@@ -254,7 +255,7 @@ class WeiboQuery {
                     raw_pics_list.length = dynamicPicCountLimit;
                 pic_urls = raw_pics_list.map((img) => img?.large?.url);
                 for (let pic_url of pic_urls) {
-                    const temp = segment.image(pic_url, false, 15000, { referer: 'https://weibo.com' });
+                    const temp = Segment.image(pic_url, false, 15000, { referer: 'https://weibo.com' });
                     pics.push(temp);
                 }
                 msg_meta = `微博【${upName}】图文动态推送：`;
@@ -282,7 +283,7 @@ class WeiboQuery {
                     raw_pics_list.length = dynamicPicCountLimit;
                 pic_urls = raw_pics_list.map(img => img?.large?.url);
                 for (const pic_url of pic_urls) {
-                    const temp = segment.image(pic_url, false, 15000, { referer: 'https://weibo.com' });
+                    const temp = Segment.image(pic_url, false, 15000, { referer: 'https://weibo.com' });
                     pics.push(temp);
                 }
                 msg_meta = `微博【${upName}】文章动态推送：`;
