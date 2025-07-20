@@ -1,5 +1,4 @@
 // 该文件是 yuki-plugin 插件的截图类，通过注入 Puppeteer 实例为依赖，拓展了 screenshot 方法，实现了截图的额外功能。
-import { Browser } from 'puppeteer';
 import { Puppeteer } from 'jsxp';
 import fs from 'fs';
 import path from 'path';
@@ -49,7 +48,7 @@ export class YukiPuppeteerRender {
     let pageHeight = Options?.pageSplitHeight ?? 8000; // 分割图片高度，默认 8000
 
     try {
-      const browser = this.puppeteerInstance.browser as Browser;
+      const browser = this.puppeteerInstance.browser;
       const page = await browser?.newPage().catch(err => {
         console.error(err);
       });

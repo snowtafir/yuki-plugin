@@ -3,10 +3,7 @@ import { cookieWithBiliTicket, readSyncCookie } from '@/models/bilibili/bilibili
 import BiliApi from '@/models/bilibili/bilibili.main.api';
 import axios from 'axios';
 import lodash from 'lodash';
-
-declare const Bot: any, segment: any;
-
-declare const logger: any;
+import { Segment, logger } from '@/utils/host';
 
 export class BiliQuery {
   /**
@@ -483,7 +480,7 @@ export class BiliQuery {
           `\n链接：${this.formatUrl(desc.jump_url)}`
         ];
 
-        pics = [segment.image(desc?.cover)];
+        pics = [Segment.image(desc?.cover)];
 
         return { msg, pics, dynamicType };
 
@@ -567,7 +564,7 @@ export class BiliQuery {
         }
 
         pics = pics.map((item: any) => {
-          return segment.image(item);
+          return Segment.image(item);
         });
 
         msg_meta = `B站【${upName}】图文动态推送：`;
@@ -622,7 +619,7 @@ export class BiliQuery {
         module_stat = data?.modules?.module_stat;
 
         pics = pics.map((item: any) => {
-          return segment.image(item);
+          return Segment.image(item);
         });
 
         msg_meta = `B站【${upName}】文章动态推送：`;
@@ -709,7 +706,7 @@ export class BiliQuery {
           `\n链接：https:${desc.link}`
         ];
 
-        pics = [segment.image(desc.cover)];
+        pics = [Segment.image(desc.cover)];
         return { msg, pics, dynamicType };
 
       default:

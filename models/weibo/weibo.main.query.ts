@@ -2,10 +2,7 @@ import moment from 'moment';
 import fetch from 'node-fetch';
 import WeiboApi from '@/models/weibo/weibo.main.api';
 import { JSDOM } from 'jsdom';
-
-declare const Bot: any, segment: any;
-
-declare const logger: any;
+import { Segment, logger } from '@/utils/host';
 
 export class WeiboQuery {
   /**获取文章id */
@@ -252,7 +249,7 @@ export class WeiboQuery {
 
         pic_urls = video_pics_list.map(img => img?.large?.url);
         for (const pic_url of pic_urls) {
-          const temp = segment.image(pic_url, false, 15000, { referer: 'https://weibo.com' });
+          const temp = Segment.image(pic_url, false, 15000, { referer: 'https://weibo.com' });
           pics.push(temp);
         }
 
@@ -286,7 +283,7 @@ export class WeiboQuery {
         pic_urls = raw_pics_list.map((img: any) => img?.large?.url);
 
         for (let pic_url of pic_urls) {
-          const temp = segment.image(pic_url, false, 15000, { referer: 'https://weibo.com' });
+          const temp = Segment.image(pic_url, false, 15000, { referer: 'https://weibo.com' });
           pics.push(temp);
         }
 
@@ -318,7 +315,7 @@ export class WeiboQuery {
         pic_urls = raw_pics_list.map(img => img?.large?.url);
 
         for (const pic_url of pic_urls) {
-          const temp = segment.image(pic_url, false, 15000, { referer: 'https://weibo.com' });
+          const temp = Segment.image(pic_url, false, 15000, { referer: 'https://weibo.com' });
           pics.push(temp);
         }
 

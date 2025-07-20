@@ -6,10 +6,9 @@ import { ScreenshotOptions } from '@/utils/puppeteer.render';
 import { BilibiliWebDataFetcher } from '@/models/bilibili/bilibili.main.get.web.data';
 import { postGateway, readSyncCookie } from '@/models/bilibili/bilibili.main.models';
 import { BiliQuery } from '@/models/bilibili/bilibili.main.query';
+import { Segment, Redis, logger } from '@/utils/host';
 
-declare const Bot: any, redis: any, segment: any;
-
-declare const logger: any;
+declare const Bot: any;
 
 export class BiliTask {
   taskName: string;
@@ -233,10 +232,10 @@ export class BiliTask {
       markKey: string = '';
     if (chatType === 'group') {
       markKey = this.groupKey;
-      sended = await redis.get(`${markKey}${chatId}:${id_str}`);
+      sended = await Redis.get(`${markKey}${chatId}:${id_str}`);
     } else if (chatType === 'private') {
       markKey = this.privateKey;
-      sended = await redis.get(`${markKey}${chatId}:${id_str}`);
+      sended = await Redis.get(`${markKey}${chatId}:${id_str}`);
     }
     if (sended) return; // 如果已经发送过，则直接返回
 
@@ -300,7 +299,7 @@ export class BiliTask {
         'SINGLE',
         id_str,
         extentData?.type,
-        imgs.map(img => segment.image(img))
+        imgs.map(img => Segment.image(img))
       );
     } else {
       const dynamicMsg = await BiliQuery.formatTextDynamicData(upName, pushDynamicData, false, biliConfigData); // 构建图文动态消息
@@ -482,13 +481,13 @@ export class BiliTask {
             LogMark.add('1');
           }
 
-          let liveAtAllMark: number | string | null = await redis.get(`${markKey}${chatId}:liveAtAllMark`); // 直播动态@全体成员标记，默认 0
+          let liveAtAllMark: number | string | null = await Redis.get(`${markKey}${chatId}:liveAtAllMark`); // 直播动态@全体成员标记，默认 0
           const hasLiveDynamic = messageCombinationList.some(m => m.dynamicType === 'DYNAMIC_TYPE_LIVE_RCMD');
           // 如果开启了直播动态@全体成员
           if (liveAtAll && !liveAtAllMark && hasLiveDynamic && liveAtAllGroupList.has(String(chatId))) {
             try {
-              await this.sendMsgApi(chatId, bot_id, chatType, [segment.at('all')]);
-              await redis.set(`${markKey}${chatId}:liveAtAllMark`, 1, { EX: liveAtAllCD }); // 设置直播动态@全体成员标记为 1
+              await this.sendMsgApi(chatId, bot_id, chatType, [Segment.at('all')]);
+              await Redis.set(`${markKey}${chatId}:liveAtAllMark`, 1, { EX: liveAtAllCD }); // 设置直播动态@全体成员标记为 1
             } catch (error) {
               logger.error(`直播动态发送@全体成员失败，请检查 <机器人> 是否有 [管理员权限] 或 [聊天平台是否支持] ：${error}`);
               let liveAtAllErrMsg: boolean = !!biliConfigData.liveAtAllErrMsg === false ? false : true; // 直播动态@全体成员失败是否发送错误提示消息，默认 false
@@ -529,7 +528,7 @@ export class BiliTask {
               const { sendMode, dynamicUUid_str, dynamicType, messages } = messageCombination;
               const sendMarkKey = `${markKey}${chatId}:${dynamicUUid_str}`;
               // 原子性设置标记，防止并发重复
-              const setResult = await redis.set(sendMarkKey, '1', { NX: true, EX: 3600 * 72 });
+              const setResult = await Redis.set(sendMarkKey, '1', { NX: true, EX: 3600 * 72 });
               if (!setResult) {
                 continue; // 已有标记，跳过
               }
@@ -552,7 +551,7 @@ export class BiliTask {
               continue; // 合并转发成功，跳过后续单条发送逻辑
             } else {
               for (const sendMarkKey of forwardSendMardKeyList) {
-                await redis.del(sendMarkKey); // 发送消息失败，删除合并转发成功标记
+                await Redis.del(sendMarkKey); // 发送消息失败，删除合并转发成功标记
               }
             }
           }
@@ -562,7 +561,7 @@ export class BiliTask {
             const { sendMode, dynamicUUid_str, dynamicType, messages } = messageCombination;
             const sendMarkKey = `${markKey}${chatId}:${dynamicUUid_str}`;
             // 原子性设置标记，防止并发重复
-            const setResult = await redis.set(sendMarkKey, '1', { NX: true, EX: 3600 * 72 });
+            const setResult = await Redis.set(sendMarkKey, '1', { NX: true, EX: 3600 * 72 });
             if (!setResult) {
               continue; // 已有标记，跳过
             }
@@ -576,13 +575,13 @@ export class BiliTask {
                 }
               }
               if (!sendSuccess) {
-                await redis.del(sendMarkKey); // 失败删除标记
+                await Redis.del(sendMarkKey); // 失败删除标记
               } else {
                 await this.randomDelay(1000, 2000);
               }
             } else if (sendMode === 'MERGE') {
               if (!(await this.sendMsgApi(chatId, bot_id, chatType, messages))) {
-                await redis.del(sendMarkKey); // 失败删除标记
+                await Redis.del(sendMarkKey); // 失败删除标记
               }
               await this.randomDelay(1000, 2000);
             }

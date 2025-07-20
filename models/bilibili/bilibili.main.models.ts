@@ -13,7 +13,8 @@ import { ScreenshotOptions } from '@/utils/puppeteer.render';
 import BiliApi from '@/models/bilibili/bilibili.main.api';
 import { gen_buvid_fp } from '@/models/bilibili/bilibili.risk.buid.fp';
 import { getBiliTicket } from '@/models/bilibili/bilibili.risk.ticket';
-declare const logger: any, Bot: any, redis: any, segment: any;
+import { Segment, Redis, logger } from '@/utils/host';
+declare const Bot: any;
 
 /**
  * *******************************************************************
@@ -64,7 +65,7 @@ export async function applyLoginQRCode(e: any) {
     if (qrCodeBufferArray.length === 0) {
       msg.push('渲染二维码图片失败，请查看终端输出的实时日志，\n复制哔哩登陆二维码URL，使用在线或本地二维码生成工具生成二维码并扫码。');
     } else {
-      msg.push(segment.image(qrCodeBufferArray[0]));
+      msg.push(Segment.image(qrCodeBufferArray[0]));
     }
     e.reply('请在3分钟内扫码以完成B站登陆绑定');
     e.reply(msg);
@@ -256,7 +257,7 @@ export async function exitBiliLogin(e: any) {
 export async function saveLoginCookie(e: any, biliLoginCk: string) {
   if (biliLoginCk && biliLoginCk.length > 0) {
     const LoginCkKey = 'Yz:yuki:bili:loginCookie';
-    redis.set(LoginCkKey, biliLoginCk, { EX: 3600 * 24 * 360 });
+    Redis.set(LoginCkKey, biliLoginCk, { EX: 3600 * 24 * 360 });
   } else {
     e.reply('扫码超时');
   }
@@ -265,7 +266,7 @@ export async function saveLoginCookie(e: any, biliLoginCk: string) {
 /** 读取扫码登陆后缓存的cookie */
 export async function readLoginCookie() {
   const CK_KEY = 'Yz:yuki:bili:loginCookie';
-  const tempCk = await redis.get(CK_KEY);
+  const tempCk = await Redis.get(CK_KEY);
 
   return tempCk ? tempCk : '';
 }
@@ -273,9 +274,9 @@ export async function readLoginCookie() {
 /** 读取扫码登陆后缓存的cookie的有效时间 */
 async function readLoginCookieTTL() {
   const CK_KEY = 'Yz:yuki:bili:loginCookie';
-  const tempCk = await redis.get(CK_KEY);
+  const tempCk = await Redis.get(CK_KEY);
   if (tempCk) {
-    const LoginCookieTTL = await redis.ttl(CK_KEY);
+    const LoginCookieTTL = await Redis.ttl(CK_KEY);
     return LoginCookieTTL;
   } else {
     return -2;
@@ -319,7 +320,7 @@ export async function saveLocalBiliCk(data: any) {
 /** 读取缓存的tempCK */
 export async function readTempCk() {
   const CK_KEY = 'Yz:yuki:bili:tempCookie';
-  const tempCk = await redis.get(CK_KEY);
+  const tempCk = await Redis.get(CK_KEY);
   if (!tempCk) {
     const newTempCk = await getNewTempCk();
     await saveTempCk(newTempCk);
@@ -342,7 +343,7 @@ export async function readTempCk() {
 /**保存tempCK*/
 export async function saveTempCk(newTempCk: any) {
   const CK_KEY = 'Yz:yuki:bili:tempCookie';
-  await redis.set(CK_KEY, newTempCk, { EX: 3600 * 24 * 180 });
+  await Redis.set(CK_KEY, newTempCk, { EX: 3600 * 24 * 180 });
 }
 
 /** 综合获取ck，返回优先级：localCK > loginCK > tempCK */
@@ -544,14 +545,14 @@ export async function get_buvid_fp(cookie: string) {
 export async function cookieWithBiliTicket(cookie: string): Promise<string> {
   const BiliJctKey = 'Yz:yuki:bili:bili_ticket';
   cookie = await readSavedCookieItems(cookie, ['bili_ticket'], true);
-  const biliTicket = await redis.get(BiliJctKey);
+  const biliTicket = await Redis.get(BiliJctKey);
   if (!biliTicket) {
     try {
       const csrf = await readSavedCookieItems(cookie, ['bili_jct'], false);
       const { ticket, ttl } = await getBiliTicket(csrf);
-      await redis.set(BiliJctKey, ticket, { EX: ttl });
+      await Redis.set(BiliJctKey, ticket, { EX: ttl });
       if (ticket && ttl) {
-        await redis.set(BiliJctKey, ticket, { EX: ttl });
+        await Redis.set(BiliJctKey, ticket, { EX: ttl });
         return cookie + `;bili_ticket=${ticket};`;
       } else {
         return cookie;

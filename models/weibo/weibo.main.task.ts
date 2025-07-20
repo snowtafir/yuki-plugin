@@ -5,10 +5,9 @@ import { renderPage } from '@/utils/image';
 import { ScreenshotOptions } from '@/utils/puppeteer.render';
 import { WeiboWebDataFetcher } from '@/models/weibo/weibo.main.get.web.data';
 import { WeiboQuery } from '@/models/weibo/weibo.main.query';
+import { Segment, Redis, logger } from '@/utils/host';
 
-declare const Bot: any, redis: any, segment: any;
-
-declare const logger: any;
+declare const Bot: any;
 
 export class WeiboTask {
   taskName: string;
@@ -202,10 +201,10 @@ export class WeiboTask {
       markKey: string = '';
     if (chatType === 'group') {
       markKey = this.groupKey;
-      sended = await redis.get(`${markKey}${chatId}:${id_str}`);
+      sended = await Redis.get(`${markKey}${chatId}:${id_str}`);
     } else if (chatType === 'private') {
       markKey = this.privateKey;
-      sended = await redis.get(`${markKey}${chatId}:${id_str}`);
+      sended = await Redis.get(`${markKey}${chatId}:${id_str}`);
     }
     if (sended) return; // 如果已经发送过，则直接返回
 
@@ -267,7 +266,7 @@ export class WeiboTask {
         'SINGLE',
         id_str,
         extentData?.type,
-        imgs.map(img => segment.image(img))
+        imgs.map(img => Segment.image(img))
       );
     } else {
       const dynamicMsg = await WeiboQuery.formatTextDynamicData(upName, pushDynamicData, false, weiboConfigData); //构建文字动态消息
@@ -475,7 +474,7 @@ export class WeiboTask {
               const { sendMode, dynamicUUid_str, dynamicType, messages } = messageCombination;
               const sendMarkKey = `${markKey}${chatId}:${dynamicUUid_str}`;
               // 原子性设置标记，防止并发重复
-              const setResult = await redis.set(sendMarkKey, '1', { NX: true, EX: 3600 * 72 });
+              const setResult = await Redis.set(sendMarkKey, '1', { NX: true, EX: 3600 * 72 });
               if (!setResult) {
                 continue; // 已有标记，跳过
               }
@@ -498,7 +497,7 @@ export class WeiboTask {
               continue; // 合并转发成功，跳过后续单条发送逻辑
             } else {
               for (const sendMarkKey of forwardSendMardKeyList) {
-                await redis.del(sendMarkKey); // 发送消息失败，删除合并转发成功标记
+                await Redis.del(sendMarkKey); // 发送消息失败，删除合并转发成功标记
               }
             }
           }
@@ -508,7 +507,7 @@ export class WeiboTask {
             const { sendMode, dynamicUUid_str, dynamicType, messages } = messageCombination;
             const sendMarkKey = `${markKey}${chatId}:${dynamicUUid_str}`;
             // 原子性设置标记，防止并发重复
-            const setResult = await redis.set(sendMarkKey, '1', { NX: true, EX: 3600 * 72 });
+            const setResult = await Redis.set(sendMarkKey, '1', { NX: true, EX: 3600 * 72 });
             if (!setResult) {
               continue; // 已有标记，跳过
             }
@@ -522,13 +521,13 @@ export class WeiboTask {
                 }
               }
               if (!sendSuccess) {
-                await redis.del(sendMarkKey); // 失败删除标记
+                await Redis.del(sendMarkKey); // 失败删除标记
               } else {
                 await this.randomDelay(1000, 2000);
               }
             } else if (sendMode === 'MERGE') {
               if (!(await this.sendMsgApi(chatId, bot_id, chatType, messages))) {
-                await redis.del(sendMarkKey); // 失败删除标记
+                await Redis.del(sendMarkKey); // 失败删除标记
               }
               await this.randomDelay(1000, 2000);
             }
