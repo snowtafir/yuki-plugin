@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { pathToFileURL } from 'url';
 import { _paths } from './paths.js';
 
 // 读取宿主 package.json 的 name 字段
@@ -37,7 +38,8 @@ if (hostType === 'yunzaijs') {
 else {
     // trss/miao/other
     // plugin基类路径兼容trss/miao等
-    const pluginModule = await import(path.join(_paths.root, 'lib', 'plugins', 'plugin.js'));
+    const pluginPath = pathToFileURL(path.join(_paths.root, 'lib', 'plugins', 'plugin.js')).href;
+    const pluginModule = await import(pluginPath);
     Plugin = pluginModule.default || pluginModule;
     Segment = global.segment || (global.segment = global.oicq ? global.oicq.segment : global.icqq ? global.icqq.segment : undefined);
     Redis = global.redis;
