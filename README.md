@@ -93,12 +93,12 @@ export default defineConfig({
 
 gitee仓库：
 ```shell
-git clone --branch main https://gitee.com/snowtafir/yuki-plugin.git ./plugins/yuki-plugin
+git clone --branch main3 https://gitee.com/snowtafir/yuki-plugin.git ./plugins/yuki-plugin
 ```
 
 github仓库：
 ```shell
-git clone --branch main https://github.com/snowtafir/yuki-plugin.git ./plugins/yuki-plugin
+git clone --branch main3 https://github.com/snowtafir/yuki-plugin.git ./plugins/yuki-plugin
 ```
 
 * 依赖安装：
@@ -218,13 +218,13 @@ https://m.weibo.cn/u/7643376782 # 7643376782 为崩坏星穹铁道博主uid
 <details><summary>参与开发，点击展开</summary>
 
 > [!TIP] 
-> * main、main3分支为编译分支，请勿直接在该分支上进行开发，请使用dev、dev3、npm分支进行同步开发，并提交Pull requests。
-> * 提交PR后由管理员审核，审核成功并合并后会自动进行github actions编译，最终提交编译好的代码到main、main3分支以及发布到npm。
+> * main3分支为编译分支，请勿直接在该分支上进行开发，请使用dev3、npm分支进行同步开发，并提交Pull requests。
+> * 提交PR后由管理员审核，审核成功并合并后会自动进行github actions编译，最终提交编译好的代码到main3分支以及发布到npm。
 > * 根据喜好，可使用 [vscode编辑器](https://code.visualstudio.com/) 或其他 IDE 辅助开发
 
 1. Fork 项目到自己的仓库。
 2. clone Fork 后的项目到本地。
-3. 进入clone后的项目目录，打开终端或 git bash 执行 `git checkout xxx` 切换到xxx分支（请依次切换到dev3、dev、npm分支进行同步开发）。
+3. 进入clone后的项目目录，打开终端或 git bash 执行 `git checkout xxx` 切换到xxx分支（请依次切换到dev3、npm分支进行同步开发）。
 4. 准备环境：
 ```sh
 npm config set registry https://registry.npmmirror.com

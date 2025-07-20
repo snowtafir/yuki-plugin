@@ -1,3 +1,6 @@
+# 2.0.8
+* 合并分支dev与dev3，减少维护成本
+
 # 2.0.7
 * 新增动态内容过多时转发发送功能，默认开启
 * 优化动态检查日志
@@ -27,7 +30,7 @@
 # 2.0.4
 * 增加splitHeight配置项，其他优化
 * 优化B站风控相关，新增bili_tiket参数
-* fix Repeated Instantiation Puppeteer
+* fix Repeated Instantiation puppeteer
 * 优化获取B站登录ck
 * 添加截图列队，优化配置文件注释
 
