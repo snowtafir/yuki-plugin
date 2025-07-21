@@ -15,6 +15,7 @@ export type ScreenshotOptions = {
     pageWidth?: number;
     modelName?: string;
     saveHtmlfile?: boolean;
+    isPauseGif?: boolean;
 };
 export declare class YukiPuppeteerRender {
     private puppeteerInstance;

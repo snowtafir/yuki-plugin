@@ -177,6 +177,7 @@ class WeiboTask {
             let isSplit = !!weiboConfigData.isSplit === false ? false : true; // 是否启用分片截图，默认为 true
             let style = isSplit ? '' : `.unfold { max-height: ${weiboConfigData?.noSplitHeight ?? 7500}px; }`; // 不启用分片截图模式的样式
             let splitHeight = weiboConfigData?.splitHeight ?? 8000; // 分片截图高度，默认 8000, 单位 px，启用分片截图时生效
+            let isPauseGif = !!weiboConfigData?.isPauseGif === true ? true : false; // 是否暂停 GIF 动图，默认为 false
             const extentData = { ...data };
             const urlQrcodeData = await QRCode.toDataURL(extentData?.url);
             let renderData = this.buildRenderData(extentData, urlQrcodeData, boxGrid);
@@ -190,7 +191,8 @@ class WeiboTask {
                     quality: 98
                 },
                 saveHtmlfile: false,
-                pageSplitHeight: splitHeight
+                pageSplitHeight: splitHeight,
+                isPauseGif: isPauseGif
             };
             let imgs = await this.renderDynamicCard(uid, renderData, ScreenshotOptionsData);
             if (!imgs)
@@ -245,22 +247,25 @@ class WeiboTask {
      * @returns 渲染数据
      */
     buildRenderData(extentData, urlQrcodeData, boxGrid) {
+        const baseData = {
+            appName: 'weibo',
+            boxGrid: boxGrid,
+            type: extentData?.type,
+            face: extentData?.face,
+            pendant: extentData?.pendant,
+            name: extentData?.name,
+            pubTs: extentData?.pubTs,
+            title: extentData?.title,
+            content: extentData?.content,
+            urlImgData: urlQrcodeData,
+            created: extentData?.created,
+            pics: extentData?.pics,
+            category: extentData?.category
+        };
         if (extentData.orig && extentData.orig.length !== 0) {
             return {
                 data: {
-                    appName: 'weibo',
-                    boxGrid: boxGrid,
-                    type: extentData?.type,
-                    face: extentData?.face,
-                    pendant: extentData?.pendant,
-                    name: extentData?.name,
-                    pubTs: extentData?.pubTs,
-                    title: extentData?.title,
-                    content: extentData?.content,
-                    urlImgData: urlQrcodeData,
-                    created: extentData?.created,
-                    pics: extentData?.pics,
-                    category: extentData?.category,
+                    ...baseData,
                     orig: {
                         data: {
                             type: extentData?.orig?.data?.type,
@@ -278,23 +283,7 @@ class WeiboTask {
             };
         }
         else {
-            return {
-                data: {
-                    appName: 'weibo',
-                    boxGrid: boxGrid,
-                    type: extentData?.type,
-                    face: extentData?.face,
-                    pendant: extentData?.pendant,
-                    name: extentData?.name,
-                    pubTs: extentData?.pubTs,
-                    title: extentData?.title,
-                    content: extentData?.content,
-                    urlImgData: urlQrcodeData,
-                    created: extentData?.created,
-                    pics: extentData?.pics,
-                    category: extentData?.category
-                }
-            };
+            return { data: baseData };
         }
     }
     /**

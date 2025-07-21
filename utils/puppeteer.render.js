@@ -53,7 +53,9 @@ class YukiPuppeteerRender {
             pageHeight = Math.round(boundingBox.height / num); //动态调整分片高度，防止过短影响观感。
             await page.setViewport({ width: boundingBox.width + 50, height: pageHeight + 100 });
             // 禁止 GIF 动图播放
-            await page.addStyleTag({ content: `img[src$=".gif"] {animation-play-state: paused !important;}` });
+            if (Options?.isPauseGif === true) {
+                await page.addStyleTag({ content: `img[src$=".gif"] {animation-play-state: paused !important;}` });
+            }
             // 是否保存 html 文件
             if (Options?.saveHtmlfile === true) {
                 const htmlContent = await page.content();
