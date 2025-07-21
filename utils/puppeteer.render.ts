@@ -20,6 +20,7 @@ export type ScreenshotOptions = {
   pageWidth?: number;
   modelName?: string;
   saveHtmlfile?: boolean;
+  isPauseGif?: boolean;
 };
 
 export class YukiPuppeteerRender {
@@ -77,7 +78,9 @@ export class YukiPuppeteerRender {
       await page.setViewport({ width: boundingBox.width + 50, height: pageHeight + 100 });
 
       // 禁止 GIF 动图播放
-      await page.addStyleTag({ content: `img[src$=".gif"] {animation-play-state: paused !important;}` });
+      if (Options?.isPauseGif === true) {
+        await page.addStyleTag({ content: `img[src$=".gif"] {animation-play-state: paused !important;}` });
+      }
 
       // 是否保存 html 文件
       if (Options?.saveHtmlfile === true) {
