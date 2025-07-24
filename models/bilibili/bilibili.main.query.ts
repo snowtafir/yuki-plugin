@@ -49,14 +49,15 @@ export class BiliQuery {
               return { url: item?.url, width: item?.width, height: item?.height };
             }) || [];
           additional = data?.modules?.module_dynamic?.additional;
+          formatData.data.title = desc?.title || '';
           formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text, additional) || '';
         } else {
           desc = data?.modules?.module_dynamic?.desc || {};
           pics = data?.modules?.module_dynamic?.major?.draw?.items;
           pics = [];
+          formatData.data.title = desc?.title || '';
           formatData.data.content = this.parseRichTextNodes(desc?.text);
         }
-        formatData.data.title = '';
         formatData.data.url = `${BiliDrawDynamicLinkUrl}${data.id_str}`;
         formatData.data.pubTime = author.pub_time;
         formatData.data.pubTs = moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss');
@@ -72,6 +73,7 @@ export class BiliQuery {
             return { url: item?.url, width: item?.width, height: item?.height };
           });
           additional = data?.modules?.module_dynamic?.additional;
+          formatData.data.title = desc?.title || '';
           formatData.data.content = this.parseRichTextNodes(desc?.summary?.rich_text_nodes || desc?.summary?.text, additional) || '';
         } else if (majorType === 'MAJOR_TYPE_DRAW') {
           desc = data?.modules?.module_dynamic?.desc;
@@ -79,6 +81,7 @@ export class BiliQuery {
           pics = pics.map((item: any) => {
             return { url: item?.url, width: item?.width, height: item?.height };
           });
+          formatData.data.title = desc?.title || '';
           formatData.data.content = this.parseRichTextNodes(desc?.rich_text_nodes || desc?.text) || '';
         } else {
           desc = data?.modules?.module_dynamic?.desc;
@@ -86,9 +89,9 @@ export class BiliQuery {
           pics = pics.map((item: any) => {
             return { url: item?.src };
           });
+          formatData.data.title = desc?.title || '';
           formatData.data.content = this.parseRichTextNodes(desc?.text);
         }
-        formatData.data.title = '';
         formatData.data.url = `${BiliDrawDynamicLinkUrl}${data.id_str}`;
         formatData.data.pubTime = author.pub_time;
         formatData.data.pubTs = moment(author.pub_ts * 1000).format('YYYY年MM月DD日 HH:mm:ss');
@@ -510,6 +513,7 @@ export class BiliQuery {
         msg_meta = `B站【${upName}】图文动态推送：`;
         msg = [
           msg_meta,
+          ...(desc?.title ? [`\n--------------------`, `\n${desc.title}`] : []),
           `\n--------------------`,
           `\n正文：`,
           `\n${this.dynamicContentLimit(content, setData)}`,
@@ -570,6 +574,7 @@ export class BiliQuery {
         msg_meta = `B站【${upName}】图文动态推送：`;
         msg = [
           msg_meta,
+          ...(desc?.title ? [`\n--------------------`, `\n${desc.title}`] : []),
           `\n--------------------`,
           `\n正文：`,
           `\n${this.dynamicContentLimit(content, setData)}`,
