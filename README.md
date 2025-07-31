@@ -6,7 +6,7 @@
 
 - 支持 群聊/私聊 订阅B站动态和微博动态，支持定时推送，支持手动触发推送，支持简单查询B站/微博用户信息。
 
-[![访问量](https://profile-counter.glitch.me/yuki-plugin/count.svg)](https://github.com/snowtafir/yuki-plugin)
+![访问统计](https://visitor-badge.laobi.icu/badge?page_id=snowtafir/yuki-plugin)
 
 
 # 🚩运行环境：
