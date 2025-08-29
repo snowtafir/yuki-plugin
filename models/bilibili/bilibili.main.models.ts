@@ -1,3 +1,11 @@
+import { LoginProps } from '@/components/loginQrcode/Page';
+import BiliApi from '@/models/bilibili/bilibili.main.api';
+import { gen_buvid_fp } from '@/models/bilibili/bilibili.risk.buid.fp';
+import { getBiliTicket } from '@/models/bilibili/bilibili.risk.ticket';
+import { Redis, Segment, logger } from '@/utils/host';
+import { renderPage } from '@/utils/image';
+import { _paths } from '@/utils/paths';
+import { ScreenshotOptions } from '@/utils/puppeteer.render';
 import axios from 'axios';
 import fs from 'fs';
 import lodash from 'lodash';
@@ -6,14 +14,6 @@ import { promisify } from 'node:util';
 import path from 'path';
 import QRCode from 'qrcode';
 import YAML from 'yaml';
-import { LoginProps } from '@/components/loginQrcode/Page';
-import { renderPage } from '@/utils/image';
-import { _paths } from '@/utils/paths';
-import { ScreenshotOptions } from '@/utils/puppeteer.render';
-import BiliApi from '@/models/bilibili/bilibili.main.api';
-import { gen_buvid_fp } from '@/models/bilibili/bilibili.risk.buid.fp';
-import { getBiliTicket } from '@/models/bilibili/bilibili.risk.ticket';
-import { Segment, Redis, logger } from '@/utils/host';
 declare const Bot: any;
 
 /**
@@ -49,7 +49,7 @@ export async function applyLoginQRCode(e: any) {
     const qrcodeUrl = res?.data?.url;
     let loginUrlQrcodeData = await QRCode.toDataURL(`${qrcodeUrl}`);
     const LoginPropsData: LoginProps = {
-      data: { url: loginUrlQrcodeData }
+      data: { name: 'B站', url: loginUrlQrcodeData }
     };
     const ScreenshotOptionsData: ScreenshotOptions = {
       saveHtmlfile: false,
@@ -290,7 +290,7 @@ async function readLocalBiliCk() {
     fs.mkdirSync(dir, { recursive: true }); // 创建目录，包括父目录
   }
 
-  const files = fs.readdirSync(dir).filter((file: string) => file.endsWith('.yaml'));
+  const files = fs.readdirSync(dir).filter((file: string) => file.endsWith('biliCookie.yaml'));
   const readFile = promisify(fs.readFile);
 
   const promises = files.map((file: any) => readFile(path.join(dir, file), 'utf8'));

@@ -8,6 +8,7 @@ const LoginQrcodeCss: string = require('./../../resources/css/loginQrcode/Page.c
 
 export type LoginProps = {
   data: {
+    name: string;
     url: string;
   };
 };
@@ -20,7 +21,7 @@ export default function App({ data }: LoginProps) {
         <div className="txt-0 text-center mt-3 mb-3 p-1 text-blue-500">
           Created By yuki-plugin
           <br />
-          扫码登录B站获取CK
+          扫码登录{data.name}获取CK
         </div>
         <div className="QrCode m-auto">
           <img className="qr-code w-72 h-72 ml-7" src={data.url} alt="二维码" />
