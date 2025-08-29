@@ -4,7 +4,6 @@ import { cookieWithBiliTicket, readSyncCookie } from '@src/models/bilibili/bilib
 import BiliApi from '@src/models/bilibili/bilibili.main.api';
 import axios from 'axios';
 import lodash from 'lodash';
-import { title } from 'node:process';
 
 declare const logger: any;
 

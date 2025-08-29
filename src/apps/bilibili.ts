@@ -408,7 +408,7 @@ message.use(
   [/^(#|\/)(yuki|优纪)?(取消|删除|del|DEL)(b站|B站|bili|bilibili|哔哩|哔哩哔哩)本地(ck|CK|cookie|COOKIE)$/]
 );
 
-/** 当前正在使用的B站ck */
+/** 当前正在使用的本地B站ck */
 message.use(
   async e => {
     if (e.isGroup) {
@@ -433,7 +433,7 @@ message.use(
       }
     }
   },
-  [/^(#|\/)(yuki|优纪)?(取消|删除|del|DEL)(b站|B站|bili|bilibili|哔哩|哔哩哔哩)本地(ck|CK|cookie|COOKIE)$/]
+  [/^(#|\/)(yuki|优纪)?我的(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(ck|CK|cookie|COOKIE)$/]
 );
 
 /** 删除并刷新redis缓存的临时B站ck */
