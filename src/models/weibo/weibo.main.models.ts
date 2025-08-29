@@ -74,13 +74,13 @@ export class WeiboMainModels {
             return { qrid, rid, X_CSRF_TOKEN };
           } else {
             logger.error('微博登录：获取rid失败');
-            e.reply(`获取微博登录rid密钥失败: ${JSON.stringify(ridData)}`);
-            throw new Error(`获取微博登录rid密钥失败: ${JSON.stringify(ridData)}`);
+            e.reply(`获取微博登录rid密钥失败: ${JSON.stringify(ridData)}，\n接口逆向进度受阻，未完成，无法登录。\n无妨，已切换启用临时ck`);
+            throw new Error(`获取微博登录rid密钥失败: ${JSON.stringify(ridData)}，\n接口逆向进度受阻，未完成，无法登录。\n无妨，已切换启用临时ck`);
           }
         }
       } else {
-        e.reply(`获取微博登录二维码失败: ${JSON.stringify(resData)}，\n接口逆向进度受阻，未完成，无法登录。\n无妨，已切换启用临时ck`);
-        throw new Error(`获取微博登录二维码失败: ${JSON.stringify(resData)}，\n接口逆向进度受阻，未完成，无法登录。\n无妨，已切换启用临时ck`);
+        e.reply(`获取微博登录二维码失败: ${JSON.stringify(resData)}`);
+        throw new Error(`获取微博登录二维码失败: ${JSON.stringify(resData)}`);
       }
     } else {
       logger.error('微博登录：获取X_CSRF_TOKEN失败');
