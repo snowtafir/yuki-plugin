@@ -17,4 +17,16 @@ export default class YukiWeibo extends Plugin {
     getWeiboUserInfoByUid(): Promise<boolean>;
     /** 根据昵称搜索博主信息*/
     searchWeiboUserInfoByKeyword(): Promise<void>;
+    /** 扫码登录微博 */
+    scanWeiboLogin(): Promise<void>;
+    /** 删除登陆的微博ck */
+    delWeiboLogin(): Promise<void>;
+    /** 显示我的微博登录信息 */
+    myWeiboLoginInfo(): Promise<void>;
+    /** 手动绑定本地获取的微博cookie */
+    addLocalWeiboCookie(): Promise<boolean>;
+    /** 删除绑定的本地微博ck */
+    delLocalWeiboCookie(): Promise<void>;
+    /** 查看当前正在使用的本地微博ck */
+    myUsingWeiboCookie(): Promise<void>;
 }

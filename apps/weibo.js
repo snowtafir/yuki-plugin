@@ -1,8 +1,10 @@
 import { WeiboWebDataFetcher } from '../models/weibo/weibo.main.get.web.data.js';
+import { WeiboMainModels } from '../models/weibo/weibo.main.models.js';
 import { WeiboQuery } from '../models/weibo/weibo.main.query.js';
 import { WeiboTask } from '../models/weibo/weibo.main.task.js';
 import Config from '../utils/config.js';
-import { Plugin, hostType } from '../utils/host.js';
+import { Plugin, hostType, Redis } from '../utils/host.js';
+import lodash from 'lodash';
 
 class YukiWeibo extends Plugin {
     constructor() {
@@ -35,6 +37,30 @@ class YukiWeibo extends Plugin {
             {
                 reg: '^(#|/)(yuki|优纪)?搜索(微博|weibo|WEIBO)(博|bo|BO)主.*$',
                 fnc: 'searchWeiboUserInfoByKeyword'
+            },
+            {
+                reg: '^(#|/)(yuki|优纪)?(扫码|添加|ADD|add)(微博|weibo|WEIBO)登录$',
+                fnc: 'scanWeiboLogin'
+            },
+            {
+                reg: '^(#|/)(yuki|优纪)?(取消|删除|del|DEL)(微博|weibo|WEIBO)登录$',
+                fnc: 'delWeiboLogin'
+            },
+            {
+                reg: '^(#|/)(yuki|优纪)?我的(微博|weibo|WEIBO)登录$',
+                fnc: 'myWeiboLoginInfo'
+            },
+            {
+                reg: '^(#|/)(yuki|优纪)?(绑定|添加|ADD|add)(微博|weibo|WEIBO)本地(ck|CK|cookie|COOKIE)(:|：)?.*$',
+                fnc: 'addLocalWeiboCookie'
+            },
+            {
+                reg: '^(#|/)(yuki|优纪)?(取消|删除|del|DEL)(微博|weibo|WEIBO)本地(ck|CK|cookie|COOKIE)$',
+                fnc: 'delLocalWeiboCookie'
+            },
+            {
+                reg: '^(#|/)(yuki|优纪)?我的(微博|weibo|WEIBO)(ck|CK|cookie|COOKIE)$',
+                fnc: 'myUsingWeiboCookie'
             }
         ];
         if (hostType === 'yunzaijs') {
@@ -337,6 +363,121 @@ class YukiWeibo extends Plugin {
       \nUID：${uid || id}
       \n粉丝人数：${followers_count_str || ''}`);
         this.e.reply(messages.join('\n'));
+    }
+    /** 扫码登录微博 */
+    async scanWeiboLogin() {
+        if (!this.e.isMaster) {
+            this.e.reply('未取得bot主人身份，无权限配置微博登录ck');
+        }
+        else {
+            const LoginCk = await WeiboMainModels.readLoginCookie();
+            const SUB = await WeiboMainModels.readSavedCookieItems(LoginCk, ['SUB'], false);
+            const SUBP = await WeiboMainModels.readSavedCookieItems(LoginCk, ['SUBP'], false);
+            if (LoginCk && SUB && SUBP) {
+                this.e.reply(`当前已有微博登录ck，请勿重复扫码！\n如需更换，请先删除当前登录再扫码：\n#yuki删除微博登录`);
+            }
+            else {
+                try {
+                    const tokenKey = await WeiboMainModels.applyLoginQRCode(this.e);
+                    if (tokenKey && tokenKey.rid) {
+                        let weiboLoginCk = await WeiboMainModels.pollLoginQRCode(this.e, tokenKey.qrid, tokenKey.rid, tokenKey.X_CSRF_TOKEN);
+                        if (weiboLoginCk) {
+                            if (lodash.trim(weiboLoginCk).length != 0) {
+                                await WeiboMainModels.saveLoginCookie(this.e, weiboLoginCk);
+                                this.e.reply(`get weibo LoginCk：成功！`);
+                            }
+                            else {
+                                this.e.reply(`get weibo LoginCk：失败X﹏X`);
+                            }
+                        }
+                    }
+                }
+                catch (Error) {
+                    global?.logger?.info(`yuki-plugin Login weibo Failed：${Error}`);
+                }
+            }
+        }
+    }
+    /** 删除登陆的微博ck */
+    async delWeiboLogin() {
+        if (this.e.isMaster) {
+            await Redis.set('Yz:yuki:weibo:loginCookie', '', { EX: 3600 * 24 * 180 });
+            this.e.reply(`扫码登陆的微博cookie已删除~`);
+        }
+        else {
+            this.e.reply('未取得bot主人身份，无权限删除微博登录ck');
+        }
+    }
+    /** 显示我的微博登录信息 */
+    async myWeiboLoginInfo() {
+        if (this.e.isMaster) {
+            await WeiboMainModels.checkWeiboLogin(this.e);
+        }
+        else {
+            this.e.reply('未取得bot主人身份，无权限查看微博登录状态');
+        }
+    }
+    /** 手动绑定本地获取的微博cookie */
+    async addLocalWeiboCookie() {
+        if (this.e.isMaster) {
+            if (this.e.isPrivate) {
+                await this.e.reply('请注意账号安全，请手动撤回发送的cookie，并私聊进行添加绑定！');
+            }
+            else {
+                let localBiliCookie = this.e.msg.replace(/^(#|\/)(yuki|优纪)?(绑定|添加|ADD|add)(微博|weibo|WEIBO)(ck|CK|cookie|COOKIE)(:|：)?/g, '').trim();
+                const XSRF_TOKEN = await WeiboMainModels.readSavedCookieItems(localBiliCookie, ['XSRF-TOKEN'], false);
+                if (XSRF_TOKEN) {
+                    //筛选ck
+                    localBiliCookie = await WeiboMainModels.readSavedCookieItems(localBiliCookie, ['XSRF-TOKEN', 'SUB', 'SUBP', 'SRF', 'SCF', 'SRT', ' _T_WM', 'M_WEIBOCN_PARAMS', 'SSOLoginState', 'ALF'], false);
+                    await WeiboMainModels.saveLocalBiliCk(localBiliCookie);
+                    logger.mark(`${this.e.logFnc} 保存微博cookie成功 [XSRF_TOKEN: ${XSRF_TOKEN}]`);
+                    let uidMsg = [`好耶~绑定微博cookie成功：\nXSRF_TOKEN: ${XSRF_TOKEN}`];
+                    await this.e.reply(uidMsg);
+                }
+                else {
+                    this.e.reply('绑定的微博cookie无效，请检查后重新添加！');
+                    return false;
+                }
+            }
+        }
+        else {
+            this.e.reply('未取得bot主人身份，无权限配置B站登录ck');
+        }
+    }
+    /** 删除绑定的本地微博ck */
+    async delLocalWeiboCookie() {
+        if (this.e.isMaster) {
+            await WeiboMainModels.saveLocalBiliCk('');
+            await this.e.reply(`手动绑定的微博ck已删除~`);
+        }
+        else {
+            this.e.reply('未取得bot主人身份，无权限删除B站登录ck');
+        }
+    }
+    /** 查看当前正在使用的本地微博ck */
+    async myUsingWeiboCookie() {
+        if (this.e.isGroup) {
+            await this.e.reply('注意账号安全，请私聊查看叭');
+        }
+        else {
+            if (this.e.isMaster) {
+                let { cookie, mark } = await WeiboMainModels.readSyncCookie();
+                if (mark === 'localCk') {
+                    this.e.reply(`当前使用本地获取的微博cookie：`);
+                    this.e.reply(`${cookie}`);
+                }
+                else if (mark === 'loginCk') {
+                    this.e.reply(`当前使用扫码登录的微博cookie：`);
+                    this.e.reply(`${cookie}`);
+                }
+                else if (mark == 'ckIsEmpty') {
+                    this.e.reply(`当前无可使用的微博cookie。`);
+                }
+            }
+            else {
+                this.e.reply('未取得bot主人身份，无权限查看当前使用的B站cookie');
+            }
+        }
     }
 }
 

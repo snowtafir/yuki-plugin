@@ -1,3 +1,9 @@
+import BiliApi from './bilibili.main.api.js';
+import { gen_buvid_fp } from './bilibili.risk.buid.fp.js';
+import { getBiliTicket } from './bilibili.risk.ticket.js';
+import { Redis, Segment, logger } from '../../utils/host.js';
+import { renderPage } from '../../utils/image.js';
+import { _paths } from '../../utils/paths.js';
 import axios from 'axios';
 import fs__default from 'fs';
 import lodash from 'lodash';
@@ -6,12 +12,6 @@ import { promisify } from 'node:util';
 import path__default from 'path';
 import QRCode from 'qrcode';
 import YAML from 'yaml';
-import { renderPage } from '../../utils/image.js';
-import { _paths } from '../../utils/paths.js';
-import BiliApi from './bilibili.main.api.js';
-import { gen_buvid_fp } from './bilibili.risk.buid.fp.js';
-import { getBiliTicket } from './bilibili.risk.ticket.js';
-import { Redis, Segment, logger } from '../../utils/host.js';
 
 /**
  * *******************************************************************
@@ -35,7 +35,7 @@ async function applyLoginQRCode(e) {
         const qrcodeUrl = res?.data?.url;
         let loginUrlQrcodeData = await QRCode.toDataURL(`${qrcodeUrl}`);
         const LoginPropsData = {
-            data: { url: loginUrlQrcodeData }
+            data: { name: 'B站', url: loginUrlQrcodeData }
         };
         const ScreenshotOptionsData = {
             saveHtmlfile: false,
@@ -251,7 +251,7 @@ async function readLocalBiliCk() {
     if (!fs__default.existsSync(dir)) {
         fs__default.mkdirSync(dir, { recursive: true }); // 创建目录，包括父目录
     }
-    const files = fs__default.readdirSync(dir).filter((file) => file.endsWith('.yaml'));
+    const files = fs__default.readdirSync(dir).filter((file) => file.endsWith('biliCookie.yaml'));
     const readFile = promisify(fs__default.readFile);
     const promises = files.map((file) => readFile(path__default.join(dir, file), 'utf8'));
     const contents = await Promise.all(promises);

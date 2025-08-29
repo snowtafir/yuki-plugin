@@ -1,6 +1,6 @@
 {
   "name": "yuki-plugin",
-  "version": "2.0.8-3",
+  "version": "2.0.8-4",
   "author": "snowtafir",
   "description": "优纪插件，yunzai关于 微博推送、B站推送 等功能的拓展插件",
   "main": "./index",
@@ -25,6 +25,7 @@
     "axios": "^1.7.9",
     "blessed": "^0.1.81",
     "chokidar": "^4.0.1",
+    "cookie": "^1.0.2",
     "jsdom": "^25.0.1",
     "json5": "^2.2.3",
     "jsxp": "1.2.1",
@@ -49,6 +50,7 @@
     "@rollup/plugin-typescript": "^11.1.6",
     "@types/chokidar": "2.1.7",
     "@types/jsdom": "^21.1.7",
+    "@types/lodash": "^4.17.20",
     "@types/md5": "^2.3.5",
     "@types/node": "^22.2.0",
     "@types/node-fetch": "^2.6.11",
