@@ -16,26 +16,18 @@ function getHostName() {
 }
 function getHostType() {
     const name = getHostName();
-    if (name === 'yunzai-pe' || name === 'yunzai-core')
-        return 'yunzaijs';
     if (name === 'trss-yunzai')
         return 'trss';
     if (name === 'miao-yunzai')
         return 'miao';
+    if (name === 'yunzai-pe' || name === 'yunzai-core')
+        return 'yunzaijs';
     return 'other';
 }
 // 动态导入依赖
 let Plugin, Segment, Redis;
 const hostType = getHostType();
-if (hostType === 'yunzaijs') {
-    // yunzai-pe/yunzai-core
-    await import('yunzaijs').then(yunzaijs => {
-        Plugin = yunzaijs.Plugin;
-        Segment = yunzaijs.Segment;
-        Redis = yunzaijs.Redis;
-    });
-}
-else {
+if (hostType === 'trss' || hostType === 'miao' || hostType === 'other') {
     // trss/miao/other
     // plugin基类路径兼容trss/miao等
     const pluginPath = pathToFileURL(path.join(_paths.root, 'lib', 'plugins', 'plugin.js')).href;
@@ -43,6 +35,14 @@ else {
     Plugin = pluginModule.default || pluginModule;
     Segment = global.segment || (global.segment = global.oicq ? global.oicq.segment : global.icqq ? global.icqq.segment : undefined);
     Redis = global.redis;
+}
+else if (hostType === 'yunzaijs') {
+    // yunzai-pe/yunzai-core
+    await import('yunzaijs').then(yunzaijs => {
+        Plugin = yunzaijs.Plugin;
+        Segment = yunzaijs.Segment;
+        Redis = yunzaijs.Redis;
+    });
 }
 // logger全局
 const logger = global.logger;
