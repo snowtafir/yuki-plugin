@@ -16,7 +16,7 @@ export default class YukiHelp extends Plugin {
       super();
       this.rule = rules.map(r => ({ ...r, fnc: this[r.fnc].name }));
     } else {
-      super({ rule: rules });
+      super({ rule: rules, name: '[Yuki-Plugin] help', des: '优纪插件帮助功能' });
     }
   }
 
