@@ -15,7 +15,7 @@ class YukiVersion extends Plugin {
             this.rule = rules.map(r => ({ ...r, fnc: this[r.fnc].name }));
         }
         else {
-            super({ rule: rules });
+            super({ rule: rules, name: '[Yuki-Plugin] version', des: '查看优纪插件版本' });
         }
     }
     /**

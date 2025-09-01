@@ -79,7 +79,7 @@ class YukiBili extends Plugin {
             this.rule = rules.map(r => ({ ...r, fnc: this[r.fnc].name }));
         }
         else {
-            super({ rule: rules });
+            super({ rule: rules, name: '[Yuki-Plugin] bilibili', des: '优纪插件B站功能' });
         }
         this.biliConfigData = Config.getConfigData('config', 'bilibili', 'config');
         this.biliPushData = Config.getConfigData('config', 'bilibili', 'push');

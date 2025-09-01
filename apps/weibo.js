@@ -68,7 +68,7 @@ class YukiWeibo extends Plugin {
             this.rule = rules.map(r => ({ ...r, fnc: this[r.fnc].name }));
         }
         else {
-            super({ rule: rules });
+            super({ rule: rules, name: '[Yuki-Plugin] weibo', des: '优纪插件微博功能' });
         }
         this.weiboConfigData = Config.getConfigData('config', 'weibo', 'config');
         this.weiboPushData = Config.getConfigData('config', 'weibo', 'push');
