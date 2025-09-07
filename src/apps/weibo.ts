@@ -259,19 +259,19 @@ message.use(
       if (e.isPrivate) {
         await e.reply('请注意账号安全，请手动撤回发送的cookie，并私聊进行添加绑定！');
       } else {
-        let localBiliCookie = e.msg.replace(/^(#|\/)(yuki|优纪)?(绑定|添加|ADD|add)(微博|weibo|WEIBO)(ck|CK|cookie|COOKIE)(:|：)?/g, '').trim();
+        let localWeiboCookie = e.msg.replace(/^(#|\/)(yuki|优纪)?(绑定|添加|ADD|add)(微博|weibo|WEIBO)(ck|CK|cookie|COOKIE)(:|：)?/g, '').trim();
 
-        const XSRF_TOKEN = await WeiboMainModels.readSavedCookieItems(localBiliCookie, ['XSRF-TOKEN'], false);
+        const XSRF_TOKEN = await WeiboMainModels.readSavedCookieItems(localWeiboCookie, ['XSRF-TOKEN'], false);
 
         if (XSRF_TOKEN) {
           //筛选ck
-          localBiliCookie = await WeiboMainModels.readSavedCookieItems(
-            localBiliCookie,
+          localWeiboCookie = await WeiboMainModels.readSavedCookieItems(
+            localWeiboCookie,
             ['XSRF-TOKEN', 'SUB', 'SUBP', 'SRF', 'SCF', 'SRT', ' _T_WM', 'M_WEIBOCN_PARAMS', 'SSOLoginState', 'ALF'],
             false
           );
 
-          await WeiboMainModels.saveLocalBiliCk(localBiliCookie);
+          await WeiboMainModels.saveLocalBiliCk(localWeiboCookie);
 
           logger.mark(`${e.logFnc} 保存微博cookie成功 [XSRF_TOKEN: ${XSRF_TOKEN}]`);
 
