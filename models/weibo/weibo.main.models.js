@@ -290,7 +290,7 @@ class WeiboMainModels {
         }
         const cookiePairs = String(Wck)
             .trim()
-            .match(/(\w+)=([^;|,]+)/g) //正则 /(\w+)=([^;]+);/g 匹配 a=b 的内容，并分组为 [^;|,]+ 来匹配值，其中 [^;|,] 表示除了分号和,以外的任意字符
+            .match(/([a-zA-Z0-9_-]+)=([^;|,]+)/g) //正则 /(\w+)=([^;]+);/g 匹配 a=b 的内容，并分组为 [^;|,]+ 来匹配值，其中 [^;|,] 表示除了分号和,以外的任意字符
             ?.map(match => match.split('='))
             .filter(([key, value]) => (isInverted ? !items.includes(key) : items.includes(key)) && value !== '')
             .map(([key, value]) => `${key}=${value}`)
