@@ -56,7 +56,7 @@ export declare function getNewTempCk(): Promise<string>;
  * @param cookie 请求所需的cookie
  * @returns 返回POST请求的结果
  */
-export declare function postGateway(cookie: string): Promise<import("axios").AxiosResponse<any, any>>;
+export declare function postGateway(cookie: string): Promise<import("axios").AxiosResponse<any, any, {}>>;
 /**生成buvid_fp
  * @param {string} uuid
  */
