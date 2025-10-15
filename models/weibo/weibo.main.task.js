@@ -215,6 +215,7 @@ class WeiboTask {
                 // 构建白名单关键字正则表达式，转义特殊字符
                 const whiteWords = new RegExp(getWhiteWords.map(word => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g');
                 if (!whiteWords.test(dynamicMsg.msg.join(''))) {
+                    logger.info(`博主 "${upName}" 微博动态：白名单关键词已开启，但动态消息未匹配，已跳过推送`);
                     return; // 如果动态消息不在白名单中，则直接返回
                 }
             }
@@ -224,8 +225,11 @@ class WeiboTask {
             if (getBanWords && Array.isArray(getBanWords) && getBanWords.length > 0) {
                 // 构建屏蔽关键字正则表达式，转义特殊字符
                 const banWords = new RegExp(getBanWords.map(word => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g');
-                if (banWords.test(dynamicMsg.msg.join(''))) {
-                    return 'return'; // 如果动态消息包含屏蔽关键字，则直接返回
+                const content = dynamicMsg.msg.join('');
+                const matched = content.match(banWords);
+                if (matched) {
+                    logger.info(`博主 "${upName}" 微博动态：触发屏蔽关键词 "${matched.join(', ')}" ，已跳过推送`);
+                    return; // 如果动态消息包含屏蔽关键字，则直接返回
                 }
             }
             else if (getBanWords && !Array.isArray(getBanWords)) {
