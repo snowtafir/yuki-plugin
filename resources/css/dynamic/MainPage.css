@@ -28,7 +28,7 @@ body::-webkit-scrollbar {
 @import url('https://s1.hdslb.com/bfs/static/jinkela/long/font/regular.css');
 
 body {
-  font-family: 'OPSans', 'HarmonyOS_Regular', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+  font-family: 'OPSans', 'HarmonyOS_Regular', 'Noto Sans', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
   background-color: #f9f9f9;
   margin: 0;
   padding: 0;
