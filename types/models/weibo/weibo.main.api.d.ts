@@ -7,21 +7,19 @@ declare class WeiboApi {
     initUserAgent(): Promise<void>;
     get WEIBO_API(): {
         weiboGetIndex: string;
-        weiboAjaxSearch: string;
     };
     /**统一设置header */
     get WEIBO_HEADERS(): {
         Accept: string;
-        'Accept-Language': string;
         'Accept-Encoding': string;
-        'X-Requested-With': string;
-        'MWeibo-Pwa': string;
-        'X-XSRF-TOKEN': string;
+        'Accept-Language': string;
+        Connection: string;
         'Sec-Fetch-Dest': string;
         'Sec-Fetch-Mode': string;
         'Sec-Fetch-Site': string;
-        Connection: string;
-        'User-agent': string;
+        'X-Requested-With': string;
+        'MWeibo-Pwa': string;
+        'User-Agent': string;
     };
     get WEIBO_GET_X_CSRF_TOKEN_HEADERS(): {
         Accept: string;
@@ -107,7 +105,6 @@ declare class WeiboApi {
         'Accept-Encoding': string;
         Connection: string;
         Referer: string;
-        Cookie: string;
         'Upgrade-Insecure-Requests': string;
         'Sec-Fetch-Dest': string;
         'Sec-Fetch-Mode': string;

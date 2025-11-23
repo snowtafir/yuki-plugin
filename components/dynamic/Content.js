@@ -2,10 +2,10 @@ import React from 'react';
 import { createRequire } from '../../utils/paths.js';
 
 // DynamicContent.tsx
-const require = createRequire(import.meta.url);
-const ContentBoxGrid4Css = require('./../../resources/css/dynamic/Content.box.grid.4.css');
-const ContentBoxGrid9Css = require('./../../resources/css/dynamic/Content.box.grid.9.css');
-const ContentCss = require('./../../resources/css/dynamic/Content.css');
+const require$1 = createRequire(import.meta.url);
+const ContentBoxGrid4Css = require$1('./../../resources/css/dynamic/Content.box.grid.4.css');
+const ContentBoxGrid9Css = require$1('./../../resources/css/dynamic/Content.box.grid.9.css');
+const ContentCss = require$1('./../../resources/css/dynamic/Content.css');
 const Content = ({ data }) => {
     const picItems = data.pics && (React.createElement("div", { className: "pic-content" }, data.pics.map((item, index) => {
         if (item) {

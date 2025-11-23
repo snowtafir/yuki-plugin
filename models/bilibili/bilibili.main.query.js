@@ -1,9 +1,10 @@
-import moment from 'moment';
-import { readSyncCookie, cookieWithBiliTicket } from './bilibili.main.models.js';
 import BiliApi from './bilibili.main.api.js';
-import axios from 'axios';
-import lodash from 'lodash';
+import BiliCookieManager from './bilibili.risk.cookie.js';
 import { logger, Segment } from '../../utils/host.js';
+import axioss from 'axios';
+import lodash from 'lodash';
+import moment from 'moment';
+import * as tough from 'tough-cookie';
 
 class BiliQuery {
     /**
@@ -246,11 +247,18 @@ class BiliQuery {
      * @returns  完整的B站文章内容json数据
      */
     static async getFullArticleContent(postUrl) {
-        let { cookie } = await readSyncCookie();
-        cookie = await cookieWithBiliTicket(cookie);
+        const bili_jct = await BiliCookieManager.checkCookieBiliTicket();
+        const { cookie, mark } = await BiliCookieManager.readSyncCookie();
         try {
-            const response = await axios.get(postUrl, {
-                headers: lodash.merge(BiliApi.BILIBILI_ARTICLE_HEADERS, { Cookie: `${cookie}`, Host: 'www.bilibili.com' }),
+            const headers = lodash.merge(BiliApi.BILIBILI_ARTICLE_HEADERS, {
+                Cookie: mark === 'localCk' ? `${bili_jct}+${cookie}` : undefined,
+                Host: 'www.bilibili.com'
+            });
+            const ck = cookie instanceof tough.CookieJar ? cookie : undefined;
+            const response = await axioss.get(postUrl, {
+                jar: ck, // 仅在非 localCk 时传递 jar
+                timeout: 15000,
+                headers,
                 responseType: 'text'
             });
             const text = response.data;

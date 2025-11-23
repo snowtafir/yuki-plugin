@@ -4,10 +4,10 @@ import { createRequire } from '../../utils/paths.js';
 
 // Account
 // up账户组件
-const require = createRequire(import.meta.url);
-const Bilibililogo = require('./../../resources/img/icon/dynamic/bilibili.svg');
-const Weibilogo = require('./../../resources/img/icon/dynamic/weibo.svg');
-const AccountCss = require('./../../resources/css/dynamic/Account.css');
+const require$1 = createRequire(import.meta.url);
+const Bilibililogo = require$1('./../../resources/img/icon/dynamic/bilibili.svg');
+const Weibilogo = require$1('./../../resources/img/icon/dynamic/weibo.svg');
+const AccountCss = require$1('./../../resources/css/dynamic/Account.css');
 const Account = ({ data }) => {
     const renderLogo = (logoSrc, className) => React.createElement("img", { src: logoSrc, className: className, alt: "logo" });
     return (React.createElement(React.Fragment, null,

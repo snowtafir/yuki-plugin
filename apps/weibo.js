@@ -1,10 +1,9 @@
 import { WeiboWebDataFetcher } from '../models/weibo/weibo.main.get.web.data.js';
-import { WeiboMainModels } from '../models/weibo/weibo.main.models.js';
 import { WeiboQuery } from '../models/weibo/weibo.main.query.js';
 import { WeiboTask } from '../models/weibo/weibo.main.task.js';
+import WeiboCookieManager from '../models/weibo/weibo.risk.cookie.js';
 import Config from '../utils/config.js';
-import { Plugin, hostType, Redis } from '../utils/host.js';
-import lodash from 'lodash';
+import { Plugin, hostType } from '../utils/host.js';
 
 class YukiWeibo extends Plugin {
     constructor() {
@@ -49,18 +48,6 @@ class YukiWeibo extends Plugin {
             {
                 reg: '^(#|/)(yuki|优纪)?我的(微博|weibo|WEIBO)登录$',
                 fnc: 'myWeiboLoginInfo'
-            },
-            {
-                reg: '^(#|/)(yuki|优纪)?(绑定|添加|ADD|add)(微博|weibo|WEIBO)本地(ck|CK|cookie|COOKIE)(:|：)?.*$',
-                fnc: 'addLocalWeiboCookie'
-            },
-            {
-                reg: '^(#|/)(yuki|优纪)?(取消|删除|del|DEL)(微博|weibo|WEIBO)本地(ck|CK|cookie|COOKIE)$',
-                fnc: 'delLocalWeiboCookie'
-            },
-            {
-                reg: '^(#|/)(yuki|优纪)?我的(微博|weibo|WEIBO)(ck|CK|cookie|COOKIE)$',
-                fnc: 'myUsingWeiboCookie'
             }
         ];
         if (hostType === 'yunzaijs') {
@@ -345,23 +332,23 @@ class YukiWeibo extends Plugin {
             return;
         }
         const { ok, data } = res.data || {};
-        const { user, users } = data;
-        let info = user[0];
-        let infos = users[0];
-        let uid = info?.uid;
-        let id = infos?.id;
-        let nick = info?.nick;
-        let screen_name = infos?.screen_name;
-        let followers_count_str = infos?.followers_count_str;
-        if (ok !== 1 && !info && !infos) {
-            this.e.reply('惹~没有搜索到该用户捏，\n请换个关键词试试吧~ \nPS：该方法只能搜索到大V');
+        const result = data?.cards
+            ?.filter(card => card?.card_type === 11) // 筛选 card_type = 11
+            ?.flatMap(card => (Array.isArray(card.card_group) ? card.card_group : [])) // 提取 card_group
+            ?.filter(item => item?.card_type === 10) || []; // 筛选 card_type = 10
+        if (!result) {
+            this.e.reply('惹~没有搜索到相关用户捏，\n请换个关键词试试吧~ \nPS：该方法只能搜索到大V');
             return;
         }
         const messages = [];
-        messages.push(`-----微博-----
-      \n博主昵称：${nick || screen_name}
-      \nUID：${uid || id}
-      \n粉丝人数：${followers_count_str || ''}`);
+        // 只取前5个结果
+        for (const item of result.slice(0, 5)) {
+            const userInfo = item?.user || {};
+            const id = userInfo.id;
+            const screen_name = userInfo.screen_name;
+            const followers_count = userInfo.followers_count;
+            messages.push(`\n------------------\n博主昵称：${screen_name}\nUID：${id}\n粉丝人数：${followers_count || ''}`);
+        }
         this.e.reply(messages.join('\n'));
     }
     /** 扫码登录微博 */
@@ -370,38 +357,13 @@ class YukiWeibo extends Plugin {
             this.e.reply('未取得bot主人身份，无权限配置微博登录ck');
         }
         else {
-            const LoginCk = await WeiboMainModels.readLoginCookie();
-            const SUB = await WeiboMainModels.readSavedCookieItems(LoginCk, ['SUB'], false);
-            const SUBP = await WeiboMainModels.readSavedCookieItems(LoginCk, ['SUBP'], false);
-            if (LoginCk && SUB && SUBP) {
-                this.e.reply(`当前已有微博登录ck，请勿重复扫码！\n如需更换，请先删除当前登录再扫码：\n#yuki删除微博登录`);
-            }
-            else {
-                try {
-                    const tokenKey = await WeiboMainModels.applyLoginQRCode(this.e);
-                    if (tokenKey && tokenKey.rid) {
-                        let weiboLoginCk = await WeiboMainModels.pollLoginQRCode(this.e, tokenKey.qrid, tokenKey.rid, tokenKey.X_CSRF_TOKEN);
-                        if (weiboLoginCk) {
-                            if (lodash.trim(weiboLoginCk).length != 0) {
-                                await WeiboMainModels.saveLoginCookie(this.e, weiboLoginCk);
-                                this.e.reply(`get weibo LoginCk：成功！`);
-                            }
-                            else {
-                                this.e.reply(`get weibo LoginCk：失败X﹏X`);
-                            }
-                        }
-                    }
-                }
-                catch (Error) {
-                    global?.logger?.info(`yuki-plugin Login weibo Failed：${Error}`);
-                }
-            }
+            await WeiboCookieManager.weiboLogin(this.e);
         }
     }
     /** 删除登陆的微博ck */
     async delWeiboLogin() {
         if (this.e.isMaster) {
-            await Redis.set('Yz:yuki:weibo:loginCookie', '', { EX: 3600 * 24 * 180 });
+            await WeiboCookieManager.resetCookiesAndRedis();
             this.e.reply(`扫码登陆的微博cookie已删除~`);
         }
         else {
@@ -411,72 +373,10 @@ class YukiWeibo extends Plugin {
     /** 显示我的微博登录信息 */
     async myWeiboLoginInfo() {
         if (this.e.isMaster) {
-            await WeiboMainModels.checkWeiboLogin(this.e);
+            await WeiboCookieManager.checkWeiboLogin(this.e);
         }
         else {
             this.e.reply('未取得bot主人身份，无权限查看微博登录状态');
-        }
-    }
-    /** 手动绑定本地获取的微博cookie */
-    async addLocalWeiboCookie() {
-        if (this.e.isMaster) {
-            if (!this.e.isPrivate) {
-                await this.e.reply('请注意账号安全，请手动撤回发送的cookie，并私聊进行添加绑定！');
-            }
-            else {
-                let localWeiboCookie = this.e.msg.replace(/^(#|\/)(yuki|优纪)?(绑定|添加|ADD|add)(微博|weibo|WEIBO)(ck|CK|cookie|COOKIE)(:|：)?/g, '').trim();
-                const XSRF_TOKEN = await WeiboMainModels.readSavedCookieItems(localWeiboCookie, ['XSRF-TOKEN'], false);
-                if (XSRF_TOKEN) {
-                    //筛选ck
-                    localWeiboCookie = await WeiboMainModels.readSavedCookieItems(localWeiboCookie, ['XSRF-TOKEN', 'SUB', 'SUBP', 'SRF', 'SCF', 'SRT', ' _T_WM', 'M_WEIBOCN_PARAMS', 'SSOLoginState', 'ALF'], false);
-                    await WeiboMainModels.saveLocalBiliCk(localWeiboCookie);
-                    logger.mark(`${this.e.logFnc} 保存微博cookie成功 [XSRF_TOKEN: ${XSRF_TOKEN}]`);
-                    let uidMsg = [`好耶~绑定微博cookie成功：\n${XSRF_TOKEN}`];
-                    await this.e.reply(uidMsg);
-                }
-                else {
-                    this.e.reply('绑定的微博cookie无效，请检查后重新添加！');
-                    return false;
-                }
-            }
-        }
-        else {
-            this.e.reply('未取得bot主人身份，无权限配置B站登录ck');
-        }
-    }
-    /** 删除绑定的本地微博ck */
-    async delLocalWeiboCookie() {
-        if (this.e.isMaster) {
-            await WeiboMainModels.saveLocalBiliCk('');
-            await this.e.reply(`手动绑定的微博ck已删除~`);
-        }
-        else {
-            this.e.reply('未取得bot主人身份，无权限删除B站登录ck');
-        }
-    }
-    /** 查看当前正在使用的本地微博ck */
-    async myUsingWeiboCookie() {
-        if (this.e.isGroup) {
-            await this.e.reply('注意账号安全，请私聊查看叭');
-        }
-        else {
-            if (this.e.isMaster) {
-                let { cookie, mark } = await WeiboMainModels.readSyncCookie();
-                if (mark === 'localCk') {
-                    this.e.reply(`当前使用本地获取的微博cookie：`);
-                    this.e.reply(`${cookie}`);
-                }
-                else if (mark === 'loginCk') {
-                    this.e.reply(`当前使用扫码登录的微博cookie：`);
-                    this.e.reply(`${cookie}`);
-                }
-                else if (mark == 'ckIsEmpty') {
-                    this.e.reply(`当前无可使用的微博cookie。`);
-                }
-            }
-            else {
-                this.e.reply('未取得bot主人身份，无权限查看当前使用的B站cookie');
-            }
         }
     }
 }

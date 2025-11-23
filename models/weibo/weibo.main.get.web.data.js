@@ -1,114 +1,172 @@
-import axios from 'axios';
 import WeiboApi from './weibo.main.api.js';
 import { WeiboQuery } from './weibo.main.query.js';
+import WeiboCookieManager from './weibo.risk.cookie.js';
 import { logger } from '../../utils/host.js';
-import { WeiboMainModels } from './weibo.main.models.js';
-import { randomInt } from 'crypto';
+import axioss from 'axios';
+import { wrapper } from 'axios-cookiejar-support';
 import lodash from 'lodash';
 
-function generateRandomString(length = 6) {
-    const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
-    let result = '';
-    for (let i = 0; i < length; i++) {
-        const randomIndex = randomInt(0, characters.length);
-        result += characters[randomIndex];
-    }
-    return result;
-}
+const axios = wrapper(axioss);
 class WeiboWebDataFetcher {
     e;
     constructor(e) { }
     /**通过uid获取博主信息 */
-    async getBloggerInfo(target) {
-        const param = { containerid: '100505' + target };
+    async getBloggerInfo(uid) {
+        const param = { type: 'uid', value: `${uid}`, containerid: '100505' + `${uid}` };
         const url = new URL(WeiboApi.WEIBO_API.weiboGetIndex);
         url.search = new URLSearchParams(param).toString();
-        const { cookie, mark } = await WeiboMainModels.readSyncCookie();
-        let COOKIE = '', XSRF_TOKEN = '';
-        if (String(cookie).includes('XSRF-TOKEN')) {
-            COOKIE = cookie;
-            XSRF_TOKEN = await WeiboMainModels.readSavedCookieItems(cookie, ['XSRF-TOKEN'], false);
-        }
-        else {
-            logger.warn(`优纪插件：获取博主信息，未登录，如获取报错或失败请先 #扫码微博登录`);
-            XSRF_TOKEN = generateRandomString();
-            COOKIE = `XSRF_TOKEN=${XSRF_TOKEN}`;
-        }
+        const jar = await WeiboCookieManager.getSessionCookieJar();
+        const X_XSRF_TOKEN = await WeiboCookieManager.getCookieValueByKeyFromString(jar, 'X-XSRF-TOKEN', url.toString());
+        // (1) 保存初始状态
+        const initialCookies = await new Promise((resolve, reject) => {
+            jar.store.getAllCookies((err, cookies) => {
+                if (err)
+                    reject(err);
+                else
+                    resolve(cookies || []);
+            });
+        });
         const resp = await axios(url.toString(), {
             method: 'GET',
+            jar,
+            withCredentials: true,
             timeout: 10000,
-            headers: lodash.merge(WeiboApi.WEIBO_HEADERS, { 'X-XSRF-TOKEN': `${XSRF_TOKEN}`, 'Cookie': `${COOKIE}`, 'referer': 'https://m.weibo.cn' })
+            headers: lodash.merge(WeiboApi.WEIBO_HEADERS, {
+                'Host': 'm.weibo.cn',
+                'X-XSRF-TOKEN': `${X_XSRF_TOKEN}`,
+                'Referer': `https://m.weibo.cn/u/${uid}`
+            })
         });
-        // 处理 Set-Cookie 响应头
-        if (resp.headers['set-cookie']) {
-            await WeiboMainModels.updateCookieWithSetCookie(resp.headers['set-cookie'], mark);
+        // (3) 获取请求完成后的 Cookie 状态
+        const updatedCookies = await new Promise((resolve, reject) => {
+            jar.store.getAllCookies((err, cookies) => {
+                if (err)
+                    reject(err);
+                else
+                    resolve(cookies || []);
+            });
+        });
+        // 构建初始状态的 Map
+        const initialCookieMap = new Map(initialCookies.map(c => [`${c.key}:${c.domain}`, c]));
+        // 构建更新后的 Map
+        const updatedCookieMap = new Map(updatedCookies.map(c => [`${c.key}:${c.domain}`, c]));
+        // 比较两个 Map
+        for (const [key, updatedCookie] of updatedCookieMap.entries()) {
+            const initialCookie = initialCookieMap.get(key);
+            if (!initialCookie || initialCookie.value !== updatedCookie.value) {
+                console.log(`Weibo Cookie ${updatedCookie.key} was updated.`);
+                await WeiboCookieManager.saveCookiesToRedis(jar); // 更新同步到 Redis
+            }
         }
         return resp;
     }
     /**通过关键词搜索微博大v */
     async searchBloggerInfo(keyword) {
-        const url = WeiboApi.WEIBO_API.weiboAjaxSearch;
-        const { cookie, mark } = await WeiboMainModels.readSyncCookie();
-        let COOKIE = '', XSRF_TOKEN = '';
-        const params = {
-            q: keyword
-        };
-        if (String(cookie).includes('XSRF-TOKEN')) {
-            COOKIE = cookie;
-            XSRF_TOKEN = await WeiboMainModels.readSavedCookieItems(cookie, ['XSRF-TOKEN'], false);
-        }
-        else {
-            logger.warn(`优纪插件：搜索微博大V，未登录，如获取报错或失败请先 #扫码微博登录`);
-            XSRF_TOKEN = generateRandomString();
-            COOKIE = `XSRF_TOKEN=${XSRF_TOKEN}`;
-        }
-        const resp = await axios(url, {
-            method: 'GET',
-            params,
-            timeout: 10000,
-            headers: lodash.merge(WeiboApi.WEIBO_HEADERS, { 'X-XSRF-TOKEN': `${XSRF_TOKEN}`, 'Cookie': `${COOKIE}`, 'referer': 'https://m.weibo.cn' })
+        const params = { containerid: '100103', type: '3', q: `${keyword}`, t: '', page_type: 'searchall' };
+        const url = new URL(WeiboApi.WEIBO_API.weiboGetIndex);
+        url.search = new URLSearchParams(params).toString();
+        const jar = await WeiboCookieManager.getSessionCookieJar();
+        const X_XSRF_TOKEN = await WeiboCookieManager.getCookieValueByKeyFromString(jar, 'X-XSRF-TOKEN', url.toString());
+        // (1) 保存初始状态
+        const initialCookies = await new Promise((resolve, reject) => {
+            jar.store.getAllCookies((err, cookies) => {
+                if (err)
+                    reject(err);
+                else
+                    resolve(cookies || []);
+            });
         });
-        // 处理 Set-Cookie 响应头
-        if (resp.headers['set-cookie']) {
-            await WeiboMainModels.updateCookieWithSetCookie(resp.headers['set-cookie'], mark);
+        const resp = await axios(url.toString(), {
+            method: 'GET',
+            jar,
+            withCredentials: true,
+            timeout: 10000,
+            headers: lodash.merge(WeiboApi.WEIBO_HEADERS, {
+                'X-XSRF-TOKEN': `${X_XSRF_TOKEN}`,
+                'Referer': 'https://m.weibo.cn/search?'
+            })
+        });
+        // (3) 获取请求完成后的 Cookie 状态
+        const updatedCookies = await new Promise((resolve, reject) => {
+            jar.store.getAllCookies((err, cookies) => {
+                if (err)
+                    reject(err);
+                else
+                    resolve(cookies || []);
+            });
+        });
+        // 构建初始状态的 Map
+        const initialCookieMap = new Map(initialCookies.map(c => [`${c.key}:${c.domain}`, c]));
+        // 构建更新后的 Map
+        const updatedCookieMap = new Map(updatedCookies.map(c => [`${c.key}:${c.domain}`, c]));
+        // 比较两个 Map
+        for (const [key, updatedCookie] of updatedCookieMap.entries()) {
+            const initialCookie = initialCookieMap.get(key);
+            if (!initialCookie || initialCookie.value !== updatedCookie.value) {
+                console.log(`Weibo Cookie ${updatedCookie.key} was updated.`);
+                await WeiboCookieManager.saveCookiesToRedis(jar); // 更新同步到 Redis
+            }
         }
         return resp;
     }
     /**获取主页动态资源相关数组 */
-    async getBloggerDynamicList(target) {
-        const params = { containerid: '107603' + target };
+    async getBloggerDynamicList(uid) {
+        const params = { containerid: '107603' + uid };
         const url = new URL(WeiboApi.WEIBO_API.weiboGetIndex);
         url.search = new URLSearchParams(params).toString();
         await new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * (6500 - 1000 + 1) + 1000)));
-        const { cookie, mark } = await WeiboMainModels.readSyncCookie();
-        let COOKIE = '', XSRF_TOKEN = '';
-        if (String(cookie).includes('XSRF-TOKEN')) {
-            COOKIE = cookie;
-            XSRF_TOKEN = await WeiboMainModels.readSavedCookieItems(cookie, ['XSRF-TOKEN'], false);
-        }
-        else {
-            logger.warn(`优纪插件：获取主页动态资源，未登录，如获取报错或失败请先 #扫码微博登录`);
-            XSRF_TOKEN = generateRandomString();
-            COOKIE = `XSRF_TOKEN=${XSRF_TOKEN}`;
-        }
+        const jar = await WeiboCookieManager.getSessionCookieJar();
+        const X_XSRF_TOKEN = await WeiboCookieManager.getCookieValueByKeyFromString(jar, 'X-XSRF-TOKEN', url.toString());
+        // (1) 保存初始状态
+        const initialCookies = await new Promise((resolve, reject) => {
+            jar.store.getAllCookies((err, cookies) => {
+                if (err)
+                    reject(err);
+                else
+                    resolve(cookies || []);
+            });
+        });
         try {
             const response = await axios(url.toString(), {
                 method: 'GET',
+                jar,
+                withCredentials: true,
                 timeout: 10000,
-                headers: lodash.merge(WeiboApi.WEIBO_HEADERS, { 'X-XSRF-TOKEN': `${XSRF_TOKEN}`, 'Cookie': `${COOKIE}`, 'referer': 'https://m.weibo.cn' })
+                headers: lodash.merge(WeiboApi.WEIBO_HEADERS, {
+                    'Host': 'm.weibo.cn',
+                    'X-XSRF-TOKEN': `${X_XSRF_TOKEN}`,
+                    'referer': `https://m.weibo.cn/u/${uid}`
+                })
             });
-            // 处理 Set-Cookie 响应头
-            if (response.headers['set-cookie']) {
-                await WeiboMainModels.updateCookieWithSetCookie(response.headers['set-cookie'], mark);
-            }
             const { ok, data, msg } = response?.data;
             if (!ok && msg !== '这里还没有内容') {
                 throw new Error(response?.config.url);
             }
+            // (3) 获取请求完成后的 Cookie 状态
+            const updatedCookies = await new Promise((resolve, reject) => {
+                jar.store.getAllCookies((err, cookies) => {
+                    if (err)
+                        reject(err);
+                    else
+                        resolve(cookies || []);
+                });
+            });
+            // 构建初始状态的 Map
+            const initialCookieMap = new Map(initialCookies.map(c => [`${c.key}:${c.domain}`, c]));
+            // 构建更新后的 Map
+            const updatedCookieMap = new Map(updatedCookies.map(c => [`${c.key}:${c.domain}`, c]));
+            // 比较两个 Map
+            for (const [key, updatedCookie] of updatedCookieMap.entries()) {
+                const initialCookie = initialCookieMap.get(key);
+                if (!initialCookie || initialCookie.value !== updatedCookie.value) {
+                    console.log(`Weibo Cookie ${updatedCookie.key} was updated.`);
+                    await WeiboCookieManager.saveCookiesToRedis(jar); // 更新同步到 Redis
+                }
+            }
             return data.cards.filter(WeiboQuery.filterCardTypeCustom);
         }
         catch (error) {
-            global?.logger?.mark('微博推送：Error fetching sub list:', error);
+            logger?.mark('微博推送：Error fetching sub list:', error);
             return [];
         }
     }

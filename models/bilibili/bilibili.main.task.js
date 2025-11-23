@@ -1,10 +1,11 @@
-import QRCode from 'qrcode';
-import Config from '../../utils/config.js';
-import { renderPage } from '../../utils/image.js';
 import { BilibiliWebDataFetcher } from './bilibili.main.get.web.data.js';
-import { readSyncCookie, postGateway } from './bilibili.main.models.js';
 import { BiliQuery } from './bilibili.main.query.js';
+import BiliCookieManager from './bilibili.risk.cookie.js';
+import Config from '../../utils/config.js';
 import { logger, Redis, Segment } from '../../utils/host.js';
+import { renderPage } from '../../utils/image.js';
+import QRCode from 'qrcode';
+import * as tough from 'tough-cookie';
 
 class BiliTask {
     taskName;
@@ -17,11 +18,27 @@ class BiliTask {
         this.privateKey = 'Yz:yuki:bili:upPush:private:';
     }
     async hendleEventDynamicData(uid, count = 0) {
-        let { cookie } = await readSyncCookie();
+        let { cookie, mark } = await BiliCookieManager.readSyncCookie();
         const resp = await new BilibiliWebDataFetcher().getBiliDynamicListDataByUid(uid);
         const resjson = await resp?.data;
         if (!resjson || resjson.code !== 0 || resjson.code === -352) {
-            await postGateway(cookie);
+            let ck;
+            if (mark === 'localCk') {
+                ck = cookie;
+            }
+            else {
+                if (cookie instanceof tough.CookieJar) {
+                    ck = await new Promise((resolve, reject) => {
+                        cookie.getCookieString('https://www.bilibili.com', (err, cookieString) => {
+                            if (err)
+                                reject(err);
+                            else
+                                resolve(cookieString || '');
+                        });
+                    });
+                }
+            }
+            await BiliCookieManager.postGateway(ck);
             if (count < 2) {
                 await this.randomDelay(2000, 8000); // 随机延时2-8秒
                 await this.hendleEventDynamicData(uid, count + 1);

@@ -25,7 +25,7 @@ async function getBiliTicket(csrf) {
         'key_id': 'ec02',
         'hexsign': hexSign,
         'context[ts]': String(ts),
-        'csrf': csrf ?? '' // 使用空字符串代替null
+        'csrf': csrf // 使用空字符串代替null
     });
     try {
         const response = await fetch(`${url}?${params}`, {

@@ -6,8 +6,8 @@ import Footer from './Footer.js';
 import { createRequire } from '../../utils/paths.js';
 
 // MainPage.tsx
-const require = createRequire(import.meta.url);
-const MainPageCss = require('./../../resources/css/dynamic/MainPage.css');
+const require$1 = createRequire(import.meta.url);
+const MainPageCss = require$1('./../../resources/css/dynamic/MainPage.css');
 function App({ data }) {
     return (React.createElement(React.Fragment, null,
         React.createElement("link", { rel: "stylesheet", href: MainPageCss }),

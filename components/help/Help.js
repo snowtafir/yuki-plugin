@@ -4,13 +4,13 @@ import path__default from 'path';
 import { createRequire, _paths } from '../../utils/paths.js';
 
 //help.tsx
-const require = createRequire(import.meta.url);
+const require$1 = createRequire(import.meta.url);
 const botPackageJsonPath = path__default.join(_paths.root, 'package.json');
 const BOT_NAME = Config.getPackageJsonKey('name', botPackageJsonPath);
 const botVersion = Config.getPackageJsonKey('version', botPackageJsonPath);
 const yukiPluginVersion = Config.getPackageJsonKey('version', path__default.join(_paths.pluginPath, 'package.json'));
-const HelpCss = require('./../../resources/css/help/help.css');
-const iconPath = (iconName) => require(`./../../resources/img/icon/puplic/${iconName}.png`);
+const HelpCss = require$1('./../../resources/css/help/help.css');
+const iconPath = (iconName) => require$1(`./../../resources/img/icon/puplic/${iconName}.png`);
 function App({ data }) {
     return (React.createElement(React.Fragment, null,
         React.createElement("link", { rel: "stylesheet", href: HelpCss }),

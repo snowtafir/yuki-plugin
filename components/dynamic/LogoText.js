@@ -3,8 +3,8 @@ import { createRequire } from '../../utils/paths.js';
 
 // LogoText
 // Logo 文本组件
-const require = createRequire(import.meta.url);
-const LogoTextCss = require('./../../resources/css/dynamic/LogoText.css');
+const require$1 = createRequire(import.meta.url);
+const LogoTextCss = require$1('./../../resources/css/dynamic/LogoText.css');
 const LogoText = ({ data }) => (React.createElement(React.Fragment, null,
     React.createElement("link", { rel: "stylesheet", href: LogoTextCss }),
     data.appName === 'bilibili' && React.createElement("div", { className: "bilibili-logo-text" }, data.category),
