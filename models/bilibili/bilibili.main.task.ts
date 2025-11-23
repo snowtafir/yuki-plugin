@@ -1,12 +1,13 @@
-import QRCode from 'qrcode';
 import { MainProps } from '@/components/dynamic/MainPage';
+import { BilibiliWebDataFetcher } from '@/models/bilibili/bilibili.main.get.web.data';
+import { BiliQuery } from '@/models/bilibili/bilibili.main.query';
+import BiliCookieManager from '@/models/bilibili/bilibili.risk.cookie';
 import Config from '@/utils/config';
+import { Redis, Segment, logger } from '@/utils/host';
 import { renderPage } from '@/utils/image';
 import { ScreenshotOptions } from '@/utils/puppeteer.render';
-import { BilibiliWebDataFetcher } from '@/models/bilibili/bilibili.main.get.web.data';
-import { postGateway, readSyncCookie } from '@/models/bilibili/bilibili.main.models';
-import { BiliQuery } from '@/models/bilibili/bilibili.main.query';
-import { Segment, Redis, logger } from '@/utils/host';
+import QRCode from 'qrcode';
+import * as tough from 'tough-cookie';
 
 declare const Bot: any;
 
@@ -22,12 +23,25 @@ export class BiliTask {
   }
 
   async hendleEventDynamicData(uid: string | number, count: number = 0): Promise<any> {
-    let { cookie } = await readSyncCookie();
+    let { cookie, mark } = await BiliCookieManager.readSyncCookie();
     const resp = await new BilibiliWebDataFetcher().getBiliDynamicListDataByUid(uid);
     const resjson = await resp?.data;
 
     if (!resjson || resjson.code !== 0 || resjson.code === -352) {
-      await postGateway(cookie);
+      let ck: any;
+      if (mark === 'localCk') {
+        ck = cookie;
+      } else {
+        if (cookie instanceof tough.CookieJar) {
+          ck = await new Promise<string>((resolve, reject) => {
+            cookie.getCookieString('https://www.bilibili.com', (err, cookieString) => {
+              if (err) reject(err);
+              else resolve(cookieString || '');
+            });
+          });
+        }
+      }
+      await BiliCookieManager.postGateway(ck);
       if (count < 2) {
         await this.randomDelay(2000, 8000); // 随机延时2-8秒
         await this.hendleEventDynamicData(uid, count + 1);

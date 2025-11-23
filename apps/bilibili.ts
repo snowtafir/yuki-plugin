@@ -1,18 +1,14 @@
 import { BilibiliWebDataFetcher } from '@/models/bilibili/bilibili.main.get.web.data';
-import {
-  applyLoginQRCode,
+/* import {
   checkBiliLogin,
-  exitBiliLogin,
   getNewTempCk,
-  pollLoginQRCode,
   postGateway,
   readLoginCookie,
   readSavedCookieItems,
   readSyncCookie,
   saveLocalBiliCk,
-  saveLoginCookie,
   saveTempCk
-} from '@/models/bilibili/bilibili.main.models';
+} from '@/models/bilibili/bilibili.main.models'; */
 import { BiliQuery } from '@/models/bilibili/bilibili.main.query';
 import { BiliTask } from '@/models/bilibili/bilibili.main.task';
 import Config from '@/utils/config';
@@ -20,6 +16,8 @@ import { Plugin, Redis, Segment, hostType, logger } from '@/utils/host';
 import JSON from 'json5';
 import lodash from 'lodash';
 import moment from 'moment';
+import BiliCookieManager from '@/models/bilibili/bilibili.risk.cookie';
+import * as tough from 'tough-cookie';
 
 export default class YukiBili extends Plugin {
   constructor() {
@@ -317,46 +315,14 @@ export default class YukiBili extends Plugin {
     if (!this.e.isMaster) {
       this.e.reply('未取得bot主人身份，无权限配置B站登录ck');
     } else {
-      const LoginCk = await readLoginCookie();
-      if (LoginCk) {
-        this.e.reply(`当前已有B站登录ck，请勿重复扫码！\n如需更换，请先删除当前登录ck：\n#yuki删除B站登录`);
-      } else {
-        try {
-          const token = await applyLoginQRCode(this.e);
-          if (token) {
-            let biliLoginCk = await pollLoginQRCode(this.e, token);
-            if (biliLoginCk) {
-              if (lodash.trim(biliLoginCk).length != 0) {
-                await saveLoginCookie(this.e, biliLoginCk);
-                this.e.reply(`get bilibili LoginCk：成功！`);
-                const result = await postGateway(biliLoginCk); //激活ck
-
-                const { code, data } = await result.data; // 解析校验结果
-
-                switch (code) {
-                  case 0:
-                    global?.logger?.mark(`优纪插件：获取biliLoginCK，Gateway校验成功：${JSON.stringify(data)}`);
-                    break;
-                  default:
-                    global?.logger?.mark(`优纪插件：获取biliLoginCK，Gateway校验失败：${JSON.stringify(data)}`);
-                    break;
-                }
-              } else {
-                this.e.reply(`get bilibili LoginCk：失败X﹏X`);
-              }
-            }
-          }
-        } catch (Error) {
-          global?.logger?.info(`yuki-plugin Login bilibili Failed：${Error}`);
-        }
-      }
+      await BiliCookieManager.biliLogin(this.e);
     }
   }
 
   /** 删除登陆的B站ck */
   async delBiliLogin() {
     if (this.e.isMaster) {
-      await exitBiliLogin(this.e);
+      await BiliCookieManager.exitBiliLogin(this.e);
       await Redis.set('Yz:yuki:bili:loginCookie', '', { EX: 3600 * 24 * 180 });
       this.e.reply(`扫码登陆的B站cookie已删除~`);
     } else {
@@ -367,7 +333,7 @@ export default class YukiBili extends Plugin {
   /**验证B站登录 */
   async myBiliLoginInfo() {
     if (this.e.isMaster) {
-      await checkBiliLogin(this.e);
+      await BiliCookieManager.checkBiliLogin(this.e);
     } else {
       this.e.reply('未取得bot主人身份，无权限查看B站登录状态');
     }
@@ -414,13 +380,13 @@ export default class YukiBili extends Plugin {
         }
 
         //筛选ck
-        localBiliCookie = await readSavedCookieItems(
+        localBiliCookie = await BiliCookieManager.readSavedCookieItems(
           localBiliCookie,
           ['buvid3', 'buvid4', '_uuid', 'SESSDATA', 'DedeUserID', 'DedeUserID__ckMd5', 'bili_jct', 'b_nut', 'b_lsid', 'buvid_fp', 'sid'],
           false
         );
 
-        await saveLocalBiliCk(localBiliCookie);
+        await BiliCookieManager.saveLocalBiliCk(localBiliCookie);
 
         logger.mark(`${this.e.logFnc} 保存B站cookie成功 [UID:${param.DedeUserID}]`);
 
@@ -428,7 +394,7 @@ export default class YukiBili extends Plugin {
 
         await this.e.reply(uidMsg);
 
-        const result = await postGateway(localBiliCookie); //激活ck
+        const result = await BiliCookieManager.postGateway(localBiliCookie); //激活ck
 
         const { code, data } = await result.data; // 解析校验结果
 
@@ -449,7 +415,7 @@ export default class YukiBili extends Plugin {
   /** 删除绑定的本地B站ck */
   async delLocalBiliCookie() {
     if (this.e.isMaster) {
-      await saveLocalBiliCk('');
+      await BiliCookieManager.saveLocalBiliCk('');
       await this.e.reply(`手动绑定的B站ck已删除~`);
     } else {
       this.e.reply('未取得bot主人身份，无权限删除B站登录ck');
@@ -462,18 +428,34 @@ export default class YukiBili extends Plugin {
       await this.reply('注意账号安全，请私聊查看叭');
     } else {
       if (this.e.isMaster) {
-        let { cookie, mark } = await readSyncCookie();
+        let { cookie, mark } = await BiliCookieManager.readSyncCookie();
         if (mark === 'localCk') {
           this.e.reply(`当前使用本地获取的B站cookie：`);
           this.e.reply(`${cookie}`);
         } else if (mark === 'loginCk') {
+          let ck: string = '';
+          if (cookie instanceof tough.CookieJar) {
+            ck = await new Promise<string>((resolve, reject) => {
+              cookie.getCookieString('.bilibili.com', (err, cookieString) => {
+                if (err) reject(err);
+                else resolve(cookieString || '');
+              });
+            });
+          }
           this.e.reply(`当前使用扫码登录的B站cookie：`);
-          this.e.reply(`${cookie}`);
+          this.e.reply(`${ck}`);
         } else if (mark === 'tempCk') {
+          let ck: string = '';
+          if (cookie instanceof tough.CookieJar) {
+            ck = await new Promise<string>((resolve, reject) => {
+              cookie.getCookieString('.bilibili.com', (err, cookieString) => {
+                if (err) reject(err);
+                else resolve(cookieString || '');
+              });
+            });
+          }
           this.e.reply(`当前使用自动获取的临时B站cookie：`);
-          this.e.reply(`${cookie}`);
-        } else if (mark == 'ckIsEmpty') {
-          this.e.reply(`当前无可使用的B站cookie。`);
+          this.e.reply(`${ck}`);
         }
       } else {
         this.e.reply('未取得bot主人身份，无权限查看当前使用的B站cookie');
@@ -484,10 +466,9 @@ export default class YukiBili extends Plugin {
   /** 删除并刷新redis缓存的临时B站ck */
   async reflashTempCk() {
     try {
-      const newTempCk = await getNewTempCk();
+      const newTempCk = await BiliCookieManager.getNewTempCk();
       if (newTempCk) {
-        await saveTempCk(newTempCk);
-        const result = await postGateway(newTempCk);
+        const result = await BiliCookieManager.postGateway(newTempCk);
 
         const data = await result.data; // 解析校验结果
 
