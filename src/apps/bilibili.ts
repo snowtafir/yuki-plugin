@@ -7,20 +7,8 @@ import { BiliTask } from '@src/models/bilibili/bilibili.main.task';
 import Config from '@src/utils/config';
 import { _paths } from '@src/utils/paths';
 import { BilibiliWebDataFetcher } from '@src/models/bilibili/bilibili.main.get.web.data';
-import {
-  applyLoginQRCode,
-  checkBiliLogin,
-  exitBiliLogin,
-  getNewTempCk,
-  pollLoginQRCode,
-  postGateway,
-  readLoginCookie,
-  readSavedCookieItems,
-  readSyncCookie,
-  saveLocalBiliCk,
-  saveLoginCookie,
-  saveTempCk
-} from '@src/models/bilibili/bilibili.main.models';
+import BiliCookieManager from '@src/models/bilibili/bilibili.risk.cookie';
+import * as tough from 'tough-cookie';
 
 declare const logger: any;
 
@@ -255,39 +243,7 @@ message.use(
     if (!e.isMaster) {
       e.reply('未取得bot主人身份，无权限配置B站登录ck');
     } else {
-      const LoginCk = await readLoginCookie();
-      if (LoginCk) {
-        e.reply(`当前已有B站登录ck，请勿重复扫码！\n如需更换，请先删除当前登录再扫码：\n#yuki删除B站登录`);
-      } else {
-        try {
-          const token = await applyLoginQRCode(e);
-          if (token) {
-            let biliLoginCk = await pollLoginQRCode(e, token);
-            if (biliLoginCk) {
-              if (lodash.trim(biliLoginCk).length != 0) {
-                await saveLoginCookie(e, biliLoginCk);
-                e.reply(`get bilibili LoginCk：成功！`);
-                const result = await postGateway(biliLoginCk); //激活ck
-
-                const { code, data } = await result.data; // 解析校验结果
-
-                switch (code) {
-                  case 0:
-                    global?.logger?.mark(`优纪插件：获取biliLoginCK，Gateway校验成功：${JSON.stringify(data)}`);
-                    break;
-                  default:
-                    global?.logger?.mark(`优纪插件：获取biliLoginCK，Gateway校验失败：${JSON.stringify(data)}`);
-                    break;
-                }
-              } else {
-                e.reply(`get bilibili LoginCk：失败X﹏X`);
-              }
-            }
-          }
-        } catch (Error) {
-          global?.logger?.info(`yuki-plugin Login bilibili Failed：${Error}`);
-        }
-      }
+      await BiliCookieManager.biliLogin(e);
     }
   },
   [/^(#|\/)(yuki|优纪)?(扫码|添加|ADD|add)(b站|B站|bili|bilibili|哔哩|哔哩哔哩)登录$/]
@@ -297,7 +253,7 @@ message.use(
 message.use(
   async e => {
     if (e.isMaster) {
-      await exitBiliLogin(e);
+      await BiliCookieManager.exitBiliLogin(e);
       await Redis.set('Yz:yuki:bili:loginCookie', '', { EX: 3600 * 24 * 180 });
       e.reply(`扫码登陆的B站cookie已删除~`);
     } else {
@@ -311,7 +267,7 @@ message.use(
 message.use(
   async e => {
     if (e.isMaster) {
-      await checkBiliLogin(e);
+      await BiliCookieManager.checkBiliLogin(e);
     } else {
       e.reply('未取得bot主人身份，无权限查看B站登录状态');
     }
@@ -361,13 +317,13 @@ message.use(
         }
 
         //筛选ck
-        localBiliCookie = await readSavedCookieItems(
+        localBiliCookie = await BiliCookieManager.readSavedCookieItems(
           localBiliCookie,
           ['buvid3', 'buvid4', '_uuid', 'SESSDATA', 'DedeUserID', 'DedeUserID__ckMd5', 'bili_jct', 'b_nut', 'b_lsid', 'buvid_fp', 'sid'],
           false
         );
 
-        await saveLocalBiliCk(localBiliCookie);
+        await BiliCookieManager.saveLocalBiliCk(localBiliCookie);
 
         logger.mark(`${e.logFnc} 保存B站cookie成功 [UID:${param.DedeUserID}]`);
 
@@ -375,7 +331,7 @@ message.use(
 
         await e.reply(uidMsg);
 
-        const result = await postGateway(localBiliCookie); //激活ck
+        const result = await BiliCookieManager.postGateway(localBiliCookie); //激活ck
 
         const { code, data } = await result.data; // 解析校验结果
 
@@ -399,7 +355,7 @@ message.use(
 message.use(
   async e => {
     if (e.isMaster) {
-      await saveLocalBiliCk('');
+      await BiliCookieManager.saveLocalBiliCk('');
       await e.reply(`手动绑定的B站ck已删除~`);
     } else {
       e.reply('未取得bot主人身份，无权限删除B站登录ck');
@@ -415,18 +371,34 @@ message.use(
       await e.reply('注意账号安全，请私聊查看叭');
     } else {
       if (e.isMaster) {
-        let { cookie, mark } = await readSyncCookie();
+        let { cookie, mark } = await BiliCookieManager.readSyncCookie();
         if (mark === 'localCk') {
           e.reply(`当前使用本地获取的B站cookie：`);
           e.reply(`${cookie}`);
         } else if (mark === 'loginCk') {
+          let ck: string = '';
+          if (cookie instanceof tough.CookieJar) {
+            ck = await new Promise<string>((resolve, reject) => {
+              cookie.getCookieString('.bilibili.com', (err, cookieString) => {
+                if (err) reject(err);
+                else resolve(cookieString || '');
+              });
+            });
+          }
           e.reply(`当前使用扫码登录的B站cookie：`);
-          e.reply(`${cookie}`);
+          e.reply(`${ck}`);
         } else if (mark === 'tempCk') {
+          let ck: string = '';
+          if (cookie instanceof tough.CookieJar) {
+            ck = await new Promise<string>((resolve, reject) => {
+              cookie.getCookieString('.bilibili.com', (err, cookieString) => {
+                if (err) reject(err);
+                else resolve(cookieString || '');
+              });
+            });
+          }
           e.reply(`当前使用自动获取的临时B站cookie：`);
-          e.reply(`${cookie}`);
-        } else if (mark == 'ckIsEmpty') {
-          e.reply(`当前无可使用的B站cookie。`);
+          e.reply(`${ck}`);
         }
       } else {
         e.reply('未取得bot主人身份，无权限查看当前使用的B站cookie');
@@ -440,10 +412,9 @@ message.use(
 message.use(
   async e => {
     try {
-      const newTempCk = await getNewTempCk();
+      const newTempCk = await BiliCookieManager.getNewTempCk();
       if (newTempCk) {
-        await saveTempCk(newTempCk);
-        const result = await postGateway(newTempCk);
+        const result = await BiliCookieManager.postGateway(newTempCk);
 
         const data = await result.data; // 解析校验结果
 

@@ -85,15 +85,6 @@
     - icon: condessence_crystal
       title: '#我的微博登录'
       desc: '查看app扫码登录的信息和状态'
-    - icon: romaritime_flower
-      title: '#绑定微博本地ck: ***'
-      desc: '配置本地获取的微博CK'
-    - icon: unfading_silky_grace
-      title: '#删除微博本地ck'
-      desc: '删除手动获取的微博ck'
-    - icon: delightful_encounter
-      title: '#我的微博ck'
-      desc: '查看当前启用的微博ck,仅限私聊'
 - group: 其他指令
   list:
     - icon: 风车

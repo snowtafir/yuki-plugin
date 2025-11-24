@@ -1,9 +1,10 @@
-import moment from 'moment';
-import { Segment } from 'yunzaijs';
-import { cookieWithBiliTicket, readSyncCookie } from '@src/models/bilibili/bilibili.main.models';
 import BiliApi from '@src/models/bilibili/bilibili.main.api';
+import BiliCookieManager from '@src/models/bilibili/bilibili.risk.cookie';
 import axios from 'axios';
 import lodash from 'lodash';
+import moment from 'moment';
+import * as tough from 'tough-cookie';
+import { Segment } from 'yunzaijs';
 
 declare const logger: any;
 
@@ -269,11 +270,20 @@ export class BiliQuery {
    * @returns  完整的B站文章内容json数据
    */
   static async getFullArticleContent(postUrl: string) {
-    let { cookie } = await readSyncCookie();
-    cookie = await cookieWithBiliTicket(cookie);
+    const bili_jct = await BiliCookieManager.checkCookieBiliTicket();
+    const { cookie, mark } = await BiliCookieManager.readSyncCookie();
+
     try {
+      const headers = lodash.merge(BiliApi.BILIBILI_ARTICLE_HEADERS, {
+        Cookie: mark === 'localCk' ? `${bili_jct}+${cookie}` : undefined,
+        Host: 'www.bilibili.com'
+      });
+
+      const ck = cookie instanceof tough.CookieJar ? cookie : undefined;
       const response = await axios.get(postUrl, {
-        headers: lodash.merge(BiliApi.BILIBILI_ARTICLE_HEADERS, { Cookie: `${cookie}`, Host: 'www.bilibili.com' }),
+        jar: ck, // 仅在非 localCk 时传递 jar
+        timeout: 15000,
+        headers,
         responseType: 'text'
       });
       const text = response.data;

@@ -8,7 +8,7 @@ class WeiboApi {
     this.initialize();
   }
 
-  static WEIBO_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36';
+  static WEIBO_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36';
 
   //初始化User-Agent
   async initialize() {
@@ -24,25 +24,22 @@ class WeiboApi {
 
   get WEIBO_API() {
     return {
-      weiboGetIndex: 'https://m.weibo.cn/api/container/getIndex',
-      //通过关键词${upKeyword}搜索博主 parama = { q: 'Keyword'},
-      weiboAjaxSearch: 'https://weibo.com/ajax/side/search'
+      weiboGetIndex: 'https://m.weibo.cn/api/container/getIndex'
     };
   }
   /**统一设置header */
   get WEIBO_HEADERS() {
     return {
       'Accept': 'application/json, text/plain, */*',
-      'Accept-Language': 'zh-CN,en-US;q=0.5',
       'Accept-Encoding': 'gzip, deflate, br, zstd',
-      'X-Requested-With': 'XMLHttpRequest',
-      'MWeibo-Pwa': '1',
-      'X-XSRF-TOKEN': '',
+      'Accept-Language': 'zh-CN,zh;q=0.9',
+      'Connection': 'keep-alive',
       'Sec-Fetch-Dest': 'empty',
       'Sec-Fetch-Mode': 'cors',
       'Sec-Fetch-Site': 'same-origin',
-      'Connection': 'keep-alive',
-      'User-agent': this.USER_AGENT
+      'X-Requested-With': 'XMLHttpRequest',
+      'MWeibo-Pwa': '1',
+      'User-Agent': this.USER_AGENT
     };
   }
 
