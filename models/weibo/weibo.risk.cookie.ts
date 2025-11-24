@@ -1,6 +1,6 @@
 import WeiboApi from '@/models/weibo/weibo.main.api';
 import { Redis, Segment, logger } from '@/utils/host';
-import axioss from 'axios';
+import axioss, { AxiosError } from 'axios';
 import { wrapper } from 'axios-cookiejar-support';
 import crypto from 'crypto';
 import lodash from 'lodash';
@@ -227,7 +227,7 @@ class WeiboRiskCookie {
   }
   static derToPem(derBuf: Buffer<ArrayBuffer>) {
     const b64 = derBuf.toString('base64');
-    const lines = b64.match(/.{1,64}/g).join('\n');
+    const lines = (b64.match(/.{1,64}/g) || []).join('\n');
     return `-----BEGIN PUBLIC KEY-----\n${lines}\n-----END PUBLIC KEY-----\n`;
   }
   // 根据 UMD::Aa 逻辑加密并拼装 bd 的 payload（返回最终的字符串）
@@ -363,7 +363,7 @@ class WeiboRiskCookie {
         responseType: 'text'
       });
 
-      let bdJson = null;
+      let bdJson: any = null;
       try {
         bdJson = typeof bdRes.data === 'string' ? JSON.parse(bdRes.data) : bdRes.data;
       } catch (e) {
@@ -439,7 +439,7 @@ class WeiboRiskCookie {
       await this.saveCookiesToRedis(jar);
       logger.info('完成。注意：真实成功依赖服务器对指纹/行为数据的校验，可能需增强 fingerprint 与行为模拟。');
     } catch (err) {
-      console.error('error:', err && err.stack ? err.stack : err);
+      console.error('error:', err);
     }
   }
 
@@ -503,7 +503,7 @@ class WeiboRiskCookie {
           await Redis.del(metaKey);
           logger.info(`Migrated cookie key "${key}" -> "${newKey}".`);
         } catch (e) {
-          logger.warn('Failed to migrate redis cookie key:', key, e && e.message ? e.message : e);
+          logger.warn('Failed to migrate redis cookie key:', key, e);
         }
       }
     }
@@ -554,7 +554,7 @@ class WeiboRiskCookie {
         await jar.setCookie(cookieStr, url);
         logger.info(`Restored cookie "${name}" for domain "${domain}" and path "${path}".`);
       } catch (e) {
-        console.warn('Failed to restore cookie:', cookieStr, e && e.message ? e.message : e);
+        console.warn('Failed to restore cookie:', cookieStr, e);
       }
     }
   }
@@ -585,7 +585,7 @@ class WeiboRiskCookie {
       const redisKey = `${this.prefix}:${domainKey}:${cookie.key}`;
 
       // 计算 TTL（秒）
-      let ttl = null;
+      let ttl: number = 0;
       const ttlInMs = cookie.TTL ? cookie.TTL() : 0; // TTL 返回毫秒，可能不存在
       if (ttlInMs > 0) {
         ttl = Math.floor(ttlInMs / 1000);
@@ -610,8 +610,8 @@ class WeiboRiskCookie {
           await Redis.set(redisKey, cookie.value);
           await Redis.set(`${redisKey}:meta`, meta);
         }
-      } catch (e) {
-        logger.warn('Failed to save cookie to Redis:', redisKey, e && e.message ? e.message : e);
+      } catch (error: unknown) {
+        logger.warn('Failed to save cookie to Redis:', redisKey, error);
       }
     }
   }
@@ -649,7 +649,11 @@ class WeiboRiskCookie {
         deleteOperations.push(...metaKeys.map(metaKey => ['del', metaKey]));
 
         if (deleteOperations.length > 0) {
-          await Redis.multi(deleteOperations).exec(); // 批量删除
+          const multi = Redis.multi(); // 创建 multi 实例
+          deleteOperations.forEach(operation => {
+            multi[operation[0]](operation[1]); // 动态调用命令
+          });
+          await multi.exec(); // 执行批量操作
           console.log(`Deleted ${keys.length} cookies and their metadata from Redis.`);
         }
       } else {
@@ -939,9 +943,9 @@ class WeiboRiskCookie {
   }
 
   /**处理扫码结果 */
-  async pollLoginQRCode(e: any, qrid: string, rid: string, X_CSRF_TOKEN: string): Promise<boolean> {
+  async pollLoginQRCode(e: any, qrid: string, rid: string, X_CSRF_TOKEN: string) {
     const url = `https://passport.weibo.com/sso/v2/qrcode/check?entry=wapsso&source=wapssowb&url=https://m.weibo.cn/&qrid=${qrid}&rid=${rid}&ver=20250520`;
-    const response = await axios(url, {
+    const response: any = await axios(url, {
       method: 'GET',
       headers: lodash.merge(WeiboApi.WEIBO_POLL_LOGIN_STATUS_HEADERS, {
         'X-CSRF-TOKEN': X_CSRF_TOKEN,
@@ -979,6 +983,10 @@ class WeiboRiskCookie {
         // 处理 5 次重定向
         for (let i = 0; i < 4; i++) {
           try {
+            // 确保 currentUrl 不为 undefined
+            if (!currentUrl) {
+              throw new Error('currentUrl 不能为空');
+            }
             const resp = await axios.get(currentUrl, {
               method: 'GET',
               jar,
@@ -995,50 +1003,55 @@ class WeiboRiskCookie {
               continue;
             }
           } catch (error) {
-            if (error.response && error.response.status === 302) {
-              currentUrl = error.response.headers['location'];
-              continue;
+            // 类型守卫：确认 error 是 AxiosError 类型
+            if (axios.isAxiosError(error)) {
+              const axiosError = error as AxiosError; // 类型断言
+              if (axiosError.response && axiosError.response.status === 302) {
+                console.log('捕获到 302 重定向:', axiosError.response.data);
+              }
             } else {
-              throw error; // 非 302 错误，抛出异常
+              console.error('非 Axios 错误:', error);
             }
           }
         }
-      }
-      // 获取请求完成后的 Cookie 状态
-      const updatedCookies = await new Promise<tough.Cookie[]>((resolve, reject) => {
-        jar.store.getAllCookies((err, cookies) => {
-          if (err) reject(err);
-          else resolve(cookies || []);
+        // 获取请求完成后的 Cookie 状态
+        const updatedCookies = await new Promise<tough.Cookie[]>((resolve, reject) => {
+          jar.store.getAllCookies((err, cookies) => {
+            if (err) reject(err);
+            else resolve(cookies || []);
+          });
         });
-      });
 
-      // 构建初始状态的 Map
-      const initialCookieMap = new Map(initialCookies.map(c => [`${c.key}:${c.domain}`, c]));
-      // 构建更新后的 Map
-      const updatedCookieMap = new Map(updatedCookies.map(c => [`${c.key}:${c.domain}`, c]));
-      // 比较两个 Map
-      let hasUpdates = false; // 标记是否有 Cookie 更新
+        // 构建初始状态的 Map
+        const initialCookieMap = new Map(initialCookies.map(c => [`${c.key}:${c.domain}`, c]));
+        // 构建更新后的 Map
+        const updatedCookieMap = new Map(updatedCookies.map(c => [`${c.key}:${c.domain}`, c]));
+        // 比较两个 Map
+        let hasUpdates = false; // 标记是否有 Cookie 更新
 
-      for (const [key, updatedCookie] of updatedCookieMap.entries()) {
-        const initialCookie = initialCookieMap.get(key);
-        if (!initialCookie || initialCookie.value !== updatedCookie.value) {
-          logger.info(`Weibo Cookie ${updatedCookie.key} was updated.`);
-          hasUpdates = true; // 标记有更新
+        for (const [key, updatedCookie] of updatedCookieMap.entries()) {
+          const initialCookie = initialCookieMap.get(key);
+          if (!initialCookie || initialCookie.value !== updatedCookie.value) {
+            logger.info(`Weibo Cookie ${updatedCookie.key} was updated.`);
+            hasUpdates = true; // 标记有更新
+          }
         }
-      }
-      // 如果有更新，统一保存到 Redis
-      if (hasUpdates) {
-        logger.info('weibo: Detected updates in cookies, saving all cookies to Redis...');
-        logger.info('weibo: cookies in jar (all domains):');
-        updatedCookies.forEach(c => {
-          logger.info(` - ${c.key} = ${c.value}; domain=${c.domain}; path=${c.path}; hostOnly=${!!c.hostOnly}; secure=${!!c.secure}; httpOnly=${!!c.httpOnly}`);
-        });
-        await WeiboCookieManager.saveCookiesToRedis(jar); // 统一保存
-        await e.reply(`~微博登陆成功~`);
-        return true;
-      } else {
-        await e.reply(`获取微博登录Cookie失败`);
-        return false;
+        // 如果有更新，统一保存到 Redis
+        if (hasUpdates) {
+          logger.info('weibo: Detected updates in cookies, saving all cookies to Redis...');
+          logger.info('weibo: cookies in jar (all domains):');
+          updatedCookies.forEach(c => {
+            logger.info(
+              ` - ${c.key} = ${c.value}; domain=${c.domain}; path=${c.path}; hostOnly=${!!c.hostOnly}; secure=${!!c.secure}; httpOnly=${!!c.httpOnly}`
+            );
+          });
+          await WeiboCookieManager.saveCookiesToRedis(jar); // 统一保存
+          await e.reply(`~微博登陆成功~`);
+          return true;
+        } else {
+          await e.reply(`获取微博登录Cookie失败`);
+          return false;
+        }
       }
     } else if (data?.retcode === 50114001) {
       // 未扫码
@@ -1054,13 +1067,12 @@ class WeiboRiskCookie {
     } else if (data?.retcode === 50114003) {
       // 二维码已失效
       e.reply('微博登陆二维码已失效');
-      return null;
+      return false;
     } else {
       e.reply('处理微博登录扫码结果出错');
       throw new Error(`处理微博登录扫码结果出错: ${JSON.stringify(data)}`);
     }
   }
 }
-
 const WeiboCookieManager = new WeiboRiskCookie();
 export default WeiboCookieManager;

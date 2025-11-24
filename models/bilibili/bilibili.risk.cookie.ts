@@ -306,7 +306,10 @@ class BiliRiskCookie {
     } else {
       const res = await fetch('https://api.bilibili.com/x/web-interface/nav', {
         method: 'GET',
-        headers: lodash.merge(BiliApi.BIlIBILI_LOGIN_HEADERS, { 'User-agent': BiliApi.BILIBILI_HEADERS['User-Agent'], 'Cookie': SESSDATA_str }),
+        headers: lodash.merge(BiliApi.BIlIBILI_LOGIN_HEADERS, {
+          'User-agent': BiliApi.BILIBILI_HEADERS['User-Agent'],
+          'Cookie': SESSDATA_str ? SESSDATA_str : ''
+        }),
         redirect: 'follow'
       });
       const resData: any = await res.json();
@@ -503,7 +506,7 @@ class BiliRiskCookie {
           try {
             await jar.setCookie(cookieStr, url);
           } catch (e) {
-            logger?.warn('setCookieString setCookie failed', cookieStr, e?.message || e);
+            logger?.warn('setCookieString setCookie failed', cookieStr, e);
           }
         }
       } else {
@@ -574,14 +577,16 @@ class BiliRiskCookie {
         if ((meta as any).secure) cookieStr += ' Secure;';
         try {
           // 动态生成 URL
-          const host = domain.startsWith('.') ? domain.slice(1) : domain; // 去掉前导的 '.'
-          const protocol = (meta as any).secure ? 'https' : 'https';
-          const url = `${protocol}://${host}${path}`;
+          if (domain) {
+            const host = domain.startsWith('.') ? domain.slice(1) : domain; // 去掉前导的 '.'
+            const protocol = (meta as any).secure ? 'https' : 'https';
+            const url = `${protocol}://${host}${path}`;
 
-          // 设置 Cookie 到 jar
-          await jar.setCookie(cookieStr, url);
+            // 设置 Cookie 到 jar
+            await jar.setCookie(cookieStr, url);
+          }
         } catch (e) {
-          logger?.warn('Failed to restore cookie to jar', key, e?.message || e);
+          logger?.warn('Failed to restore cookie to jar', key, e);
         }
       }
     } catch (err) {
@@ -612,7 +617,7 @@ class BiliRiskCookie {
 
       // 构造 Redis 键
       const redisKey = `${this.prefix}:${cookie.domain}:${cookie.key}`;
-      let ttl = null;
+      let ttl: number = 0;
 
       // 使用 cookie.TTL() 方法计算 TTL
       const ttlInMs = cookie.TTL(); // TTL 返回的是毫秒值
@@ -663,12 +668,12 @@ class BiliRiskCookie {
       const pattern = `${this.prefix}:*:*`;
       const keys = (await Redis.keys(pattern)) || [];
       if (keys.length) {
-        const delKeys = [];
+        const delKeys: string[] = [];
         for (const k of keys) {
           delKeys.push(k);
           delKeys.push(`${k}:meta`);
         }
-        if (delKeys.length) await Redis.del(...delKeys);
+        if (delKeys.length) await Promise.all(delKeys.map(key => Redis.del(key)));
       }
 
       this.cookieJar = new tough.CookieJar();
@@ -696,7 +701,7 @@ class BiliRiskCookie {
   }
 
   /** 从 jar 中获取指定 key 的值（基于 url） */
-  async getCookieValueByKeyFromString(jar: tough.CookieJar, key: string, url: string): Promise<string | null> {
+  async getCookieValueByKeyFromString(jar: tough.CookieJar, key: string, url: string): Promise<string | undefined> {
     try {
       const cookieString = await new Promise<string>((resolve, reject) => {
         jar.getCookieString(url, (err, cookieString) => {
@@ -705,10 +710,10 @@ class BiliRiskCookie {
         });
       });
       const match = cookieString.match(new RegExp(`${key}=([^;]+)`));
-      return match ? match[1] : null;
+      return match ? match[1] : undefined;
     } catch (err) {
       logger?.error('getCookieValueByKeyFromString error', err);
-      return null;
+      return undefined;
     }
   }
 
@@ -754,7 +759,7 @@ class BiliRiskCookie {
   }
 
   /** 综合获取ck，返回优先级：localCK > loginCK > tempCK */
-  async readSyncCookie(): Promise<{ cookie: string | tough.CookieJar; mark: 'localCk' | 'loginCk' | 'tempCk' }> {
+  async readSyncCookie(): Promise<{ cookie: string | tough.CookieJar; mark: 'localCk' | 'loginCk' | 'tempCk' | 'ckIsEmpty' }> {
     const localCk = await this.readLocalBiliCk();
     const SESSDATA_expires = await this.getCookieExpiration(this.cookieJar, 'SESSDATA', 'https://api.bilibili.com');
     const validCk = (ck: string) => ck?.trim().length > 10;
@@ -765,6 +770,7 @@ class BiliRiskCookie {
     } else if (!validCk(localCk) && SESSDATA_expires === null) {
       return { cookie: await this.getSessionCookieJar(), mark: 'tempCk' };
     }
+    return { cookie: '', mark: 'ckIsEmpty' };
   }
 
   /** 读取手动绑定的B站ck */

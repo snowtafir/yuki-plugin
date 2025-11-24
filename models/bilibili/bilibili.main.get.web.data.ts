@@ -1,7 +1,6 @@
 import BiliApi from '@/models/bilibili/bilibili.main.api';
 import axioss from 'axios';
 import lodash from 'lodash';
-//import { cookieWithBiliTicket, readSavedCookieItems, readSavedCookieOtherItems, readSyncCookie } from '@/models/bilibili/bilibili.main.models';
 import BiliCookieManager from '@/models/bilibili/bilibili.risk.cookie';
 import { getDmImg } from '@/models/bilibili/bilibili.risk.dm.img';
 import { getWbiSign } from '@/models/bilibili/bilibili.risk.wbi';
@@ -234,15 +233,15 @@ export class BilibiliWebDataFetcher {
     const ShortVideoUrlApi = BiliApi.BILIBIL_API.biliShortVideoUrl;
     const url = `${ShortVideoUrlApi}${tvUrlID}`;
     const bili_jct = await BiliCookieManager.checkCookieBiliTicket();
-    let jar: tough.CookieJar;
     const { cookie, mark } = await BiliCookieManager.readSyncCookie();
 
     const headers = lodash.merge(BiliApi.BILIBILI_DYNAMIC_SPACE_HEADERS, {
       Cookie: mark === 'localCk' ? `${bili_jct}+${cookie}` : undefined
     });
 
+    const ck = cookie instanceof tough.CookieJar ? cookie : undefined;
     const res = await axios.get(url, {
-      jar: mark !== 'localCk' ? jar : undefined, // 仅在非 localCk 时传递 jar
+      jar: ck, // 仅在非 localCk 时传递 jar
       timeout: 15000,
       headers
     });
