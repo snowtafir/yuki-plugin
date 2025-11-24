@@ -58,7 +58,7 @@ declare class BiliRiskCookie {
     /** 从 jar 中获取指定 URL 的 cookie 字符串 */
     getCookieStringForUrl(url: string): Promise<string>;
     /** 从 jar 中获取指定 key 的值（基于 url） */
-    getCookieValueByKeyFromString(jar: tough.CookieJar, key: string, url: string): Promise<string | null>;
+    getCookieValueByKeyFromString(jar: tough.CookieJar, key: string, url: string): Promise<string | undefined>;
     /**
      * 获取指定 key 的 Cookie 的过期时间（时间戳，毫秒级）
      * @param jar CookieJar 实例
@@ -70,7 +70,7 @@ declare class BiliRiskCookie {
     /** 综合获取ck，返回优先级：localCK > loginCK > tempCK */
     readSyncCookie(): Promise<{
         cookie: string | tough.CookieJar;
-        mark: 'localCk' | 'loginCk' | 'tempCk';
+        mark: 'localCk' | 'loginCk' | 'tempCk' | 'ckIsEmpty';
     }>;
     /** 读取手动绑定的B站ck */
     readLocalBiliCk(): Promise<any>;

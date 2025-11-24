@@ -209,13 +209,13 @@ class BilibiliWebDataFetcher {
         const ShortVideoUrlApi = BiliApi.BILIBIL_API.biliShortVideoUrl;
         const url = `${ShortVideoUrlApi}${tvUrlID}`;
         const bili_jct = await BiliCookieManager.checkCookieBiliTicket();
-        let jar;
         const { cookie, mark } = await BiliCookieManager.readSyncCookie();
         const headers = lodash.merge(BiliApi.BILIBILI_DYNAMIC_SPACE_HEADERS, {
             Cookie: mark === 'localCk' ? `${bili_jct}+${cookie}` : undefined
         });
+        const ck = cookie instanceof tough.CookieJar ? cookie : undefined;
         const res = await axios.get(url, {
-            jar: mark !== 'localCk' ? jar : undefined, // 仅在非 localCk 时传递 jar
+            jar: ck, // 仅在非 localCk 时传递 jar
             timeout: 15000,
             headers
         });

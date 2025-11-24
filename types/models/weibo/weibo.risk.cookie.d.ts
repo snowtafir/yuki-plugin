@@ -136,7 +136,7 @@ declare class WeiboRiskCookie {
     /**
      * 扫码登录流程
      */
-    weiboLogin(e: any): Promise<boolean>;
+    weiboLogin(e: any): Promise<any>;
     /**
      * 登录前访问bd接口获取rid
      * @param {string} X_CSRF_TOKEN - X_CSRF_TOKEN
@@ -161,7 +161,7 @@ declare class WeiboRiskCookie {
         X_CSRF_TOKEN: string;
     }>;
     /**处理扫码结果 */
-    pollLoginQRCode(e: any, qrid: string, rid: string, X_CSRF_TOKEN: string): Promise<boolean>;
+    pollLoginQRCode(e: any, qrid: string, rid: string, X_CSRF_TOKEN: string): any;
 }
 declare const WeiboCookieManager: WeiboRiskCookie;
 export default WeiboCookieManager;

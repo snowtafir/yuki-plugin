@@ -266,7 +266,10 @@ class BiliRiskCookie {
         else {
             const res = await fetch('https://api.bilibili.com/x/web-interface/nav', {
                 method: 'GET',
-                headers: lodash.merge(BiliApi.BIlIBILI_LOGIN_HEADERS, { 'User-agent': BiliApi.BILIBILI_HEADERS['User-Agent'], 'Cookie': SESSDATA_str }),
+                headers: lodash.merge(BiliApi.BIlIBILI_LOGIN_HEADERS, {
+                    'User-agent': BiliApi.BILIBILI_HEADERS['User-Agent'],
+                    'Cookie': SESSDATA_str ? SESSDATA_str : ''
+                }),
                 redirect: 'follow'
             });
             const resData = await res.json();
@@ -446,7 +449,7 @@ class BiliRiskCookie {
                         await jar.setCookie(cookieStr, url);
                     }
                     catch (e) {
-                        logger?.warn('setCookieString setCookie failed', cookieStr, e?.message || e);
+                        logger?.warn('setCookieString setCookie failed', cookieStr, e);
                     }
                 }
             }
@@ -520,14 +523,16 @@ class BiliRiskCookie {
                     cookieStr += ' Secure;';
                 try {
                     // 动态生成 URL
-                    const host = domain.startsWith('.') ? domain.slice(1) : domain; // 去掉前导的 '.'
-                    const protocol = meta.secure ? 'https' : 'https';
-                    const url = `${protocol}://${host}${path}`;
-                    // 设置 Cookie 到 jar
-                    await jar.setCookie(cookieStr, url);
+                    if (domain) {
+                        const host = domain.startsWith('.') ? domain.slice(1) : domain; // 去掉前导的 '.'
+                        const protocol = meta.secure ? 'https' : 'https';
+                        const url = `${protocol}://${host}${path}`;
+                        // 设置 Cookie 到 jar
+                        await jar.setCookie(cookieStr, url);
+                    }
                 }
                 catch (e) {
-                    logger?.warn('Failed to restore cookie to jar', key, e?.message || e);
+                    logger?.warn('Failed to restore cookie to jar', key, e);
                 }
             }
         }
@@ -559,7 +564,7 @@ class BiliRiskCookie {
                 continue; // 跳过被删除的 Cookie
             // 构造 Redis 键
             const redisKey = `${this.prefix}:${cookie.domain}:${cookie.key}`;
-            let ttl = null;
+            let ttl = 0;
             // 使用 cookie.TTL() 方法计算 TTL
             const ttlInMs = cookie.TTL(); // TTL 返回的是毫秒值
             if (ttlInMs > 0) {
@@ -616,7 +621,7 @@ class BiliRiskCookie {
                     delKeys.push(`${k}:meta`);
                 }
                 if (delKeys.length)
-                    await Redis.del(...delKeys);
+                    await Promise.all(delKeys.map(key => Redis.del(key)));
             }
             this.cookieJar = new tough.CookieJar();
         }
@@ -656,11 +661,11 @@ class BiliRiskCookie {
                 });
             });
             const match = cookieString.match(new RegExp(`${key}=([^;]+)`));
-            return match ? match[1] : null;
+            return match ? match[1] : undefined;
         }
         catch (err) {
             logger?.error('getCookieValueByKeyFromString error', err);
-            return null;
+            return undefined;
         }
     }
     /**
@@ -718,6 +723,7 @@ class BiliRiskCookie {
         else if (!validCk(localCk) && SESSDATA_expires === null) {
             return { cookie: await this.getSessionCookieJar(), mark: 'tempCk' };
         }
+        return { cookie: '', mark: 'ckIsEmpty' };
     }
     /** 读取手动绑定的B站ck */
     async readLocalBiliCk() {
