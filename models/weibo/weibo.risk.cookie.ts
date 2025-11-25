@@ -163,54 +163,12 @@ class WeiboRiskCookie {
 
   // 简单 fingerprint（可按需增强）
   static buildSimpleFingerprint() {
-    const randFracInt = (base: number, min = 0.6, max = 1) => {
-      const v = min + Math.random() * (max - min); // 0.6-1
-      return Math.floor(base * v); // 换成 Math.round(...) 或 Math.ceil(...) 根据需要
-    };
     return JSON.stringify({
-      fp: {
-        '0': { s: 1, v: '1.2.1' },
-        '1': { s: 1, v: false },
-        '2': { s: 1, v: ['lang'] },
-        '3': { s: 1, v: `${WeiboApi.USER_AGENT}` },
-        '4': { s: -1, v: '' },
-        '5': { s: 1, v: 33 },
-        '6': { s: -1, v: '' },
-        '7': { s: 1, v: [['zh-CN'], ['zh-CN']] },
-        '8': { s: 1, v: true },
-        '9': { s: 1, v: 'default' },
-        '10': { s: 1, v: true },
-        '11': { s: 1, v: 5 },
-        '12': { s: -1, e: '' },
-        '13': { s: 1, v: '20030107' },
-        '14': { s: -1, e: '' },
-        '15': { s: 1, v: `${WeiboApi.USER_AGENT}` },
-        '16': { s: 1, v: { vendor: 'WebKit', renderer: 'WebKit WebGL' } },
-        '17': { s: -1, v: '' },
-        '18': {
-          s: 1,
-          v: { ow: randFracInt(2235, 0.6, 1), oh: randFracInt(1210, 0.6, 1), iw: randFracInt(589, 0.6, 1), ih: randFracInt(1089, 0.6, 1) }
-        },
-        '19': { s: 1, v: 'chrome' },
-        '20': { s: 1, v: 'webkit' },
-        '21': { s: 1, v: false },
-        '22': { s: 1, v: true },
-        '23': {
-          s: 1,
-          v: { ots: false, mtp: 0, mmtp: -1 }
-        }
-      },
-      bh: {
-        mt: [],
-        kt: {
-          down: 0,
-          up: 0
-        }
-      },
-      meta: {
-        isTraceKeyboard: false,
-        isTraceMouse: false
-      }
+      ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+      platform: 'Win32',
+      screen: '1920x1080x24',
+      fonts: ['Arial', 'SimSun'],
+      plugins: []
     });
   }
 
@@ -412,7 +370,7 @@ class WeiboRiskCookie {
         logger.info('genvisitor2 parsed:', parsed);
         if (parsed.retcode === 20000000 && parsed.data && parsed.data.tid) {
           const tidVal = parsed.data.tid;
-          await jar.setCookie(`tid=${tidVal}; Domain=.weibo.cn; Path=/`, START_URL);
+          await jar.setCookie(`tid=${tidVal}; Domain=.weibo.cn; Path=/;`, START_URL);
           logger.info('got tid from genvisitor2:', tidVal);
         }
       }
@@ -427,7 +385,7 @@ class WeiboRiskCookie {
       // 遍历并复制到 m.weibo.cn
       allCookies.forEach(async cookie => {
         if (cookie.domain === 'weibo.cn') {
-          const newCookieStr = `${cookie.key}=${cookie.value}; Domain=.weibo.cn; Path=${cookie.path}; Expires=${cookie.expires}`;
+          const newCookieStr = `${cookie.key}=${cookie.value}; Domain=.weibo.cn; Path=${cookie.path}; Expires=${cookie.expires};`;
           await jar.setCookie(newCookieStr, 'https://m.weibo.cn');
         }
       });
@@ -491,7 +449,7 @@ class WeiboRiskCookie {
           const metaKey = `${key}:meta`;
           const metaRaw = await Redis.get(metaKey);
           const ttl = await Redis.ttl(key);
-          if (ttl > 0) {
+          if ((ttl && ttl > 0) || ttl === -1) {
             await Redis.set(newKey, value, { EX: ttl });
             if (metaRaw) await Redis.set(`${newKey}:meta`, metaRaw, { EX: ttl });
           } else {
@@ -585,13 +543,15 @@ class WeiboRiskCookie {
       const redisKey = `${this.prefix}:${domainKey}:${cookie.key}`;
 
       // 计算 TTL（秒）
-      let ttl: number = 0;
+      let ttl: number | string = 0;
       const ttlInMs = cookie.TTL ? cookie.TTL() : 0; // TTL 返回毫秒，可能不存在
-      if (ttlInMs > 0) {
+      if (ttlInMs && ttlInMs > 0) {
         ttl = Math.floor(ttlInMs / 1000);
       } else if (ttlInMs === 0) {
         // 已过期，跳过
         continue;
+      } else {
+        ttl = -1;
       }
 
       // 构造元数据
@@ -603,7 +563,7 @@ class WeiboRiskCookie {
 
       // 写入 Redis（使用 TTL 时一并写 meta）
       try {
-        if (ttl && ttl > 0) {
+        if ((ttl && ttl > 0) || ttl === -1) {
           await Redis.set(redisKey, cookie.value, { EX: ttl });
           await Redis.set(`${redisKey}:meta`, meta, { EX: ttl });
         } else {
