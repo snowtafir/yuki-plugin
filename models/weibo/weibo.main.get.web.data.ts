@@ -37,7 +37,8 @@ export class WeiboWebDataFetcher {
         'Host': 'm.weibo.cn',
         'X-XSRF-TOKEN': `${X_XSRF_TOKEN}`,
         'Referer': `https://m.weibo.cn/u/${uid}`
-      })
+      }),
+      responseType: 'json'
     });
 
     // (3) 获取请求完成后的 Cookie 状态
@@ -88,7 +89,8 @@ export class WeiboWebDataFetcher {
       headers: lodash.merge(WeiboApi.WEIBO_HEADERS, {
         'X-XSRF-TOKEN': `${X_XSRF_TOKEN}`,
         'Referer': 'https://m.weibo.cn/search?'
-      })
+      }),
+      responseType: 'json'
     });
 
     // (3) 获取请求完成后的 Cookie 状态
@@ -143,7 +145,8 @@ export class WeiboWebDataFetcher {
           'Host': 'm.weibo.cn',
           'X-XSRF-TOKEN': `${X_XSRF_TOKEN}`,
           'referer': `https://m.weibo.cn/u/${uid}`
-        })
+        }),
+        responseType: 'json'
       });
 
       const { ok, data, msg } = response?.data;
@@ -173,7 +176,7 @@ export class WeiboWebDataFetcher {
         }
       }
 
-      return data.cards.filter(WeiboQuery.filterCardTypeCustom);
+      return data?.cards.filter(WeiboQuery.filterCardTypeCustom);
     } catch (error) {
       logger?.mark('微博推送：Error fetching sub list:', error);
       return [];
