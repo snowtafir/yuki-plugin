@@ -519,10 +519,10 @@ class WeiboRiskCookie {
             // 计算 TTL（秒）
             let ttl = 0;
             const ttlInMs = cookie.TTL ? cookie.TTL() : 0; // TTL 返回毫秒，可能不存在
-            if (ttlInMs && ttlInMs > 0) {
+            if (ttlInMs && ttlInMs > 0 && isFinite(ttlInMs)) {
                 ttl = Math.floor(ttlInMs / 1000);
             }
-            else if (ttlInMs === 0) {
+            else if (ttlInMs === 0 || !isFinite(ttlInMs)) {
                 // 已过期，跳过
                 continue;
             }
@@ -541,9 +541,9 @@ class WeiboRiskCookie {
                     await Redis.set(redisKey, cookie.value, { EX: ttl });
                     await Redis.set(`${redisKey}:meta`, meta, { EX: ttl });
                 }
-                else {
-                    await Redis.set(redisKey, cookie.value);
-                    await Redis.set(`${redisKey}:meta`, meta);
+                else if (ttl === -1) {
+                    await Redis.set(redisKey, cookie.value, { EX: -1 });
+                    await Redis.set(`${redisKey}:meta`, meta, { EX: -1 });
                 }
             }
             catch (error) {
