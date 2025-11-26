@@ -545,15 +545,15 @@ class WeiboRiskCookie {
       const redisKey = `${this.prefix}:${domainKey}:${cookie.key}`;
 
       // 计算 TTL（秒）
-      let ttl: number = 0;
+      let ttl: number | string = 0;
       const ttlInMs = cookie.TTL ? cookie.TTL() : 0; // TTL 返回毫秒，可能不存在
-      if (ttlInMs > 0) {
+      if (ttlInMs && ttlInMs > 0 && isFinite(ttlInMs)) {
         ttl = Math.floor(ttlInMs / 1000);
-      } else if (ttlInMs === 0) {
+      } else if (ttlInMs === 0 || !isFinite(ttlInMs)) {
         // 已过期，跳过
         continue;
       } else {
-        ttl = -1; // 永不过期
+        ttl = -1;
       }
 
       // 构造元数据
@@ -565,12 +565,12 @@ class WeiboRiskCookie {
 
       // 写入 Redis（使用 TTL 时一并写 meta）
       try {
-        if (ttl && ttl > 0) {
+        if ((ttl && ttl > 0) || ttl === -1) {
           await Redis.set(redisKey, cookie.value, { EX: ttl });
           await Redis.set(`${redisKey}:meta`, meta, { EX: ttl });
         } else {
-          await Redis.set(redisKey, cookie.value);
-          await Redis.set(`${redisKey}:meta`, meta);
+          await Redis.set(redisKey, cookie.value, { EX: -1 });
+          await Redis.set(`${redisKey}:meta`, meta, { EX: -1 });
         }
       } catch (error: unknown) {
         logger.warn('Failed to save cookie to Redis:', redisKey, error);
