@@ -218,6 +218,13 @@ class BiliRiskCookie {
     if (data?.code === 0) {
       if (data?.data?.code === 0) {
         // 登录成功，获取 set-cookie header 并写入 Jar
+        // 手动提取并设置 cookie，兼容某些环境下 axios-cookiejar-support 可能未正确处理 set-cookie 的情况
+        const setCookieHeaders = response.headers['set-cookie'];
+        if (setCookieHeaders) {
+          for (const cookieStr of setCookieHeaders) {
+            await jar.setCookie(cookieStr, 'https://passport.bilibili.com');
+          }
+        }
         const SESSDATA_expires = await this.getCookieExpiration(jar, 'SESSDATA', 'https://passport.bilibili.com');
         try {
           if (SESSDATA_expires != null) {
