@@ -308,7 +308,7 @@ class BiliRiskCookie {
         method: 'GET',
         headers: lodash.merge(BiliApi.BIlIBILI_LOGIN_HEADERS, {
           'User-agent': BiliApi.BILIBILI_HEADERS['User-Agent'],
-          'Cookie': SESSDATA_str ? SESSDATA_str : ''
+          'Cookie': SESSDATA_str ? `SESSDATA=${SESSDATA_str}` : ''
         }),
         redirect: 'follow'
       });
@@ -324,7 +324,7 @@ class BiliRiskCookie {
         const next_exp = level_info?.next_exp;
 
         const ttl = SESSDATA_expires;
-        const LoginCookieTTLStr = ttl === -1 ? '永久' : ttl === -2 ? '-' : `${new Date(Date.now() + ttl).toLocaleString()}`;
+        const LoginCookieTTLStr = ttl === -1 ? '永久' : ttl === -2 ? '-' : `${new Date(ttl).toLocaleString()}`;
         e.reply(
           `~B站账号已登陆~\n有效期至：${LoginCookieTTLStr}。\n昵称：${uname}\nuid：${mid}\n硬币：${money}\n经验等级：${current_level}\n当前经验值exp：${current_exp}\n下一等级所需exp：${next_exp}`
         );
