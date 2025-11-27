@@ -568,9 +568,6 @@ class WeiboRiskCookie {
         if ((ttl && ttl > 0) || ttl === -1) {
           await Redis.set(redisKey, cookie.value, { EX: ttl });
           await Redis.set(`${redisKey}:meta`, meta, { EX: ttl });
-        } else {
-          await Redis.set(redisKey, cookie.value, { EX: -1 });
-          await Redis.set(`${redisKey}:meta`, meta, { EX: -1 });
         }
       } catch (error: unknown) {
         logger.warn('Failed to save cookie to Redis:', redisKey, error);

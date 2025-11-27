@@ -218,7 +218,7 @@ class BiliRiskCookie {
     if (data?.code === 0) {
       if (data?.data?.code === 0) {
         // 登录成功，获取 set-cookie header 并写入 Jar
-        const SESSDATA_expires = await this.getCookieExpiration(jar, 'SESSDATA', 'https://api.bilibili.com');
+        const SESSDATA_expires = await this.getCookieExpiration(jar, 'SESSDATA', 'https://passport.bilibili.com');
         try {
           if (SESSDATA_expires != null) {
             const tempCookie = await this.getNewTempCk();
@@ -415,6 +415,7 @@ class BiliRiskCookie {
 
       switch (code) {
         case 0:
+          await this.resetCookiesAndRedis();
           e.reply('当前缓存的B站登录CK已在B站服务器退出登录~');
           break;
         case 2202:
@@ -615,17 +616,25 @@ class BiliRiskCookie {
       if (!cookie) continue; // 跳过无效的 Cookie
       if (typeof cookie.value === 'string' && cookie.value.toLowerCase() === 'deleted') continue; // 跳过被删除的 Cookie
 
-      // 构造 Redis 键
-      const redisKey = `${this.prefix}:${cookie.domain}:${cookie.key}`;
-      let ttl: number = 0;
+      // 统一处理域名，确保大部分API接口都使用 .bilibili.com
+      let domain = cookie.domain ? cookie.domain : '.bilibili.com';
+      if (domain.startsWith('passport.bilibili.com')) {
+        domain = '.bilibili.com';
+      } else if (!domain.startsWith('.')) {
+        domain = `.${domain}`;
+      }
+      const redisKey = `${this.prefix}:${domain}:${cookie.key}`;
 
       // 使用 cookie.TTL() 方法计算 TTL
+      let ttl: number = 0;
       const ttlInMs = cookie.TTL(); // TTL 返回的是毫秒值
-      if (ttlInMs > 0) {
+      if (ttlInMs && ttlInMs > 0 && isFinite(ttlInMs)) {
         ttl = Math.floor(ttlInMs / 1000); // 转换为秒
-      } else if (ttlInMs === 0) {
+      } else if (ttlInMs === 0 || !isFinite(ttlInMs)) {
         // 如果 TTL 为 0，表示 Cookie 已过期，跳过存储
         continue;
+      } else {
+        ttl = -1;
       }
 
       // 构造元数据
@@ -636,7 +645,7 @@ class BiliRiskCookie {
       });
 
       // 写入 Redis
-      if (ttl && ttl > 0) {
+      if ((ttl && ttl > 0) || ttl === -1) {
         await Redis.set(redisKey, cookie.value, { EX: ttl }); // 设置键值对，并指定 TTL
         await Redis.set(`${redisKey}:meta`, meta, { EX: ttl }); // 存储元数据，TTL 与主键一致
       } else {
