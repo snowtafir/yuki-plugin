@@ -356,6 +356,7 @@ class BiliRiskCookie {
             const { code } = res;
             switch (code) {
                 case 0:
+                    await this.resetCookiesAndRedis();
                     e.reply('当前缓存的B站登录CK已在B站服务器退出登录~');
                     break;
                 case 2202:
@@ -562,10 +563,13 @@ class BiliRiskCookie {
                 continue; // 跳过无效的 Cookie
             if (typeof cookie.value === 'string' && cookie.value.toLowerCase() === 'deleted')
                 continue; // 跳过被删除的 Cookie
-            // 替换passport.bilibili.com域名为.bilibili.com，以便正确跨域，构造 Redis 键
-            let domain = cookie.domain;
-            if (domain === 'passport.bilibili.com') {
+            // 统一处理域名，确保大部分API接口都使用 .bilibili.com
+            let domain = cookie.domain ? cookie.domain : '.bilibili.com';
+            if (domain.startsWith('passport.bilibili.com')) {
                 domain = '.bilibili.com';
+            }
+            else if (!domain.startsWith('.')) {
+                domain = `.${domain}`;
             }
             const redisKey = `${this.prefix}:${domain}:${cookie.key}`;
             // 使用 cookie.TTL() 方法计算 TTL
