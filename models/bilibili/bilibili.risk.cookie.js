@@ -399,7 +399,7 @@ class BiliRiskCookie {
                             value: ticket,
                             domain: '.bilibili.com',
                             path: '/',
-                            expires: new Date(Date.now() + ttl) // 3天后过期
+                            expires: new Date(Date.now() + ttl * 1000) // 3天后过期
                         })
                     ]);
                     return `bili_ticket=${ticket};`;
