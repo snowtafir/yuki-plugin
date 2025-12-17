@@ -39,14 +39,28 @@ export async function getBiliTicket(csrf: string | null): Promise<{ code?: numbe
     });
 
     if (!response.ok) {
-      throw new Error(`get bili_jct HTTP error! status: ${response.status}`);
+      throw new Error(`get bili_ticket HTTP error! status: ${response.status}`);
     }
 
-    const data: any = await response.json();
+    const data = (await response.json()) as {
+      code: number;
+      message: string;
+      data: {
+        ticket: string;
+        created_at: number;
+        ttl: number;
+        context: any;
+        nav: {
+          img: string;
+          sub: string;
+        };
+      };
+      ttl: number;
+    };
 
     if (data.code !== 0) {
       if (data.code === 400) {
-        throw new Error(`get bili_jct Parameter error! ${data.message}`);
+        throw new Error(`get bili_ticket Parameter error! ${data.message}`);
       }
       throw new Error(`Failed to retrieve bili ticket: ${data.message}`);
     }

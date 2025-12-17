@@ -270,12 +270,12 @@ export class BiliQuery {
    * @returns  完整的B站文章内容json数据
    */
   static async getFullArticleContent(postUrl: string) {
-    const bili_jct = await BiliCookieManager.checkCookieBiliTicket();
+    const bili_ticket = await BiliCookieManager.checkCookieBiliTicket();
     const { cookie, mark } = await BiliCookieManager.readSyncCookie();
 
     try {
       const headers = lodash.merge(BiliApi.BILIBILI_ARTICLE_HEADERS, {
-        Cookie: mark === 'localCk' ? `${bili_jct}+${cookie}` : undefined,
+        Cookie: mark === 'localCk' ? `${bili_ticket};${cookie}` : undefined,
         Host: 'www.bilibili.com'
       });
 
