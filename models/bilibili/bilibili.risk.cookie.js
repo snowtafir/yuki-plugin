@@ -197,7 +197,8 @@ class BiliRiskCookie {
                                     resolve(cookieString || '');
                             });
                         });
-                        const result = await this.postGateway(cookieString); //激活ck
+                        const bili_ticket = await this.checkCookieBiliTicket(true);
+                        const result = await this.postGateway(cookieString + ';' + bili_ticket); //激活ck
                         const { code, data } = await result.data; // 解析校验结果
                         switch (code) {
                             case 0:
@@ -349,7 +350,7 @@ class BiliRiskCookie {
                 headers: {
                     'Host': 'passport.bilibili.com',
                     'User-Agent': BiliApi.BILIBILI_HEADERS['User-Agent'],
-                    'Cookie': `DedeUserID]=${DedeUserID};bili_jct=${biliCSRF};SESSDATA=${SESSDATA}`,
+                    'Cookie': `DedeUserID=${DedeUserID};bili_jct=${biliCSRF};SESSDATA=${SESSDATA}`,
                     'Content-Type': 'application/x-www-form-urlencoded'
                 }
             });
@@ -385,15 +386,16 @@ class BiliRiskCookie {
     /**
      * 获取有效bili_ticket并添加到cookie（bili_ticket 仍缓存于 Redis 单独 key）
      */
-    async checkCookieBiliTicket() {
-        const bili_jct_expires = await this.getCookieExpiration(this.cookieJar, 'bili_jct', 'https://api.bilibili.com');
-        if (bili_jct_expires === null) {
+    async checkCookieBiliTicket(forseRefresh = false) {
+        const bili_ticket_expires = await this.getCookieExpiration(this.cookieJar, 'bili_ticket', 'https://api.bilibili.com');
+        if (bili_ticket_expires === null || forseRefresh) {
             try {
-                const { ticket, ttl } = await getBiliTicket('');
+                const bili_jct = await this.getCookieValueByKeyFromString(this.cookieJar, 'bili_jct', 'https://api.bilibili.com');
+                const { ticket, ttl } = await getBiliTicket(bili_jct ? bili_jct : '');
                 if (ticket && ttl) {
                     await this.setCookieString([
                         new tough.Cookie({
-                            key: 'bili_jct',
+                            key: 'bili_ticket',
                             value: ticket,
                             domain: '.bilibili.com',
                             path: '/',
@@ -411,7 +413,7 @@ class BiliRiskCookie {
             }
         }
         else {
-            return `bili_jct=${await this.getCookieValueByKeyFromString(this.cookieJar, 'bili_jct', 'https://api.bilibili.com')};`;
+            return `bili_ticket=${await this.getCookieValueByKeyFromString(this.cookieJar, 'bili_ticket', 'https://api.bilibili.com')};`;
         }
     }
     /**
@@ -473,7 +475,7 @@ class BiliRiskCookie {
         }
     }
     /**
-     * 简单策略：优先从 Redis 读取长期 cookie（如 SUP/SUBP），若缺失则触发完整获取流程
+     * 简单策略：优先从 Redis 读取长期 cookie（如 SESSDATA），若缺失则触发完整获取流程
      * */
     async ensureLoginCookies(jar) {
         // 常见域名为 .weibo.cn 或 m.weibo.cn，根据实际情况检查
@@ -481,7 +483,7 @@ class BiliRiskCookie {
         const SESSDATA_Key2 = `${this.prefix}:bilibili.com:SESSDATA`;
         const isLogin = (await Redis.get(SESSDATA_Key1)) || (await Redis.get(SESSDATA_Key2));
         if (isLogin) {
-            // 直接把 Redis 的所有 cookie 恢复到 jar（包含 SUP/SUBP）
+            // 直接把 Redis 的所有 cookie 恢复到 jar（包含 SESSDATA）
             await this.loadCookiesFromRedis(jar);
             return true;
         }

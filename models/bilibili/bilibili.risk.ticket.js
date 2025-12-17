@@ -25,7 +25,7 @@ async function getBiliTicket(csrf) {
         'key_id': 'ec02',
         'hexsign': hexSign,
         'context[ts]': String(ts),
-        'csrf': csrf // 使用空字符串代替null
+        'csrf': csrf ?? '' // 使用空字符串代替null
     });
     try {
         const response = await fetch(`${url}?${params}`, {
@@ -35,12 +35,12 @@ async function getBiliTicket(csrf) {
             }
         });
         if (!response.ok) {
-            throw new Error(`get bili_jct HTTP error! status: ${response.status}`);
+            throw new Error(`get bili_ticket HTTP error! status: ${response.status}`);
         }
-        const data = await response.json();
+        const data = (await response.json());
         if (data.code !== 0) {
             if (data.code === 400) {
-                throw new Error(`get bili_jct Parameter error! ${data.message}`);
+                throw new Error(`get bili_ticket Parameter error! ${data.message}`);
             }
             throw new Error(`Failed to retrieve bili ticket: ${data.message}`);
         }

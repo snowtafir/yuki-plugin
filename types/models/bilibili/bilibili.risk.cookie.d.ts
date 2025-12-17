@@ -34,7 +34,7 @@ declare class BiliRiskCookie {
     /**
      * 获取有效bili_ticket并添加到cookie（bili_ticket 仍缓存于 Redis 单独 key）
      */
-    checkCookieBiliTicket(): Promise<string>;
+    checkCookieBiliTicket(forseRefresh?: boolean): Promise<string>;
     /**
      * 将 非标准化 bilibili 的 cookie 写入 jar 并持久化到 Redis
      * 支持两种输入形式：
@@ -43,7 +43,7 @@ declare class BiliRiskCookie {
      */
     setCookieString(input: string | tough.Cookie[], url?: string): Promise<void>;
     /**
-     * 简单策略：优先从 Redis 读取长期 cookie（如 SUP/SUBP），若缺失则触发完整获取流程
+     * 简单策略：优先从 Redis 读取长期 cookie（如 SESSDATA），若缺失则触发完整获取流程
      * */
     ensureLoginCookies(jar: tough.CookieJar): Promise<boolean>;
     /** 从 Redis 恢复到 cookieJar */

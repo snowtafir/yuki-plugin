@@ -13,7 +13,7 @@ class BilibiliWebDataFetcher {
     /**通过uid获取up动态数据表*/
     async getBiliDynamicListDataByUid(uid) {
         const url = BiliApi.BILIBIL_API.biliDynamicInfoList;
-        const bili_jct = await BiliCookieManager.checkCookieBiliTicket();
+        const bili_ticket = await BiliCookieManager.checkCookieBiliTicket();
         const { cookie, mark } = await BiliCookieManager.readSyncCookie();
         const dmImg = await getDmImg();
         const data = {
@@ -29,8 +29,8 @@ class BilibiliWebDataFetcher {
         };
         // 根据 mark 的值计算 signCookie
         const signCookie = mark === 'localCk'
-            ? (await BiliCookieManager.readSavedCookieItems(`${bili_jct}+${cookie}`, ['SESSDATA'], false)) ||
-                (await BiliCookieManager.readSavedCookieOtherItems(`${bili_jct}+${cookie}`, ['SESSDATA']))
+            ? (await BiliCookieManager.readSavedCookieItems(`${bili_ticket};${cookie}`, ['SESSDATA'], false)) ||
+                (await BiliCookieManager.readSavedCookieOtherItems(`${bili_ticket};${cookie}`, ['SESSDATA']))
             : (await BiliCookieManager.readSavedCookieItems(await BiliCookieManager.getCookieStringForUrl(url), ['SESSDATA'], false)) ||
                 (await BiliCookieManager.readSavedCookieOtherItems(await BiliCookieManager.getCookieStringForUrl(url), ['SESSDATA']));
         const { w_rid, time_stamp } = await getWbiSign(data, BiliApi.BILIBILI_HEADERS, signCookie);
@@ -40,7 +40,7 @@ class BilibiliWebDataFetcher {
             wts: time_stamp
         };
         const headers = lodash.merge(BiliApi.BILIBILI_HEADERS, {
-            Cookie: mark === 'localCk' ? `${bili_jct}+${cookie}` : undefined,
+            Cookie: mark === 'localCk' ? `${bili_ticket};${cookie}` : undefined,
             Host: `api.bilibili.com`,
             Origin: 'https://space.bilibili.com',
             Referer: `https://space.bilibili.com/${uid}/dynamic`
@@ -95,7 +95,7 @@ class BilibiliWebDataFetcher {
     /**通过uid获取up详情*/
     async getBilibiUserInfoByUid(uid) {
         const url = BiliApi.BILIBIL_API.biliSpaceUserInfoWbi;
-        const bili_jct = await BiliCookieManager.checkCookieBiliTicket();
+        const bili_ticket = await BiliCookieManager.checkCookieBiliTicket();
         const { cookie, mark } = await BiliCookieManager.readSyncCookie();
         const dmImg = await getDmImg();
         const data = {
@@ -107,8 +107,8 @@ class BilibiliWebDataFetcher {
         };
         // 根据 mark 的值计算 signCookie
         const signCookie = mark === 'localCk'
-            ? (await BiliCookieManager.readSavedCookieItems(`${bili_jct}+${cookie}`, ['SESSDATA'], false)) ||
-                (await BiliCookieManager.readSavedCookieOtherItems(`${bili_jct}+${cookie}`, ['SESSDATA']))
+            ? (await BiliCookieManager.readSavedCookieItems(`${bili_ticket};${cookie}`, ['SESSDATA'], false)) ||
+                (await BiliCookieManager.readSavedCookieOtherItems(`${bili_ticket};${cookie}`, ['SESSDATA']))
             : (await BiliCookieManager.readSavedCookieItems(await BiliCookieManager.getCookieStringForUrl(url), ['SESSDATA'], false)) ||
                 (await BiliCookieManager.readSavedCookieOtherItems(await BiliCookieManager.getCookieStringForUrl(url), ['SESSDATA']));
         const { w_rid, time_stamp } = await getWbiSign(data, BiliApi.BILIBILI_HEADERS, signCookie);
@@ -118,7 +118,7 @@ class BilibiliWebDataFetcher {
             wts: time_stamp
         };
         const headers = lodash.merge(BiliApi.BILIBILI_HEADERS, {
-            Cookie: mark === 'localCk' ? `${bili_jct}+${cookie}` : undefined,
+            Cookie: mark === 'localCk' ? `${bili_ticket};${cookie}` : undefined,
             Host: `api.bilibili.com`,
             Origin: 'https://space.bilibili.com',
             Referer: `https://space.bilibili.com/${uid}/dynamic`
@@ -135,7 +135,7 @@ class BilibiliWebDataFetcher {
     /**通过关键词搜索up*/
     async searchBiliUserInfoByKeyword(keyword) {
         const url = BiliApi.BILIBIL_API.biliSearchUpWbi;
-        const bili_jct = await BiliCookieManager.checkCookieBiliTicket();
+        const bili_ticket = await BiliCookieManager.checkCookieBiliTicket();
         const { cookie, mark } = await BiliCookieManager.readSyncCookie();
         const data = {
             keyword: keyword,
@@ -145,8 +145,8 @@ class BilibiliWebDataFetcher {
         };
         // 根据 mark 的值计算 signCookie
         const signCookie = mark === 'localCk'
-            ? (await BiliCookieManager.readSavedCookieItems(`${bili_jct}+${cookie}`, ['SESSDATA'], false)) ||
-                (await BiliCookieManager.readSavedCookieOtherItems(`${bili_jct}+${cookie}`, ['SESSDATA']))
+            ? (await BiliCookieManager.readSavedCookieItems(`${bili_ticket};${cookie}`, ['SESSDATA'], false)) ||
+                (await BiliCookieManager.readSavedCookieOtherItems(`${bili_ticket};${cookie}`, ['SESSDATA']))
             : (await BiliCookieManager.readSavedCookieItems(await BiliCookieManager.getCookieStringForUrl(url), ['SESSDATA'], false)) ||
                 (await BiliCookieManager.readSavedCookieOtherItems(await BiliCookieManager.getCookieStringForUrl(url), ['SESSDATA']));
         const { w_rid, time_stamp } = await getWbiSign(data, BiliApi.BILIBILI_HEADERS, signCookie);
@@ -156,7 +156,7 @@ class BilibiliWebDataFetcher {
             wts: time_stamp
         };
         const headers = lodash.merge(BiliApi.BILIBILI_HEADERS, {
-            Cookie: mark === 'localCk' ? `${bili_jct}+${cookie}` : undefined,
+            Cookie: mark === 'localCk' ? `${bili_ticket};${cookie}` : undefined,
             Host: `api.bilibili.com`,
             Origin: 'https://www.bilibili.com',
             Referer: `https://www.bilibili.com/`
@@ -173,14 +173,14 @@ class BilibiliWebDataFetcher {
     /*通过aid/bvid获取视频信息*/
     async getBiliVideoInfoByAid_BV(vedioID) {
         const url = BiliApi.BILIBIL_API.biliVideoInfoWbi;
-        const bili_jct = await BiliCookieManager.checkCookieBiliTicket();
+        const bili_ticket = await BiliCookieManager.checkCookieBiliTicket();
         const { cookie, mark } = await BiliCookieManager.readSyncCookie();
         let referer = vedioID?.bvid ? `https://www.bilibili.com/video/${vedioID.bvid}` : `https://www.bilibili.com/video/av${vedioID.aid}`;
         let data = vedioID?.bvid ? { bvid: vedioID.bvid } : { aid: vedioID.aid };
         // 根据 mark 的值计算 signCookie
         const signCookie = mark === 'localCk'
-            ? (await BiliCookieManager.readSavedCookieItems(`${bili_jct}+${cookie}`, ['SESSDATA'], false)) ||
-                (await BiliCookieManager.readSavedCookieOtherItems(`${bili_jct}+${cookie}`, ['SESSDATA']))
+            ? (await BiliCookieManager.readSavedCookieItems(`${bili_ticket};${cookie}`, ['SESSDATA'], false)) ||
+                (await BiliCookieManager.readSavedCookieOtherItems(`${bili_ticket};${cookie}`, ['SESSDATA']))
             : (await BiliCookieManager.readSavedCookieItems(await BiliCookieManager.getCookieStringForUrl(url), ['SESSDATA'], false)) ||
                 (await BiliCookieManager.readSavedCookieOtherItems(await BiliCookieManager.getCookieStringForUrl(url), ['SESSDATA']));
         const { w_rid, time_stamp } = await getWbiSign(data, BiliApi.BILIBILI_HEADERS, signCookie);
@@ -190,7 +190,7 @@ class BilibiliWebDataFetcher {
             wts: time_stamp
         };
         const headers = lodash.merge(BiliApi.BILIBILI_HEADERS, {
-            Cookie: mark === 'localCk' ? `${bili_jct}+${cookie}` : undefined,
+            Cookie: mark === 'localCk' ? `${bili_ticket};${cookie}` : undefined,
             Host: `api.bilibili.com`,
             Origin: 'https://www.bilibili.com',
             Referer: referer
@@ -208,10 +208,10 @@ class BilibiliWebDataFetcher {
     async getBVIDByShortUrl(tvUrlID) {
         const ShortVideoUrlApi = BiliApi.BILIBIL_API.biliShortVideoUrl;
         const url = `${ShortVideoUrlApi}${tvUrlID}`;
-        const bili_jct = await BiliCookieManager.checkCookieBiliTicket();
+        const bili_ticket = await BiliCookieManager.checkCookieBiliTicket();
         const { cookie, mark } = await BiliCookieManager.readSyncCookie();
         const headers = lodash.merge(BiliApi.BILIBILI_DYNAMIC_SPACE_HEADERS, {
-            Cookie: mark === 'localCk' ? `${bili_jct}+${cookie}` : undefined
+            Cookie: mark === 'localCk' ? `${bili_ticket};${cookie}` : undefined
         });
         const ck = cookie instanceof tough.CookieJar ? cookie : undefined;
         const res = await axios.get(url, {
