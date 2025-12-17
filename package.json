@@ -8,7 +8,7 @@
   "private": false,
   "repository": {
     "type": "git",
-    "url": "https://github.com/snowtafir/yuki-plugin.git"
+    "url": "git+https://github.com/snowtafir/yuki-plugin.git"
   },
   "scripts": {
     "app": "node lib/main.js",
