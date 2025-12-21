@@ -46,4 +46,4 @@ jobs:
       - name: 🚀 发布npm包
         run: |
           ls -l
-          yarn publish --tag next
+          npm publish
