@@ -8,7 +8,8 @@ class WeiboApi {
     this.initialize();
   }
 
-  static WEIBO_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36';
+  static WEIBO_USER_AGENT =
+    'Mozilla/5.0(Linux;u;Android 4.2.2;zh-cn;) AppleWebKit/534.46 (KHTML,like Gecko) Version/5.1 Mobile Safari/10600.6.3 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)';
 
   //初始化User-Agent
   async initialize() {
