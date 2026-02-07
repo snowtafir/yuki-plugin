@@ -1,7 +1,7 @@
 import React from 'react';
 import Config from '../../utils/config.js';
 import path__default from 'path';
-import { createRequire, _paths } from '../../utils/paths.js';
+import { _paths, createRequire } from '../../utils/paths.js';
 
 const require$1 = createRequire(import.meta.url);
 const botPackageJsonPath = path__default.join(_paths.root, 'package.json');
