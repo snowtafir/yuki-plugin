@@ -279,11 +279,11 @@ message.use(
 message.use(
   async e => {
     if (e.isMaster) {
-      if (e.isPrivate) {
+      if (!e.isPrivate) {
         await e.reply('请注意账号安全，请手动撤回发送的cookie，并私聊进行添加绑定！');
       } else {
         let localBiliCookie = e.msg
-          .replace(/^(#|\/)(yuki|优纪)?(绑定|添加|ADD|add)(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(ck|CK|cookie|COOKIE)(:|：)?/g, '')
+          .replace(/^(#|\/)(yuki|优纪)?(绑定|添加|ADD|add)(b站|B站|bili|bilibili|哔哩|哔哩哔哩)本地(ck|CK|cookie|COOKIE)(:|：)?/g, '')
           .trim();
 
         let param: any = {};
