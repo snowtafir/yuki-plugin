@@ -1,128 +1,149 @@
+/**
+ * image.tsx - 图片渲染模块
+ * 基于 jsxp 提供的 Picture 类和 YukiPuppeteerRender 实现 React 组件到图片的渲染
+ * 支持任务队列管理，确保截图任务按顺序执行
+ */
 import React from 'react';
-import { Picture, ComponentCreateOpsionType } from 'jsxp';
+import { Picture, ComponentCreateOpsionType } from '@/utils/package/jsxp';
 import { YukiPuppeteerRender, ScreenshotOptions } from '@/utils/puppeteer.render';
 import * as ReactPages from '@/components/index';
 
-// 定义 Image 类，继承自 Picture 类
+/**
+ * Image 类
+ * 继承自 Picture 类，整合了 YukiPuppeteerRender 提供增强的截图功能
+ */
 class Image extends Picture {
-  // 私有属性，用于存储 YukiPuppeteerRender 实例
   private yukiPuppeteerRender: YukiPuppeteerRender;
 
-  /**
-   * 构造函数，整合截图方法
-   * @param launchOptions Puppeteer 启动选项，可选。父类有默认的设置。
-   */
   constructor() {
-    // 继承父类实例
     super();
-    // 父类已经实例化组件渲染对象
-    //this.component;
-    // 父类已经实例化启动 Puppeteer
-    //this.puppeteer.start();
-    // 初始化 YukiPuppeteerRender 实例
+    // 初始化 YukiPuppeteerRender 实例，注入 Puppeteer 实例
     this.yukiPuppeteerRender = new YukiPuppeteerRender(this.puppeteer);
   }
 
   /**
-   * 实例方法，用于执行实际的渲染和截图操作
-   * @param uid 唯一标识符
-   * @param page 组件名称
-   * @param props 传入的组件参数
-   * @param ComponentCreateOpsion 组件创建选项
-   * @param ScreenshotOptions 截图选项
-   * @returns {false | {img: buffer[]}}
+   * 执行实际的渲染和截图操作
+   * @param uid 唯一标识符，用于生成 HTML 文件名
+   * @param page 组件名称，对应 components/index 中导出的组件
+   * @param props 传入组件的参数
+   * @param screenshotOptions 截图选项配置
+   * @param componentCreateOption 组件创建选项
+   * @returns 失败返回 false，成功返回包含图片 Buffer 数组的对象
    */
   async _renderPage<T = any>(
     uid: number | string,
     page: string,
     props: T = {} as T,
-    ScreenshotOptions?: ScreenshotOptions,
-    ComponentCreateOpsion?: ComponentCreateOpsionType
+    screenshotOptions?: ScreenshotOptions,
+    componentCreateOption?: ComponentCreateOpsionType
   ): Promise<false | { img: Buffer[] }> {
     // 根据组件名称获取对应的 React 组件
     const Page = ReactPages[page];
+    if (!Page) {
+      console.error(`[image] 未找到组件: ${page}`);
+      return false;
+    }
+
+    // 编译 React 组件为 HTML 文件路径
+    const htmlPath = this.component.compile({
+      path: page,
+      name: `${uid}.html`,
+      component: <Page {...props} />,
+      ...componentCreateOption
+    });
+
     // 调用 yukiPuppeteerRender 进行截图操作
-    return this.yukiPuppeteerRender.yukiScreenshot(
-      this.component.compile({
-        path: page,
-        name: `${uid}.html`,
-        component: <Page {...props} />,
-        ...ComponentCreateOpsion
-      }),
-      ScreenshotOptions
-    );
+    return this.yukiPuppeteerRender.yukiScreenshot(htmlPath, screenshotOptions);
   }
 }
 
-// 存储单例实例
-let instance: Image;
+// 单例实例
+let instance: Image | null = null;
 
-// 存储任务队列
-const queue: Array<{
+// 任务队列
+interface RenderTask {
   uid: number | string;
   page: string;
   props: any;
-  ScreenshotOptions?: ScreenshotOptions;
-  ComponentCreateOpsion?: ComponentCreateOpsionType;
+  screenshotOptions?: ScreenshotOptions;
+  componentCreateOption?: ComponentCreateOpsionType;
   resolve: (value: false | { img: Buffer[] }) => void;
   reject: (reason?: any) => void;
-}> = [];
+}
 
-// 标记当前是否有任务正在处理
+const queue: RenderTask[] = [];
 let isProcessing = false;
 
 /**
  * 处理队列中的任务
+ * 按顺序逐个执行队列中的渲染任务
  */
-const processQueue = async () => {
-  // 如果队列为空，设置 isProcessing 为 false 并返回
+const processQueue = async (): Promise<void> => {
   if (queue.length === 0) {
     isProcessing = false;
     return;
   }
 
-  // 设置 isProcessing 为 true，表示有任务正在处理
   isProcessing = true;
-  // 从队列中取出第一个任务
-  const { uid, page, props, ScreenshotOptions, ComponentCreateOpsion, resolve, reject } = queue.shift()!;
+  const task = queue.shift()!;
 
   try {
-    // 调用实例方法 renderPage 执行任务
-    const img = await instance._renderPage(uid, page, props, ScreenshotOptions, ComponentCreateOpsion);
-    // 任务成功完成，调用 resolve 回调函数
-    resolve(img);
+    const result = await instance!._renderPage(task.uid, task.page, task.props, task.screenshotOptions, task.componentCreateOption);
+    task.resolve(result);
   } catch (error) {
-    // 任务失败，打印错误信息并调用 reject 回调函数
-    console.error(error);
-    reject(false);
+    console.error('[image] 渲染任务失败:', error);
+    task.reject(false);
   }
 
-  // 处理下一个任务
+  // 继续处理下一个任务
   processQueue();
 };
 
 /**
- * 渲染列队中的任务
- * @param uid 唯一标识符
- * @param page 组件名称
- * @param props 传入的组件参数
- * @param ComponentCreateOpsion 组件创建选项
- * @param ScreenshotOptions 截图选项
- * @returns {false | {img: buffer[]}}
+ * 渲染 React 组件为图片
+ * 通过任务队列管理，确保多个渲染请求按顺序执行，避免并发问题
+ *
+ * @param uid 唯一标识符，用于生成 HTML 文件名
+ * @param page 组件名称，对应 components/index 中导出的组件
+ * @param props 传入组件的参数
+ * @param screenshotOptions 截图选项配置
+ * @param componentCreateOption 组件创建选项
+ * @returns Promise，失败返回 false，成功返回包含图片 Buffer 数组的对象
+ *
+ * @example
+ * ```typescript
+ * const result = await renderPage('user123', 'MainPage', { title: 'Hello' }, {
+ *   SOptions: { type: 'png', quality: 100 },
+ *   isSplit: true
+ * });
+ * if (result) {
+ *   // result.img 是 Buffer 数组
+ * }
+ * ```
  */
 const renderPage = async <T = any,>(
   uid: number | string,
   page: string,
   props: T = {} as T,
-  ScreenshotOptions?: ScreenshotOptions,
-  ComponentCreateOpsion?: ComponentCreateOpsionType
+  screenshotOptions?: ScreenshotOptions,
+  componentCreateOption?: ComponentCreateOpsionType
 ): Promise<false | { img: Buffer[] }> => {
+  // 懒加载单例实例
   if (!instance) {
     instance = new Image();
   }
+
   return new Promise((resolve, reject) => {
-    // 将任务添加到队列中
-    queue.push({ uid, page, props, ScreenshotOptions, ComponentCreateOpsion, resolve, reject });
+    queue.push({
+      uid,
+      page,
+      props,
+      screenshotOptions,
+      componentCreateOption,
+      resolve,
+      reject
+    });
+
     // 如果没有任务正在处理，则开始处理队列
     if (!isProcessing) {
       processQueue();
@@ -130,5 +151,4 @@ const renderPage = async <T = any,>(
   });
 };
 
-// 导出 renderPage 方法，用于生成图片
 export { renderPage };

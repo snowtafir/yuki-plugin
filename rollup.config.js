@@ -48,7 +48,8 @@ export default [
           { src: 'LICENSE', dest: path.join(__dirname, 'dist') },
           { src: './CHANGELOG.md', dest: path.join(__dirname, 'dist') },
           { src: './.gitignore', dest: path.join(__dirname, 'dist') },
-          { src: 'defaultConfig/', dest: path.join(__dirname, 'dist') }
+          { src: 'defaultConfig/', dest: path.join(__dirname, 'dist') },
+          { src: './guoba.support.js', dest: path.join(__dirname, 'dist') }
         ]
       }),
       json(),
@@ -73,6 +74,19 @@ export default [
       //image(),
     ],
     onwarn,
-    external: ['fs', 'path', 'tough-cookie', 'chalk', 'module', 'yunzai', 'yunzaijs', 'child_process', 'net', 'lodash', '../../../lib/plugins/plugin.js']
+    external: [
+      'fs',
+      'path',
+      'tough-cookie',
+      'chalk',
+      'module',
+      'yunzai',
+      'yunzaijs',
+      'child_process',
+      'net',
+      'lodash',
+      'react-dom/server',
+      '../../../lib/plugins/plugin.js'
+    ]
   }
 ];

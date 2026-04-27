@@ -66,13 +66,69 @@ class Config {
     }
   }
   /**
+   * 获取 Guoba 配置文件路径
+   * @param appDir 配置app目录
+   * @param functionName 配置文件名称，不包含.yaml后缀
+   * @returns {string} Guoba 配置文件路径
+   */
+  getGuobaConfigFilePath(appDir: string, functionName: string): string {
+    return path.join(_paths.botYukiData, 'config', appDir, `${functionName}.guoba.support.yaml`);
+  }
+
+  /**
+   * 检查 Guoba 配置文件是否存在
+   * @param appDir 配置app目录
+   * @param functionName 配置文件名称
+   * @returns {boolean} 是否存在
+   */
+  hasGuobaConfig(appDir: string, functionName: string): boolean {
+    const guobaPath = this.getGuobaConfigFilePath(appDir, functionName);
+    return fs.existsSync(guobaPath);
+  }
+
+  /**
+   * 读取 Guoba 配置文件
+   * @param appDir 配置app目录
+   * @param functionName 配置文件名称
+   * @returns {object|null} 配置数据，不存在则返回 null
+   */
+  readGuobaConfig(appDir: string, functionName: string): Record<string, any> | null {
+    try {
+      const guobaPath = this.getGuobaConfigFilePath(appDir, functionName);
+      if (!fs.existsSync(guobaPath)) {
+        return null;
+      }
+      const content = fs.readFileSync(guobaPath, 'utf8');
+      return YAML.parse(content);
+    } catch (error) {
+      logger.error(`[Guoba] 读取配置文件失败 [${appDir}/${functionName}]:`, error);
+      return null;
+    }
+  }
+
+  /**
    * 通用获取配置文件数据方法
+   * 优先级：Guoba 配置 > 用户配置 + 默认配置
    * @param typeDir 配置文件目录类型对应路径 defaultConfig: defaultConfig 或 config: yunzai/data/yuki-plugin/config
    * @param appDir 配置app目录
    * @param functionName 配置文件名称，不包含.yaml后缀
    * @returns {object} 配置数据
    */
   getConfigData(typeDir: string, appDir: string, functionName: string) {
+    // 对于 user config 类型，优先检查 Guoba 配置
+    if (typeDir === 'config') {
+      const guobaConfig = this.readGuobaConfig(appDir, functionName);
+      if (guobaConfig) {
+        const key = `guoba_${appDir}_${functionName}`;
+        if (this[key]) return this[key];
+
+        this[key] = guobaConfig;
+        // 监听 Guoba 配置文件变化
+        this.watch(this.getGuobaConfigFilePath(appDir, functionName), 'guoba', appDir, functionName);
+        return this[key];
+      }
+    }
+
     const configFilePath = this.getConfigFilePath(typeDir, appDir, functionName);
     const key = `${typeDir}_${appDir}_${functionName}`;
 
@@ -135,10 +191,19 @@ class Config {
 
   /**
    * 获取用户配置
+   * 优先级：Guoba 配置 > (用户配置 + 默认配置)
    * @param appDir 配置app目录
    * @param functionName 配置文件名称，不包含.yaml后缀
    */
   getUserConfig(appDir: string, functionName: string) {
+    // 优先检查 Guoba 配置
+    const guobaConfig = this.readGuobaConfig(appDir, functionName);
+    if (guobaConfig) {
+      const defaultConfigData = this.getDefaultConfig(appDir, functionName);
+      return lodash.merge({}, defaultConfigData, guobaConfig);
+    }
+
+    // 否则使用原有逻辑
     const userConfigData = this.getConfigData('config', appDir, functionName);
     const defaultConfigData = this.getDefaultConfig(appDir, functionName);
 
@@ -147,7 +212,7 @@ class Config {
 
   /**
    * 保存配置文件
-   * @param typeDir 插件为起始的配置文件目录
+   * @param typeDir 配置文件目录类型 defaultConfig: defaultConfig 或 config: yunzai/data/yuki-plugin/config
    * @param appDir 配置app目录
    * @param functionName 配置文件名称，不包含.yaml后缀
    * @param data 配置数据
