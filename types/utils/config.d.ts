@@ -12,7 +12,29 @@ declare class Config {
     /** 操作并创建配置文件到指定目录 */
     initConfigFiles(): void;
     /**
+     * 获取 Guoba 配置文件路径
+     * @param appDir 配置app目录
+     * @param functionName 配置文件名称，不包含.yaml后缀
+     * @returns {string} Guoba 配置文件路径
+     */
+    getGuobaConfigFilePath(appDir: string, functionName: string): string;
+    /**
+     * 检查 Guoba 配置文件是否存在
+     * @param appDir 配置app目录
+     * @param functionName 配置文件名称
+     * @returns {boolean} 是否存在
+     */
+    hasGuobaConfig(appDir: string, functionName: string): boolean;
+    /**
+     * 读取 Guoba 配置文件
+     * @param appDir 配置app目录
+     * @param functionName 配置文件名称
+     * @returns {object|null} 配置数据，不存在则返回 null
+     */
+    readGuobaConfig(appDir: string, functionName: string): Record<string, any> | null;
+    /**
      * 通用获取配置文件数据方法
+     * 优先级：Guoba 配置 > 用户配置 + 默认配置
      * @param typeDir 配置文件目录类型对应路径 defaultConfig: defaultConfig 或 config: yunzai/data/yuki-plugin/config
      * @param appDir 配置app目录
      * @param functionName 配置文件名称，不包含.yaml后缀
@@ -43,13 +65,14 @@ declare class Config {
     getDefaultConfig(appDir: string, functionName: string): any;
     /**
      * 获取用户配置
+     * 优先级：Guoba 配置 > (用户配置 + 默认配置)
      * @param appDir 配置app目录
      * @param functionName 配置文件名称，不包含.yaml后缀
      */
     getUserConfig(appDir: string, functionName: string): any;
     /**
      * 保存配置文件
-     * @param typeDir 插件为起始的配置文件目录
+     * @param typeDir 配置文件目录类型 defaultConfig: defaultConfig 或 config: yunzai/data/yuki-plugin/config
      * @param appDir 配置app目录
      * @param functionName 配置文件名称，不包含.yaml后缀
      * @param data 配置数据
