@@ -108,9 +108,13 @@ yarn install
 # 📦二、插件配置
 
 > [!IMPORTANT] 
-> 统一的配置文件路径：
+> 统一的手动配置文件路径：
 
 `Yunzai/data/yuki-plugin/config/`，启动一次后，即可查看配置文件。
+
+> 通过锅巴插件进行配置：
+
+ `Yunzai/data/yuki-plugin/config/{bilibili/weibo}/config.guoba.support.yaml`，删除文件重启bot即可恢复手动配置。
 
 ### （一）B站动态功能：
  使用前建议先绑定B站账号或配置cookie，绑定后即可使用相关功能。
@@ -258,3 +262,4 @@ yarn install
 |     [Miao-Yunzai](https://gitee.com/yoimiya-kokomi/Miao-Yunzai)     | 喵喵的 Miao-Yunzai      |
 |         [Yunzai-Bot](https://gitee.com/Le-niao/Yunzai-Bot)          | 乐神的 Yunzai-Bot       |
 |[jsxp](https://github.com/lemonade-lab/lvyjs/tree/main/packages/jsxp) | 一个可以在 tsx 环境中,使用 puppeteer 对 tsx 组件进行截图的库 |
+| [Guoba-Plugin](https://github.com/guoba-yunzai/guoba-plugin) | 锅巴插件，提供网页后台管理界面 |

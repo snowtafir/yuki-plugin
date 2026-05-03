@@ -1,7 +1,7 @@
 import { LaunchOptions } from 'puppeteer';
-import { Component } from './component.js';
-import { Puppeteer } from './puppeteer.js';
-import { ComponentCreateOpsionType, RenderOptions } from './types.js';
+import { Component } from './component';
+import { Puppeteer } from './puppeteer';
+import { ComponentCreateOpsionType, RenderOptions } from './types';
 /**
  * 截图类
  * 结合了组件编译和浏览器渲染功能

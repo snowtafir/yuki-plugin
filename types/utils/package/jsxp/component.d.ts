@@ -1,4 +1,4 @@
-import { ComponentCreateOpsionType } from './types.js';
+import { ComponentCreateOpsionType } from './types';
 /**
  * 组件解析类
  * 负责将 React 组件编译为 HTML，并处理路径格式化
