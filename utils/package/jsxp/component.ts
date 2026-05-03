@@ -1,7 +1,7 @@
 import { renderToString } from 'react-dom/server';
 import { mkdirSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
-import { ComponentCreateOpsionType } from './types.js';
+import { ComponentCreateOpsionType } from './types';
 
 /**
  * 组件解析类

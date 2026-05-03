@@ -4,13 +4,13 @@
  */
 
 // 类型导出
-export type { ComponentCreateOpsionType, JSXPOptions, ObtainProps, RenderOptions, RendersType } from './types.js';
+export type { ComponentCreateOpsionType, JSXPOptions, ObtainProps, RenderOptions, RendersType } from '@/utils/package/jsxp/types';
 
 // Puppeteer 相关导出
-export { Puppeteer, PuppeteerDefineOptioins, PuppeteerOptimizeOptioins } from './puppeteer.js';
+export { Puppeteer, PuppeteerDefineOptioins, PuppeteerOptimizeOptioins } from '@/utils/package/jsxp/puppeteer';
 
 // Component 相关导出
-export { Component } from './component.js';
+export { Component } from '@/utils/package/jsxp/component';
 
 // Picture 相关导出
-export { Picture } from './picture.js';
+export { Picture } from '@/utils/package/jsxp/picture';

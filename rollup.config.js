@@ -45,6 +45,7 @@ export default [
           { src: './package.json', dest: path.join(__dirname, 'dist') },
           { src: './.puppeteerrc.cjs', dest: path.join(__dirname, 'dist') },
           { src: './README.md', dest: path.join(__dirname, 'dist') },
+          { src: './utils/package/jsxp/README.md', dest: path.join(__dirname, 'dist/utils/package/jsxp/') },
           { src: 'LICENSE', dest: path.join(__dirname, 'dist') },
           { src: './CHANGELOG.md', dest: path.join(__dirname, 'dist') },
           { src: './.gitignore', dest: path.join(__dirname, 'dist') },

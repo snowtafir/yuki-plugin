@@ -1,5 +1,5 @@
 import puppeteer, { LaunchOptions, Browser } from 'puppeteer';
-import { RenderOptions } from './types.js';
+import { RenderOptions } from './types';
 
 /**
  * 默认参数配置

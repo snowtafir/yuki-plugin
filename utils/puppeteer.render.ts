@@ -2,7 +2,7 @@
  * YukiPuppeteerRender - 增强的截图渲染类
  * 基于 jsxp 的 Puppeteer 实例，提供分片截图、样式注入等高级功能
  */
-import { Puppeteer } from '@/utils/package/jsxp';
+import { Puppeteer } from '@/utils/package/jsxp/index';
 import fs from 'fs';
 import path from 'path';
 import { _paths } from '@/utils/paths';
