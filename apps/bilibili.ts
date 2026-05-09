@@ -63,11 +63,11 @@ export default class YukiBili extends Plugin {
         fnc: 'singelSubDynamicPushList'
       },
       {
-        reg: '^(#|/)(yuki|优纪)?(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(up|UP)主.*$',
+        reg: '^(#|/)(yuki|优纪)?(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(up|UP)主(uid|UID)(:|：)?.*$',
         fnc: 'getBilibiUserInfoByUid'
       },
       {
-        reg: '^(#|/)(yuki|优纪)?搜索(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(up|UP)主.*$',
+        reg: '^(#|/)(yuki|优纪)?(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(up|UP)主昵称(:|：)?.*$',
         fnc: 'searchBiliUserInfoByKeyword'
       },
       {
@@ -646,7 +646,7 @@ export default class YukiBili extends Plugin {
 
   /**通过uid获取up主信息 */
   async getBilibiUserInfoByUid() {
-    let uid = this.e.msg.replace(/^(#|\/)(yuki|优纪)?(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(up|UP)主/g, '').trim();
+    let uid = this.e.msg.replace(/^(#|\/)(yuki|优纪)?(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(up|UP)主(uid|UID)(:|：)?/g, '').trim();
 
     const res = await new BilibiliWebDataFetcher(this.e).getBilibiUserInfoByUid(uid);
 
@@ -684,7 +684,7 @@ export default class YukiBili extends Plugin {
 
   /** 根据名称搜索up的uid*/
   async searchBiliUserInfoByKeyword() {
-    let keyword = this.e.msg.replace(/^(#|\/)(yuki|优纪)?搜索(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(up|UP)主/g, '').trim();
+    let keyword = this.e.msg.replace(/^(#|\/)(yuki|优纪)?(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(up|UP)主昵称(:|：)?/g, '').trim();
 
     const res = await new BilibiliWebDataFetcher(this.e).searchBiliUserInfoByKeyword(keyword);
 

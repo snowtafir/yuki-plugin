@@ -30,11 +30,11 @@ export default class YukiWeibo extends Plugin {
         fnc: 'singelSubDynamicPushList'
       },
       {
-        reg: '^(#|/)(yuki|优纪)?(微博|weibo|WEIBO)(博|bo|BO)主.*$',
+        reg: '^(#|/)(yuki|优纪)?(微博|weibo|WEIBO)(博|bo|BO)主(uid|UID)(:|：)?.*$',
         fnc: 'getWeiboUserInfoByUid'
       },
       {
-        reg: '^(#|/)(yuki|优纪)?搜索(微博|weibo|WEIBO)(博|bo|BO)主.*$',
+        reg: '^(#|/)(yuki|优纪)?(微博|weibo|WEIBO)(博|bo|BO)主昵称(:|：)?.*$',
         fnc: 'searchWeiboUserInfoByKeyword'
       },
       {
@@ -403,7 +403,7 @@ export default class YukiWeibo extends Plugin {
 
   /**通过uid获取up主信息 */
   async getWeiboUserInfoByUid() {
-    let uid = this.e.msg.replace(/^(#|\/)(yuki|优纪)?(微博|weibo|WEIBO)(博|bo|BO)主/g, '').trim();
+    let uid = this.e.msg.replace(/^(#|\/)(yuki|优纪)?(微博|weibo|WEIBO)(博|bo|BO)主(uid|UID)(:|：)?/g, '').trim();
 
     const res = await new WeiboWebDataFetcher(this.e).getBloggerInfo(uid);
 
@@ -441,7 +441,7 @@ export default class YukiWeibo extends Plugin {
 
   /** 根据昵称搜索博主信息*/
   async searchWeiboUserInfoByKeyword() {
-    let keyword = this.e.msg.replace(/^(#|\/)(yuki|优纪)?搜索(微博|weibo|WEIBO)(博|bo|BO)主/g, '').trim();
+    let keyword = this.e.msg.replace(/^(#|\/)(yuki|优纪)?搜索(微博|weibo|WEIBO)(博|bo|BO)主昵称(:|：)?/g, '').trim();
 
     const res = await new WeiboWebDataFetcher(this.e).searchBloggerInfo(keyword);
 

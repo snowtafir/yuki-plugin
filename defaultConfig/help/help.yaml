@@ -24,10 +24,10 @@
       title: '#执行B站任务'
       desc: '手动触发定时推送任务'
     - icon: flower_2
-      title: '#B站up主UID'
+      title: '#B站up主UID：401742377'
       desc: '通过uid查看up信息'
     - icon: shell
-      title: '#搜索B站up主原神'
+      title: '#B站up主昵称：原神'
       desc: '用昵称在b站搜索up信息'
     - icon: 雷神瞳共鸣石
       title: '#扫码B站登录'
@@ -71,10 +71,10 @@
       title: '#执行微博任务'
       desc: '手动触发定时推送任务'
     - icon: flower_2
-      title: '#微博博主UID'
+      title: '#微博博主UID：6593199887'
       desc: '通过uid查看博主信息'
     - icon: shell
-      title: '#搜索微博博主原神'
+      title: '#微博博主昵称：原神'
       desc: '根据关键词在微博搜索大V博主的信息'
     - icon: 雷神瞳共鸣石
       title: '#扫码微博登录'
