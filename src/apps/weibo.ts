@@ -408,7 +408,7 @@ message.use(
 /**通过uid获取up主信息 */
 message.use(
   async e => {
-    let uid = e.msg.replace(/^(#|\/)(yuki|优纪)?(微博|weibo|WEIBO)(博|bo|BO)主/g, '').trim();
+    let uid = e.msg.replace(/^(#|\/)(yuki|优纪)?(微博|weibo|WEIBO)(博|bo|BO)主(uid|UID)(:|：)?/g, '').trim();
 
     const res = await new WeiboWebDataFetcher(e).getBloggerInfo(uid);
 
@@ -443,13 +443,13 @@ message.use(
 
     e.reply(message);
   },
-  [/^(#|\/)(yuki|优纪)?(微博|weibo|WEIBO)(博|bo|BO)主.*$/]
+  [/^(#|\/)(yuki|优纪)?(微博|weibo|WEIBO)(博|bo|BO)主(uid|UID)(:|：)?.*$/]
 );
 
 /** 根据昵称搜索博主信息*/
 message.use(
   async e => {
-    let keyword = e.msg.replace(/^(#|\/)(yuki|优纪)?搜索(微博|weibo|WEIBO)(博|bo|BO)主/g, '').trim();
+    let keyword = e.msg.replace(/^(#|\/)(yuki|优纪)?(微博|weibo|WEIBO)(博|bo|BO)主昵称(:|：)?/g, '').trim();
 
     const res = await new WeiboWebDataFetcher(e).searchBloggerInfo(keyword);
 
@@ -485,7 +485,7 @@ message.use(
 
     e.reply(messages.join('\n'));
   },
-  [/^(#|\/)(yuki|优纪)?搜索(微博|weibo|WEIBO)(博|bo|BO)主.*$/]
+  [/^(#|\/)(yuki|优纪)?(微博|weibo|WEIBO)(博|bo|BO)主昵称(:|：)?.*$/]
 );
 
 export const YukiWeibo = message.ok;

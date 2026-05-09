@@ -616,7 +616,7 @@ message.use(
 /**通过uid获取up主信息 */
 message.use(
   async e => {
-    let uid = e.msg.replace(/^(#|\/)(yuki|优纪)?(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(up|UP)主/g, '').trim();
+    let uid = e.msg.replace(/^(#|\/)(yuki|优纪)?(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(up|UP)主(uid|UID)(:|：)?/g, '').trim();
 
     const res = await new BilibiliWebDataFetcher(e).getBilibiUserInfoByUid(uid);
 
@@ -651,13 +651,13 @@ message.use(
     }
     e.reply(message);
   },
-  [/^(#|\/)(yuki|优纪)?(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(up|UP)主.*$/]
+  [/^(#|\/)(yuki|优纪)?(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(up|UP)主(uid|UID)(:|：)?.*$/]
 );
 
 /** 根据名称搜索up的uid*/
 message.use(
   async e => {
-    let keyword = e.msg.replace(/^(#|\/)(yuki|优纪)?搜索(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(up|UP)主/g, '').trim();
+    let keyword = e.msg.replace(/^(#|\/)(yuki|优纪)?(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(up|UP)主昵称(:|：)?/g, '').trim();
 
     const res = await new BilibiliWebDataFetcher(e).searchBiliUserInfoByKeyword(keyword);
 
@@ -693,7 +693,7 @@ message.use(
 
     e.reply(messages.join('\n'));
   },
-  [/^(#|\/)(yuki|优纪)?搜索(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(up|UP)主.*$/]
+  [/^(#|\/)(yuki|优纪)?(b站|B站|bili|bilibili|哔哩|哔哩哔哩)(up|UP)主昵称(:|：)?.*$/]
 );
 
 /** 根据名称搜索up的uid*/
