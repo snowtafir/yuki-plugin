@@ -456,9 +456,17 @@ export default class YukiWeibo extends Plugin {
       data?.cards
         ?.filter(card => card?.card_type === 11) // 筛选 card_type = 11
         ?.flatMap(card => (Array.isArray(card.card_group) ? card.card_group : [])) // 提取 card_group
-        ?.filter(item => item?.card_type === 10) || []; // 筛选 card_type = 10
+        ?.flatMap(item => {
+          if (Array.isArray(item?.users)) {
+            return item.users;
+          }
+          if (item?.user) {
+            return [item.user];
+          }
+          return [];
+        }) || []; // 筛选 card_type = 10 user 或 card_type = 3 users
 
-    if (!result) {
+    if (!result.length) {
       this.e.reply('惹~没有搜索到相关用户捏，\n请换个关键词试试吧~ \nPS：该方法只能搜索到大V');
       return;
     }
@@ -466,11 +474,10 @@ export default class YukiWeibo extends Plugin {
     const messages: string[] = [];
 
     // 只取前5个结果
-    for (const item of result.slice(0, 5)) {
-      const userInfo = item?.user || {};
+    for (const userInfo of result.slice(0, 5)) {
       const id = userInfo.id;
       const screen_name = userInfo.screen_name;
-      const followers_count = userInfo.followers_count;
+      const followers_count = userInfo.followers_count || userInfo.followers_count_str || '';
 
       messages.push(`\n------------------\n博主昵称：${screen_name}\nUID：${id}\n粉丝人数：${followers_count || ''}`);
     }
