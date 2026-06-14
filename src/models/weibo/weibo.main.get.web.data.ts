@@ -69,7 +69,7 @@ export class WeiboWebDataFetcher {
 
   /**通过关键词搜索微博大v */
   async searchBloggerInfo(keyword: string) {
-    const params = { containerid: '100103', type: '3', q: `${keyword}`, t: '', page_type: 'searchall' };
+    const params = { containerid: '100103', type: '1', q: `${keyword}`, page_type: 'searchall' };
     const url = new URL(WeiboApi.WEIBO_API.weiboGetIndex);
     url.search = new URLSearchParams(params).toString();
 
