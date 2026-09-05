@@ -50,6 +50,8 @@ class BiliApi {
       biliVideoInfoWbi: `https://api.bilibili.com/x/web-interface/wbi/view`,
       //短链
       biliShortVideoUrl: `https://b23.tv/`,
+      //短链412解控接口
+      biliCapchaCheck: 'https://security.bilibili.com/th/captcha/cc/check',
       biliLiveStatus: 'https://api.live.bilibili.com/room/v1/Room/get_status_info_by_uids',
       biliCard: 'https://api.bilibili.com/x/web-interface/card',
       biliStat: 'https://api.bilibili.com/x/relation/stat',
@@ -135,6 +137,26 @@ class BiliApi {
       'Sec-Fetch-User': '?1',
       'Sec-GPC': '1',
       'Upgrade-Insecure-Requests': '1',
+      'User-Agent': this.USER_AGENT
+    };
+  }
+
+  get BILIBILI_CAPTCHA_CHECK_HEADERS() {
+    return {
+      'Accept': '*/*',
+      'Accept-Encoding': 'gzip, deflate, br, zstd',
+      'Accept-Language': 'zh-CN,en-US;q=0.5',
+      'Connection': 'keep-alive',
+      'Content-type': 'application/x-www-form-urlencoded',
+      'Host': 'security.bilibili.com',
+      'Origin': 'https://www.bilibili.com',
+      'Pragma': 'no-cache',
+      'Referer': 'https://www.bilibili.com/',
+      'Sec-Fetch-Dest': 'empty',
+      'Sec-Fetch-Mode': 'cors',
+      'Sec-Fetch-Site': 'same-site',
+      'Sec-GPC': '1',
+      'TE': 'trailers',
       'User-Agent': this.USER_AGENT
     };
   }

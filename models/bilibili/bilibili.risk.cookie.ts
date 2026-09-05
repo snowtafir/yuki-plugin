@@ -534,7 +534,7 @@ class BiliRiskCookie {
    * 简单策略：优先从 Redis 读取长期 cookie（如 SESSDATA），若缺失则触发完整获取流程
    * */
   async ensureLoginCookies(jar: tough.CookieJar) {
-    // 常见域名为 .weibo.cn 或 m.weibo.cn，根据实际情况检查
+    // 常见域名为 .bilibili.com 或 bilibili.com，根据实际情况检查
     const SESSDATA_Key1 = `${this.prefix}:.bilibili.com:SESSDATA`;
     const SESSDATA_Key2 = `${this.prefix}:bilibili.com:SESSDATA`;
 
