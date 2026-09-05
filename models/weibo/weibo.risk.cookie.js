@@ -219,7 +219,16 @@ class WeiboRiskCookie {
         return res;
     }
     static parseCallbackJs(jsText, cbName = 'visitor_gray_callback') {
-        let m = jsText.match(new RegExp(cbName + '\\s*\\(\\s*([\\s\\S]*?)\\s*\\)\\s*;?'));
+        // 改用字符串查找定位回调参数，避免使用动态构造的正则表达式
+        let m = null;
+        const nameIdx = jsText.indexOf(cbName);
+        if (nameIdx !== -1) {
+            const openIdx = jsText.indexOf('(', nameIdx + cbName.length);
+            const closeIdx = jsText.lastIndexOf(')');
+            if (openIdx !== -1 && closeIdx > openIdx) {
+                m = [null, jsText.slice(openIdx + 1, closeIdx).trim()];
+            }
+        }
         if (m) {
             try {
                 return JSON.parse(m[1]);
@@ -611,9 +620,10 @@ class WeiboRiskCookie {
                         resolve(cookieString || '');
                 });
             });
-            // 解析目标 key 的值
-            const match = cookieString.match(new RegExp(`${key}=([^;]+)`));
-            return match ? match[1] : null;
+            // 解析目标 key 的值（改用字符串查找，避免动态构造正则表达式）
+            const prefix = `${key}=`;
+            const part = cookieString.split(';').map(s => s.trim()).find(s => s.startsWith(prefix));
+            return part ? part.slice(prefix.length) : null;
         }
         catch (err) {
             console.error(`Error fetching cookie with key "${key}":`, err);
@@ -627,6 +637,10 @@ class WeiboRiskCookie {
      */
     /**查看当前ck是否登录*/
     async checkWeiboLogin(e) {
+        if (!e?.isMaster) {
+            e?.reply?.('未取得bot主人身份，无权限查看微博登录状态');
+            return false;
+        }
         const url = 'https://m.weibo.cn/api/config';
         const jar = await WeiboCookieManager.getSessionCookieJar();
         const X_XSRF_TOKEN = await WeiboCookieManager.getCookieValueByKeyFromString(jar, 'X-XSRF-TOKEN', url);
@@ -673,6 +687,10 @@ class WeiboRiskCookie {
      * 扫码登录流程
      */
     async weiboLogin(e) {
+        if (!e?.isMaster) {
+            e?.reply?.('未取得bot主人身份，无权限配置微博登录ck');
+            return false;
+        }
         const isLogin = await this.checkWeiboLogin(e);
         if (!isLogin) {
             const tokenKey = await this.applyLoginQRCode(e);
