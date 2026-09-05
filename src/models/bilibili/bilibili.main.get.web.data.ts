@@ -7,6 +7,7 @@ import { wrapper } from 'axios-cookiejar-support';
 import lodash from 'lodash';
 import * as tough from 'tough-cookie';
 import { EventType } from 'yunzaijs';
+import crypto from 'crypto';
 const axios = wrapper(axioss);
 
 export class BilibiliWebDataFetcher {
@@ -249,9 +250,114 @@ export class BilibiliWebDataFetcher {
       headers
     });
 
-    const htmlContent: string = await res.data;
-    const htmlContentRegex = /itemprop="url"\s*content="https:\/\/www.bilibili.com\/video\/(BV[a-zA-Z0-9]+)\/">/;
-    const BVID = htmlContent.match(htmlContentRegex)?.[1];
-    return `${BVID}`;
+    if (res.status === 200) {
+      const htmlContent: string = await res.data;
+      const htmlContentRegex = /property="og:url"\s*content="https:\/\/www.bilibili.com\/video\/(BV[a-zA-Z0-9]+)\/">/;
+      const BVID = htmlContent.match(htmlContentRegex)?.[1];
+      if (BVID) {
+        logger.info(`哔哩视频解析：status 200 解析短链成功，BVID: ${BVID}`);
+        return `${BVID}`;
+      } else {
+        logger.error('哔哩视频解析：status 200 正则不匹配，无法获取BVID');
+        return false;
+      }
+    } else if (res.status === 302) {
+      const locationHeader = res.headers['location'];
+      const bvidRegex = /\/video\/(BV[a-zA-Z0-9]+)/;
+      const bvidMatch = locationHeader?.match(bvidRegex)?.[1];
+      if (bvidMatch) {
+        logger.info(`哔哩视频解析：status 302 解析短链成功，BVID: ${bvidMatch}`);
+        return `${bvidMatch}`;
+      } else {
+        logger.error('哔哩视频解析：status 302 正则不匹配，无法获取BVID');
+        return false;
+      }
+    } else if (res.status === 412) {
+      const X_BILI_SEC_TOKEN = res.headers['set-cookie']
+        ?.find(c => c.includes('X-BILI-SEC-TOKEN='))
+        ?.split(';')[0]
+        .split('=')[1];
+
+      let decodedResult: number | null = null; // 显式设为可空
+
+      if (X_BILI_SEC_TOKEN) {
+        const base64_text = X_BILI_SEC_TOKEN.split('.')[1];
+        const decoded = Buffer.from(base64_text + '==', 'base64').toString('utf8');
+        const obj = JSON.parse(decoded); //{"q":"xxxxx","r":"xxxxx","ip":"xx.xx.xx.xx","fp":"xxx","verity":0,"type":"1","exp":1788276102,"iat":1788272502}
+
+        const limit = 0x4c4b40;
+        for (let i = 0; i < limit; i++) {
+          const hash = crypto
+            .createHash('sha256')
+            .update(obj.q + String(i))
+            .digest('hex');
+          if (hash === obj.r) {
+            decodedResult = i;
+            break; // 找到后立即跳出循环，节省时间
+          }
+        }
+
+        // 只有找到了结果才发送请求
+        if (decodedResult !== null) {
+          const capchaCheckRes = await axios.post(
+            BiliApi.BILIBIL_API.biliCapchaCheck,
+            { token: X_BILI_SEC_TOKEN, result: decodedResult },
+            { headers: BiliApi.BILIBILI_CAPTCHA_CHECK_HEADERS }
+          );
+          const capchaCheckResData: { code: number; message: string; ttl: number; data: null } = capchaCheckRes.data;
+          if (capchaCheckResData.code === 0) {
+            const afterCapchaCheckHeaders = lodash.merge(
+              BiliApi.BILIBILI_DYNAMIC_SPACE_HEADERS,
+              {
+                Cookie: mark === 'localCk' ? `${bili_ticket};${cookie}` : undefined
+              },
+              {
+                Cookie: `X-BILI-SEC-TOKEN=${capchaCheckResData.message}`
+              }
+            );
+            const res = await axios.get(url, {
+              jar: ck, // 仅在非 localCk 时传递 jar
+              timeout: 15000,
+              headers: afterCapchaCheckHeaders
+            });
+            if (res.status === 200) {
+              const htmlContent: string = await res.data;
+              const htmlContentRegex = /property="og:url"\s*content="https:\/\/www.bilibili.com\/video\/(BV[a-zA-Z0-9]+)\/">/;
+              const BVID = htmlContent.match(htmlContentRegex)?.[1];
+              if (BVID) {
+                logger.info(`哔哩视频解析：status 412-200 解析短链成功，BVID: ${BVID}`);
+                return `${BVID}`;
+              } else {
+                logger.error('哔哩视频解析：status 412-200 正则不匹配，无法获取BVID');
+                return false;
+              }
+            } else if (res.status === 302) {
+              const locationHeader = res.headers['location'];
+              const bvidRegex = /\/video\/(BV[a-zA-Z0-9]+)/;
+              const bvidMatch = locationHeader?.match(bvidRegex)?.[1];
+              if (bvidMatch) {
+                logger.info(`哔哩视频解析：status 412-302 解析短链成功，BVID: ${bvidMatch}`);
+                return `${bvidMatch}`;
+              } else {
+                logger.error('哔哩视频解析：status 412-302 正则不匹配，无法获取BVID');
+                return false;
+              }
+            } else {
+              logger.error('哔哩视频解析：解风控失败，短链解析失败，无法获取BVID');
+              return false;
+            }
+          } else if (capchaCheckResData.code === -1) {
+            logger.error('哔哩视频解析：解风控失败，风控方法可能已更新');
+            return false;
+          }
+        } else {
+          logger.error('哔哩视频解析：解风控失败，未找到匹配的验证码值');
+          return false;
+        }
+      } else {
+        logger.error('哔哩视频解析：遭遇风控或意外，短链解析失败，无法获取BVID');
+        return false;
+      }
+    }
   }
 }
