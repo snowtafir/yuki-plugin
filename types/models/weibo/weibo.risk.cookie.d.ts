@@ -107,7 +107,7 @@ declare class WeiboRiskCookie {
     static getUmdPublicKeyDer(): Buffer<ArrayBuffer>;
     static derToPem(derBuf: Buffer<ArrayBuffer>): string;
     makeBdPayload(fpStr: any): Promise<string>;
-    postFormWithJar(url: any, jar: any, dataObj: any, extraHeaders?: {}): Promise<import("axios").AxiosResponse<any, any, {}>>;
+    postFormWithJar(url: any, jar: any, dataObj: any, extraHeaders?: {}): Promise<import("axios").AxiosResponse<any, string, {}, any>>;
     static parseCallbackJs(jsText: any, cbName?: string): any;
     getNewSessionCookie(): Promise<void>;
     getSessionCookieJar(): Promise<tough.CookieJar>;

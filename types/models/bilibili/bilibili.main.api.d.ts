@@ -16,6 +16,7 @@ declare class BiliApi {
         biliVideoInfo: string;
         biliVideoInfoWbi: string;
         biliShortVideoUrl: string;
+        biliCapchaCheck: string;
         biliLiveStatus: string;
         biliCard: string;
         biliStat: string;
@@ -89,6 +90,23 @@ declare class BiliApi {
         'Sec-Fetch-User': string;
         'Sec-GPC': string;
         'Upgrade-Insecure-Requests': string;
+        'User-Agent': string;
+    };
+    get BILIBILI_CAPTCHA_CHECK_HEADERS(): {
+        Accept: string;
+        'Accept-Encoding': string;
+        'Accept-Language': string;
+        Connection: string;
+        'Content-type': string;
+        Host: string;
+        Origin: string;
+        Pragma: string;
+        Referer: string;
+        'Sec-Fetch-Dest': string;
+        'Sec-Fetch-Mode': string;
+        'Sec-Fetch-Site': string;
+        'Sec-GPC': string;
+        TE: string;
         'User-Agent': string;
     };
     /**返回GatWay payload */

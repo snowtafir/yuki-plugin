@@ -602,6 +602,10 @@ class YukiBili extends Plugin {
             if (videoIDMatch[2]) {
                 // 匹配 b23.tv/ 后面的部分
                 const bvidStr = await new BilibiliWebDataFetcher(this.e).getBVIDByShortUrl(videoIDMatch[2]);
+                if (bvidStr === false) {
+                    this.e.reply('遭遇风控或意外，短链解析失败，无法获取BVID~');
+                    return;
+                }
                 videoID = { bvid: bvidStr };
             }
             else if (videoIDMatch[4].startsWith('av')) {

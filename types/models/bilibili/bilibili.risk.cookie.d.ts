@@ -28,7 +28,9 @@ declare class BiliRiskCookie {
     /**
      * 请求参数POST接口(ExClimbWuzhi)过校验
      */
-    postGateway(cookie: string): Promise<import("axios").AxiosResponse<any, any, {}>>;
+    postGateway(cookie: string): Promise<import("axios").AxiosResponse<any, {
+        payload: string;
+    }, {}, any>>;
     /**退出B站账号登录，将会删除redis缓存的LoginCK，并在服务器注销该登录 Token (SESSDATA)*/
     exitBiliLogin(e: any): Promise<void>;
     /**
