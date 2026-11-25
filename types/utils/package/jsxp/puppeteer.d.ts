@@ -32,6 +32,15 @@ export declare class Puppeteer {
      */
     getLaunch(): LaunchOptions;
     /**
+     * 优先复用 TRSS-Yunzai 已加载的 Puppeteer 渲染器
+     * @returns true 表示已成功复用宿主浏览器
+     */
+    private useHostBrowser;
+    /**
+     * 启动插件本地 Chromium
+     */
+    private startLocalBrowser;
+    /**
      * 启动 Puppeteer 浏览器
      * @returns 是否启动成功
      */
@@ -41,6 +50,14 @@ export declare class Puppeteer {
      * @returns 是否启动成功
      */
     isStart(): Promise<boolean>;
+    /**
+     * 在浏览器租约内执行任务，协调宿主渲染器重启
+     */
+    withBrowserLease<T>(task: (browser: Browser) => Promise<T>, modelName?: string): Promise<T>;
+    /**
+     * 判断错误是否由宿主浏览器重启导致
+     */
+    private isBrowserLifecycleError;
     /**
      * 渲染 HTML 文件或内容为图片
      * @param html HTML 文件路径或内容

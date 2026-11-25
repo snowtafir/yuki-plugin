@@ -1,5 +1,8 @@
 import React from 'react';
 import 'puppeteer';
+import 'node:path';
+import 'node:url';
+import './paths.js';
 import 'react-dom/server';
 import 'fs';
 import 'path';
