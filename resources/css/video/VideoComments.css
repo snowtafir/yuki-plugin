@@ -1,0 +1,111 @@
+.video-comments {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #f0e7eb;
+}
+
+.video-comments-title {
+  margin-bottom: 10px;
+  color: #18191c;
+  font-size: 19px;
+  font-weight: 600;
+}
+
+.video-comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.video-comment {
+  display: flex;
+  min-height: 60px;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 6px 12px;
+  border: 1px solid #f4dfe8;
+  border-radius: 10px;
+  background: #fffafd;
+}
+
+.video-comment-avatar {
+  display: flex;
+  flex: 0 0 40px;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #ffe2ee;
+  color: #fb7299;
+  font-size: 19px;
+  font-weight: 600;
+}
+
+.video-comment-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.video-comment-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.video-comment-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 12px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.video-comment-author {
+  max-width: 70%;
+  overflow: hidden;
+  color: #fb7299;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.video-comment-actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+}
+
+.video-comment-meta time {
+  color: #a0a4aa;
+  font-size: 11px;
+}
+
+.video-comment-message {
+  display: -webkit-box;
+  margin-top: 3px;
+  overflow: hidden;
+  color: #41454a;
+  font-size: 16px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+
+.video-comment-emote {
+  display: inline-block;
+  max-width: none;
+  vertical-align: -0.25em;
+}
+
+.video-comment-like {
+  color: #9499a0;
+  font-size: 12px;
+  line-height: 1.5;
+}

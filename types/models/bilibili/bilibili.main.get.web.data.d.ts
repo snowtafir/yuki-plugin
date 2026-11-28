@@ -1,3 +1,17 @@
+export type BiliVideoHotCommentEmote = {
+    text: string;
+    url: string;
+    size: number;
+};
+export type BiliVideoHotComment = {
+    rpid: string;
+    uname: string;
+    avatar: string;
+    message: string;
+    emotes: BiliVideoHotCommentEmote[];
+    like: number;
+    ctime: number;
+};
 export declare class BilibiliWebDataFetcher {
     constructor(e?: any);
     /**通过uid获取up动态数据表*/
@@ -58,5 +72,7 @@ export declare class BilibiliWebDataFetcher {
         aid: number;
         bvid?: undefined;
     }>>;
+    /**获取视频热门评论，评论不可用时返回空数组*/
+    getBiliVideoHotComments(aid: number, count?: number): Promise<BiliVideoHotComment[]>;
     getBVIDByShortUrl(tvUrlID: string): Promise<string | false>;
 }

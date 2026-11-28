@@ -15,6 +15,7 @@ declare class BiliApi {
         biliSearchUpWbi: string;
         biliVideoInfo: string;
         biliVideoInfoWbi: string;
+        biliVideoHotCommentsWbi: string;
         biliShortVideoUrl: string;
         biliCapchaCheck: string;
         biliLiveStatus: string;

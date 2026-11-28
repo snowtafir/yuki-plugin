@@ -205,6 +205,76 @@ class BilibiliWebDataFetcher {
         });
         return res;
     }
+    /**获取视频热门评论，评论不可用时返回空数组*/
+    async getBiliVideoHotComments(aid, count = 3) {
+        const url = BiliApi.BILIBIL_API.biliVideoHotCommentsWbi;
+        try {
+            const bili_ticket = await BiliCookieManager.checkCookieBiliTicket();
+            const { cookie, mark } = await BiliCookieManager.readSyncCookie();
+            const referer = `https://www.bilibili.com/video/av${aid}`;
+            const data = {
+                oid: aid,
+                type: 1,
+                mode: 3,
+                pagination_str: JSON.stringify({ offset: '' }),
+                plat: 1,
+                seek_rpid: '',
+                web_location: 1315875
+            };
+            const signCookie = mark === 'localCk'
+                ? (await BiliCookieManager.readSavedCookieItems(`${bili_ticket};${cookie}`, ['SESSDATA'], false)) ||
+                    (await BiliCookieManager.readSavedCookieOtherItems(`${bili_ticket};${cookie}`, ['SESSDATA']))
+                : (await BiliCookieManager.readSavedCookieItems(await BiliCookieManager.getCookieStringForUrl(url), ['SESSDATA'], false)) ||
+                    (await BiliCookieManager.readSavedCookieOtherItems(await BiliCookieManager.getCookieStringForUrl(url), ['SESSDATA']));
+            const { w_rid, time_stamp } = await getWbiSign(data, BiliApi.BILIBILI_HEADERS, signCookie);
+            const params = {
+                ...data,
+                w_rid,
+                wts: time_stamp
+            };
+            const headers = lodash.merge(BiliApi.BILIBILI_HEADERS, {
+                Cookie: mark === 'localCk' ? `${bili_ticket};${cookie}` : undefined,
+                Host: 'api.bilibili.com',
+                Origin: 'https://www.bilibili.com',
+                Referer: referer
+            });
+            const ck = cookie instanceof tough.CookieJar ? cookie : undefined;
+            const res = await axios.get(url, {
+                jar: ck,
+                params,
+                timeout: 15000,
+                headers
+            });
+            const payload = res?.data;
+            if (payload?.code !== 0 || !Array.isArray(payload?.data?.replies)) {
+                logger?.warn?.(`优纪B站视频解析：热门评论不可用，code=${payload?.code ?? 'unknown'}`);
+                return [];
+            }
+            return payload.data.replies
+                .filter(reply => reply?.invisible !== true && typeof reply?.content?.message === 'string')
+                .slice(0, count)
+                .map(reply => ({
+                rpid: String(reply.rpid ?? ''),
+                uname: String(reply.member?.uname ?? ''),
+                avatar: String(reply.member?.avatar ?? ''),
+                message: reply.content.message.trim(),
+                emotes: Object.values(reply.content.emote ?? {})
+                    .filter((emote) => typeof emote?.text === 'string' && typeof emote?.url === 'string')
+                    .map((emote) => ({
+                    text: emote.text,
+                    url: emote.url.replace(/^http:\/\//, 'https://'),
+                    size: Math.min(Math.max(Number(emote.meta?.size) || 1, 1), 2)
+                })),
+                like: Number(reply.like) || 0,
+                ctime: Number(reply.ctime) || 0
+            }))
+                .filter(comment => comment.message && comment.uname);
+        }
+        catch (err) {
+            console.warn('[bilibili] 获取视频热门评论失败，已隐藏评论区', err);
+            return [];
+        }
+    }
     /*通过视频短链url获取bvid*/
     async getBVIDByShortUrl(tvUrlID) {
         const ShortVideoUrlApi = BiliApi.BILIBIL_API.biliShortVideoUrl;
