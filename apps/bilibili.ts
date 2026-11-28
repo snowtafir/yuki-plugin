@@ -728,27 +728,36 @@ export default class YukiBili extends Plugin {
       logger?.info(`优纪B站视频链接解析配置文件已设置关闭，解析终止。`);
       return false;
     }
-    const videoIDMatch = this.e.msg.match(/(b23\.tv\/([a-zA-Z0-9]+))|(www\.bilibili\.com\/video\/)?(av\d+|BV[a-zA-Z0-9]+)/);
+    /**B站app转发动态消息为QQ小程序卡片解析*/
+    const cardUrlMatch = this.e.msg.match(/"qqdocurl"\s*:\s*"([^"]+)"/);
+    const videoMessage = (cardUrlMatch?.[1] ?? this.e.msg).replace(/\\+\//g, '/');
 
-    let videoID;
-    if (videoIDMatch) {
-      if (videoIDMatch[2]) {
-        // 匹配 b23.tv/ 后面的部分
-        const bvidStr = await new BilibiliWebDataFetcher(this.e).getBVIDByShortUrl(videoIDMatch[2]);
-        if (bvidStr === false) {
-          this.e.reply('遭遇风控或意外，短链解析失败，无法获取BVID~');
-          return;
-        }
-        videoID = { bvid: bvidStr };
-      } else if (videoIDMatch[4].startsWith('av')) {
-        // 匹配 av 开头的部分
-        const aid = videoIDMatch[4].replace(/^av/, '');
-        videoID = { aid: Number(aid) };
-      } else if (videoIDMatch[4].startsWith('BV')) {
-        // 匹配 BV 开头的部分
-        videoID = { bvid: videoIDMatch[4] };
+    const shortLinkMatch = videoMessage.match(/b23\.tv\/([a-zA-Z0-9]+)/i);
+    const videoUrlMatch = videoMessage.match(/bilibili\.com\/video\/(BV[a-zA-Z0-9]{10}|av\d+)/i);
+    const bvMatch = videoMessage.match(/(?<![a-zA-Z0-9/])(BV[a-zA-Z0-9]{10})(?![a-zA-Z0-9])/);
+    const avMatch = videoMessage.match(/(?<![a-zA-Z0-9/])av(\d+)(?![a-zA-Z0-9])/i);
+
+    let videoID: { aid?: number; bvid?: string } | undefined;
+    if (shortLinkMatch) {
+      const bvidStr = await new BilibiliWebDataFetcher(this.e).getBVIDByShortUrl(shortLinkMatch[1]);
+      if (bvidStr === false) {
+        this.e.reply('遭遇风控或意外，短链解析失败，无法获取BVID~');
+        return;
       }
+      videoID = { bvid: bvidStr };
+    } else if (videoUrlMatch) {
+      const urlVideoId = videoUrlMatch[1];
+      videoID = /^av/i.test(urlVideoId) ? { aid: Number(urlVideoId.slice(2)) } : { bvid: urlVideoId.replace(/^bv/i, 'BV') };
+    } else if (bvMatch) {
+      videoID = { bvid: bvMatch[1] };
+    } else if (avMatch) {
+      videoID = { aid: Number(avMatch[1]) };
+    } else {
+      this.e.reply('未识别到有效的B站视频链接~');
+      return;
     }
+
+    logger?.info(`优纪B站视频解析：${videoID.bvid ? `bvid=${videoID.bvid}` : `aid=${videoID.aid}`}`);
     this.e.reply('优纪酱解析中，请稍后~');
     const res = await new BilibiliWebDataFetcher(this.e).getBiliVideoInfoByAid_BV(videoID);
     if (res?.statusText !== 'OK') {
