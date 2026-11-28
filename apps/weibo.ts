@@ -288,7 +288,7 @@ export default class YukiWeibo extends Plugin {
         messages.push('\n>>>>>>群组微博订阅<<<<<<');
         Object.keys(subData.group).forEach(groupId => {
           messages.push(`\n<群组${groupId}>：`);
-          subData.group[groupId].forEach((item: { type: any[]; uid: any; name: any }) => {
+          subData.group?.[groupId].forEach((item: { type: any[]; uid: any; name: any }) => {
             const types = new Set();
 
             if (item.type && item.type.length) {
@@ -311,7 +311,7 @@ export default class YukiWeibo extends Plugin {
         messages.push('\n>>>>>>私聊微博订阅<<<<<<');
         Object.keys(subData.private).forEach(userId => {
           messages.push(`\n<用户${userId}>：`);
-          subData.private[userId].forEach((item: { type: any[]; uid: any; name: any }) => {
+          subData.private?.[userId].forEach((item: { type: any[]; uid: any; name: any }) => {
             const types = new Set();
 
             if (item.type && item.type.length) {
@@ -496,8 +496,21 @@ export default class YukiWeibo extends Plugin {
   /** 删除登陆的微博ck */
   async delWeiboLogin() {
     if (this.e.isMaster) {
+      let revokeResult = { attempted: false, revoked: false };
+      try {
+        revokeResult = await WeiboCookieManager.revokeWeiboSession();
+      } catch (error) {
+        console.error('微博服务端退出失败:', error);
+      }
+
       await WeiboCookieManager.resetCookiesAndRedis();
-      this.e.reply(`扫码登陆的微博cookie已删除~`);
+      if (revokeResult.revoked) {
+        this.e.reply('微博账号已在微博服务器退出，本地 Cookie 已删除~');
+      } else if (!revokeResult.attempted) {
+        this.e.reply('当前没有可退出的微博登录 Cookie，本地缓存已清理~');
+      } else {
+        this.e.reply('微博服务器退出未确认，已删除本地微博 Cookie~');
+      }
     } else {
       this.e.reply('未取得bot主人身份，无权限删除微博登录ck');
     }
