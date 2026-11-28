@@ -1,6 +1,7 @@
 export declare class WeiboWebDataFetcher {
     e?: any;
     constructor(e?: any);
+    private requestWithVisitorRetry;
     /**通过uid获取博主信息 */
     getBloggerInfo(uid: any): Promise<import("axios").AxiosResponse<any, any, {}, any>>;
     /**通过关键词搜索微博大v */

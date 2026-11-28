@@ -1,12 +1,28 @@
 declare class WeiboApi {
     weiboConfigData: any;
     USER_AGENT: string;
+    WEB_USER_AGENT: string;
     constructor();
-    static WEIBO_USER_AGENT: string;
-    initialize(): Promise<void>;
-    initUserAgent(): Promise<void>;
+    initUserAgent(): void;
     get WEIBO_API(): {
         weiboGetIndex: string;
+        weiboLoginState: string;
+        weiboProfileInfo: string;
+        weiboLogout: string;
+        weiboUserPage: string;
+        weiboMobileOrigin: string;
+        weiboWebOrigin: string;
+        weiboPassportOrigin: string;
+        weiboVisitorOrigin: string;
+        weiboVisitorEnter: string;
+        weiboVisitorMiniJs: string;
+        weiboVisitorUmdJs: string;
+        weiboBd: string;
+        weiboGenVisitor: string;
+        weiboGenVisitorV1: string;
+        weiboSignin: string;
+        weiboQrImage: string;
+        weiboQrCheck: string;
     };
     /**统一设置header */
     get WEIBO_HEADERS(): {
@@ -19,6 +35,45 @@ declare class WeiboApi {
         'Sec-Fetch-Site': string;
         'X-Requested-With': string;
         'MWeibo-Pwa': string;
+        'User-Agent': string;
+    };
+    get WEIBO_PROFILE_HEADERS(): {
+        Accept: string;
+        'Accept-Language': string;
+        'Accept-Encoding': string;
+        'X-Requested-With': string;
+        'client-version': string;
+        'server-version': string;
+        'X-XSRF-TOKEN': string;
+        DNT: string;
+        'Sec-GPC': string;
+        Connection: string;
+        Referer: string;
+        'Sec-Fetch-Dest': string;
+        'Sec-Fetch-Mode': string;
+        'Sec-Fetch-Site': string;
+        Priority: string;
+        Pragma: string;
+        'Cache-Control': string;
+        TE: string;
+        'User-Agent': string;
+    };
+    get WEIBO_LOGOUT_HEADERS(): {
+        Accept: string;
+        'Accept-Language': string;
+        'Accept-Encoding': string;
+        DNT: string;
+        'Sec-GPC': string;
+        Connection: string;
+        Referer: string;
+        'Upgrade-Insecure-Requests': string;
+        'Sec-Fetch-Dest': string;
+        'Sec-Fetch-Mode': string;
+        'Sec-Fetch-Site': string;
+        'Sec-Fetch-User': string;
+        Priority: string;
+        Pragma: string;
+        'Cache-Control': string;
         'User-Agent': string;
     };
     get WEIBO_GET_X_CSRF_TOKEN_HEADERS(): {

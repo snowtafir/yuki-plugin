@@ -121,7 +121,7 @@ export function supportGuoba() {
             allowAdd: true,
             allowDel: true
           },
-          defaultValue: ['Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36']
+          defaultValue: ['Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36']
         },
         {
           field: 'bilibili.dynamicTimeRange',
@@ -356,20 +356,29 @@ export function supportGuoba() {
         },
         {
           field: 'weibo.userAgentList',
-          label: 'User-Agent列表',
-          bottomHelpMessage: '请求头 User-Agent 列表',
+          label: 'User-Agent 列表',
+          bottomHelpMessage: '正常浏览器 UA 列表，可配置多个，每次重启随机选择一个',
           component: 'GTags',
           componentProps: {
-            placeholder: '请输入 User-Agent',
+            placeholder: '请输入正常浏览器 User-Agent',
             allowAdd: true,
             allowDel: true
           },
           defaultValue: [
-            'Mozilla/5.0 (Linux;u;Android 4.2.2;zh-cn;) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile Safari/10600.6.3 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)',
-            'Mozilla/5.0 (iPhone;CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1 (compatible; Baiduspider-render/2.0; +http://www.baidu.com/search/spider.html)',
-            'Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36 Edg/143.0.0.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)',
-            'Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
+            'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1'
           ]
+        },
+        {
+          field: 'weibo.webUserAgent',
+          label: '网页接口 User-Agent',
+          bottomHelpMessage: 'weibo.com 官方网页接口使用的 User-Agent，留空则使用上方随机选择的 UA，重启后生效',
+          component: 'Input',
+          componentProps: {
+            placeholder: '请输入 weibo.com 网页接口 User-Agent'
+          },
+          defaultValue: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:161.0) Gecko/20100101 Firefox/161.0'
         },
         {
           field: 'weibo.dynamicTimeRange',

@@ -3,26 +3,41 @@ import Config from '../../utils/config.js';
 class WeiboApi {
     weiboConfigData;
     USER_AGENT;
+    WEB_USER_AGENT;
     constructor() {
         this.weiboConfigData = Config.getUserConfig('weibo', 'config');
-        this.USER_AGENT = WeiboApi.WEIBO_USER_AGENT;
-        this.initialize();
+        this.USER_AGENT = '';
+        this.WEB_USER_AGENT = '';
+        this.initUserAgent();
     }
-    static WEIBO_USER_AGENT = 'Mozilla/5.0(Linux;u;Android 4.2.2;zh-cn;) AppleWebKit/534.46 (KHTML,like Gecko) Version/5.1 Mobile Safari/10600.6.3 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)';
-    //初始化User-Agent
-    async initialize() {
-        await this.initUserAgent();
-    }
-    async initUserAgent() {
-        const userAgentList = await this.weiboConfigData.userAgentList;
-        if (userAgentList && userAgentList.length > 0) {
+    initUserAgent() {
+        const userAgentList = this.weiboConfigData.userAgentList || [];
+        if (userAgentList.length > 0) {
             const randomIndex = Math.floor(Math.random() * userAgentList.length);
             this.USER_AGENT = String(userAgentList[randomIndex]);
         }
+        this.WEB_USER_AGENT = String(this.weiboConfigData.webUserAgent || this.USER_AGENT || '');
     }
     get WEIBO_API() {
         return {
-            weiboGetIndex: 'https://m.weibo.cn/api/container/getIndex'
+            weiboGetIndex: 'https://m.weibo.cn/api/container/getIndex',
+            weiboLoginState: 'https://m.weibo.cn/api/config',
+            weiboProfileInfo: 'https://weibo.com/ajax/profile/info',
+            weiboLogout: 'https://login.sina.com.cn/sso/logout.php?entry=miniblog&r=',
+            weiboUserPage: 'https://m.weibo.cn/u/7643376782',
+            weiboMobileOrigin: 'https://m.weibo.cn',
+            weiboWebOrigin: 'https://weibo.com',
+            weiboPassportOrigin: 'https://passport.weibo.com',
+            weiboVisitorOrigin: 'https://visitor.passport.weibo.cn',
+            weiboVisitorEnter: 'https://visitor.passport.weibo.cn/visitor/visitor',
+            weiboVisitorMiniJs: 'https://visitor.passport.weibo.cn/js/visitor/mini_original.js?v=20161116',
+            weiboVisitorUmdJs: 'https://passport.sinaimg.cn/js/fp/1.2.1.umd.js',
+            weiboBd: 'https://passport.weibo.com/sso/bd',
+            weiboGenVisitor: 'https://visitor.passport.weibo.cn/visitor/genvisitor2',
+            weiboGenVisitorV1: 'https://visitor.passport.weibo.cn/visitor/genvisitor',
+            weiboSignin: 'https://passport.weibo.com/sso/signin?entry=wapsso&source=wapssowb&url=https://m.weibo.cn/',
+            weiboQrImage: 'https://passport.weibo.com/sso/v2/qrcode/image?entry=wapsso&size=180',
+            weiboQrCheck: 'https://passport.weibo.com/sso/v2/qrcode/check'
         };
     }
     /**统一设置header */
@@ -38,6 +53,49 @@ class WeiboApi {
             'X-Requested-With': 'XMLHttpRequest',
             'MWeibo-Pwa': '1',
             'User-Agent': this.USER_AGENT
+        };
+    }
+    get WEIBO_PROFILE_HEADERS() {
+        return {
+            'Accept': 'application/json, text/plain, */*',
+            'Accept-Language': 'zh-CN,en-US;q=0.9',
+            'Accept-Encoding': 'gzip, deflate, br, zstd',
+            'X-Requested-With': 'XMLHttpRequest',
+            'client-version': 'v1.1.261',
+            'server-version': 'v2026.11.27.1',
+            'X-XSRF-TOKEN': '',
+            'DNT': '1',
+            'Sec-GPC': '1',
+            'Connection': 'keep-alive',
+            'Referer': '',
+            'Sec-Fetch-Dest': 'empty',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Site': 'same-origin',
+            'Priority': 'u=0',
+            'Pragma': 'no-cache',
+            'Cache-Control': 'no-cache',
+            'TE': 'trailers',
+            'User-Agent': this.WEB_USER_AGENT
+        };
+    }
+    get WEIBO_LOGOUT_HEADERS() {
+        return {
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'zh-CN,en-US;q=0.9',
+            'Accept-Encoding': 'gzip, deflate, br, zstd',
+            'DNT': '1',
+            'Sec-GPC': '1',
+            'Connection': 'keep-alive',
+            'Referer': '',
+            'Upgrade-Insecure-Requests': '1',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'cross-site',
+            'Sec-Fetch-User': '?1',
+            'Priority': 'u=0, i',
+            'Pragma': 'no-cache',
+            'Cache-Control': 'no-cache',
+            'User-Agent': this.WEB_USER_AGENT
         };
     }
     get WEIBO_GET_X_CSRF_TOKEN_HEADERS() {

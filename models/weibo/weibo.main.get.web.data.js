@@ -10,13 +10,25 @@ const axios = wrapper(axioss);
 class WeiboWebDataFetcher {
     e;
     constructor(e) { }
+    async requestWithVisitorRetry(request) {
+        try {
+            return await request();
+        }
+        catch (error) {
+            if (!axios.isAxiosError(error) || error.response?.status !== 432)
+                throw error;
+            logger.warn('[weibo] 请求返回 432，刷新访客 Cookie 后重试');
+            if (!(await WeiboCookieManager.refreshVisitorCookieJar()))
+                throw error;
+            return request();
+        }
+    }
     /**通过uid获取博主信息 */
     async getBloggerInfo(uid) {
         const param = { type: 'uid', value: `${uid}`, containerid: '100505' + `${uid}` };
         const url = new URL(WeiboApi.WEIBO_API.weiboGetIndex);
         url.search = new URLSearchParams(param).toString();
         const jar = await WeiboCookieManager.getSessionCookieJar();
-        const X_XSRF_TOKEN = await WeiboCookieManager.getCookieValueByKeyFromString(jar, 'X-XSRF-TOKEN', url.toString());
         // (1) 保存初始状态
         const initialCookies = await new Promise((resolve, reject) => {
             jar.store.getAllCookies((err, cookies) => {
@@ -26,18 +38,22 @@ class WeiboWebDataFetcher {
                     resolve(cookies || []);
             });
         });
-        const resp = await axios(url.toString(), {
-            method: 'GET',
-            jar,
-            withCredentials: true,
-            timeout: 10000,
-            headers: lodash.merge(WeiboApi.WEIBO_HEADERS, {
-                'Host': 'm.weibo.cn',
-                'X-XSRF-TOKEN': `${X_XSRF_TOKEN}`,
-                'Referer': `https://m.weibo.cn/u/${uid}`
-            }),
-            responseType: 'json'
-        });
+        const requestBloggerInfo = async () => {
+            const X_XSRF_TOKEN = await WeiboCookieManager.getCookieValueByKeyFromString(jar, 'X-XSRF-TOKEN', url.toString());
+            return axios(url.toString(), {
+                method: 'GET',
+                jar,
+                withCredentials: true,
+                timeout: 10000,
+                headers: lodash.merge(WeiboApi.WEIBO_HEADERS, {
+                    'Host': 'm.weibo.cn',
+                    'X-XSRF-TOKEN': `${X_XSRF_TOKEN}`,
+                    'Referer': `https://m.weibo.cn/u/${uid}`
+                }),
+                responseType: 'json'
+            });
+        };
+        const resp = await this.requestWithVisitorRetry(requestBloggerInfo);
         // (3) 获取请求完成后的 Cookie 状态
         const updatedCookies = await new Promise((resolve, reject) => {
             jar.store.getAllCookies((err, cookies) => {
@@ -67,7 +83,6 @@ class WeiboWebDataFetcher {
         const url = new URL(WeiboApi.WEIBO_API.weiboGetIndex);
         url.search = new URLSearchParams(params).toString();
         const jar = await WeiboCookieManager.getSessionCookieJar();
-        const X_XSRF_TOKEN = await WeiboCookieManager.getCookieValueByKeyFromString(jar, 'X-XSRF-TOKEN', url.toString());
         // (1) 保存初始状态
         const initialCookies = await new Promise((resolve, reject) => {
             jar.store.getAllCookies((err, cookies) => {
@@ -77,17 +92,21 @@ class WeiboWebDataFetcher {
                     resolve(cookies || []);
             });
         });
-        const resp = await axios(url.toString(), {
-            method: 'GET',
-            jar,
-            withCredentials: true,
-            timeout: 10000,
-            headers: lodash.merge(WeiboApi.WEIBO_HEADERS, {
-                'X-XSRF-TOKEN': `${X_XSRF_TOKEN}`,
-                'Referer': 'https://m.weibo.cn/search?'
-            }),
-            responseType: 'json'
-        });
+        const requestSearchInfo = async () => {
+            const X_XSRF_TOKEN = await WeiboCookieManager.getCookieValueByKeyFromString(jar, 'X-XSRF-TOKEN', url.toString());
+            return axios(url.toString(), {
+                method: 'GET',
+                jar,
+                withCredentials: true,
+                timeout: 10000,
+                headers: lodash.merge(WeiboApi.WEIBO_HEADERS, {
+                    'X-XSRF-TOKEN': `${X_XSRF_TOKEN}`,
+                    'Referer': 'https://m.weibo.cn/search?'
+                }),
+                responseType: 'json'
+            });
+        };
+        const resp = await this.requestWithVisitorRetry(requestSearchInfo);
         // (3) 获取请求完成后的 Cookie 状态
         const updatedCookies = await new Promise((resolve, reject) => {
             jar.store.getAllCookies((err, cookies) => {
@@ -118,7 +137,6 @@ class WeiboWebDataFetcher {
         url.search = new URLSearchParams(params).toString();
         await new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * (6500 - 1000 + 1) + 1000)));
         const jar = await WeiboCookieManager.getSessionCookieJar();
-        const X_XSRF_TOKEN = await WeiboCookieManager.getCookieValueByKeyFromString(jar, 'X-XSRF-TOKEN', url.toString());
         // (1) 保存初始状态
         const initialCookies = await new Promise((resolve, reject) => {
             jar.store.getAllCookies((err, cookies) => {
@@ -128,8 +146,9 @@ class WeiboWebDataFetcher {
                     resolve(cookies || []);
             });
         });
-        try {
-            const response = await axios(url.toString(), {
+        const requestDynamicList = async () => {
+            const X_XSRF_TOKEN = await WeiboCookieManager.getCookieValueByKeyFromString(jar, 'X-XSRF-TOKEN', url.toString());
+            return axios(url.toString(), {
                 method: 'GET',
                 jar,
                 withCredentials: true,
@@ -141,6 +160,9 @@ class WeiboWebDataFetcher {
                 }),
                 responseType: 'json'
             });
+        };
+        try {
+            const response = await this.requestWithVisitorRetry(requestDynamicList);
             const { ok, data, msg } = response?.data;
             if (!ok && msg !== '这里还没有内容') {
                 throw new Error(response?.config.url);
