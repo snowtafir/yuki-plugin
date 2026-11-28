@@ -1,4 +1,5 @@
 import { BilibiliWebDataFetcher } from '@/models/bilibili/bilibili.main.get.web.data';
+import { BiliVideo } from '@/models/bilibili/bilibili.main.video';
 import { BiliQuery } from '@/models/bilibili/bilibili.main.query';
 import { BiliTask } from '@/models/bilibili/bilibili.main.task';
 import Config from '@/utils/config';
@@ -723,11 +724,14 @@ export default class YukiBili extends Plugin {
 
   /** 根据aid或bvid获解析频信息*/
   async getVideoInfoByAid_BV() {
-    let parseVideoLink = !!this.biliConfigData?.parseVideoLink === false ? false : true;
+    const biliConfigData = Config.getUserConfig('bilibili', 'config');
+    let parseVideoLink = !!biliConfigData?.parseVideoLink === false ? false : true;
     if (parseVideoLink === false) {
       logger?.info(`优纪B站视频链接解析配置文件已设置关闭，解析终止。`);
       return false;
     }
+    const fetcher = new BilibiliWebDataFetcher(this.e);
+    const video = new BiliVideo(fetcher);
     /**B站app转发动态消息为QQ小程序卡片解析*/
     const cardUrlMatch = this.e.msg.match(/"qqdocurl"\s*:\s*"([^"]+)"/);
     const videoMessage = (cardUrlMatch?.[1] ?? this.e.msg).replace(/\\+\//g, '/');
@@ -739,7 +743,7 @@ export default class YukiBili extends Plugin {
 
     let videoID: { aid?: number; bvid?: string } | undefined;
     if (shortLinkMatch) {
-      const bvidStr = await new BilibiliWebDataFetcher(this.e).getBVIDByShortUrl(shortLinkMatch[1]);
+      const bvidStr = await fetcher.getBVIDByShortUrl(shortLinkMatch[1]);
       if (bvidStr === false) {
         this.e.reply('遭遇风控或意外，短链解析失败，无法获取BVID~');
         return;
@@ -759,31 +763,13 @@ export default class YukiBili extends Plugin {
 
     logger?.info(`优纪B站视频解析：${videoID.bvid ? `bvid=${videoID.bvid}` : `aid=${videoID.aid}`}`);
     this.e.reply('优纪酱解析中，请稍后~');
-    const res = await new BilibiliWebDataFetcher(this.e).getBiliVideoInfoByAid_BV(videoID);
+    const res = await fetcher.getBiliVideoInfoByAid_BV(videoID);
     if (res?.statusText !== 'OK') {
       this.e.reply('诶嘿，出了点网络问题，等会再试试吧~');
       return;
     }
 
     const { code, data } = (await res.data) || {};
-
-    function formatNumber(num: number): string {
-      if (num >= 10000) {
-        return `${(num / 10000).toFixed(1)}万`;
-      }
-      return num.toString();
-    }
-
-    function formatDuration(seconds: number): string {
-      const hours = Math.floor(seconds / 3600);
-      const minutes = Math.floor((seconds % 3600) / 60);
-      const secs = seconds % 60;
-
-      const mm = minutes.toString().padStart(2, '0');
-      const ss = secs.toString().padStart(2, '0');
-
-      return `${hours}:${mm}:${ss}`;
-    }
 
     if (code === -400) {
       this.e.reply('视频解析请求错误~');
@@ -804,7 +790,7 @@ export default class YukiBili extends Plugin {
       this.e.reply('解析的视频稿件仅up主可见。');
       return;
     } else if (code === 0) {
-      const message = [
+      const textMessage = [
         `${data?.title}\n`,
         Segment.image(data.pic),
         `\nbvid：${data?.bvid}`,
@@ -812,7 +798,7 @@ export default class YukiBili extends Plugin {
         `\n分区：${data?.tname_v2} (${data?.tname})`,
         `\n投稿：${moment(data?.ctime * 1000).format('YYYY年MM月DD日 HH:mm:ss')}`,
         `\n发布：${moment(data?.pubdate * 1000).format('YYYY年MM月DD日 HH:mm:ss')}`,
-        `\n时长：${formatDuration(data?.duration)}`,
+        `\n时长：${BiliVideo.formatDuration(data?.duration)}`,
         `\n创作：${data?.copyright === 1 ? '原创' : '转载'}`,
         `\n--------------------`,
         `\nUP主：${data?.owner?.name}`,
@@ -822,14 +808,26 @@ export default class YukiBili extends Plugin {
         `\n视频简介：`,
         `\n${data?.desc}`,
         `\n--------------------`,
-        `\n${formatNumber(data?.stat?.view)}播放 • ${formatNumber(data?.stat?.danmaku)}弹幕 • ${formatNumber(data?.stat?.reply)}评论 `,
-        `\n${formatNumber(data?.stat?.like)}点赞 • ${formatNumber(data?.stat?.coin)}投币 • ${formatNumber(data?.stat?.favorite)}收藏`,
-        `\n${formatNumber(data?.stat?.share)}分享`,
+        `\n${BiliVideo.formatNumber(data?.stat?.view)}播放 • ${BiliVideo.formatNumber(data?.stat?.danmaku)}弹幕 • ${BiliVideo.formatNumber(data?.stat?.reply)}评论 `,
+        `\n${BiliVideo.formatNumber(data?.stat?.like)}点赞 • ${BiliVideo.formatNumber(data?.stat?.coin)}投币 • ${BiliVideo.formatNumber(data?.stat?.favorite)}收藏`,
+        `\n${BiliVideo.formatNumber(data?.stat?.share)}分享`,
         `\n--------------------`,
         `\n链接：b23.tv/${data?.bvid}`
       ];
 
-      this.e.reply(message);
+      const isTextMode = biliConfigData?.pushMsgMode === 0 || biliConfigData?.pushMsgMode === false || biliConfigData?.pushMsgMode === '0';
+      if (isTextMode) {
+        this.e.reply(textMessage);
+        return;
+      }
+
+      try {
+        const images = await video.renderCard(data, biliConfigData);
+        await this.e.reply(images.map(img => Segment.image(img)));
+      } catch (err) {
+        logger?.error?.('优纪B站视频解析：图片卡片渲染或发送失败，已回退文字模式', err);
+        this.e.reply(textMessage);
+      }
     }
   }
 }

@@ -48,6 +48,8 @@ class BiliApi {
       biliVideoInfo: `https://api.bilibili.com/x/web-interface/view`,
       // 获取视频详情 wbi  parama = { aid: avid } 或 { bvid: bvid }
       biliVideoInfoWbi: `https://api.bilibili.com/x/web-interface/wbi/view`,
+      // 获取视频热门评论 wbi parama = { oid: aid, type: 1, mode: 3 }
+      biliVideoHotCommentsWbi: `https://api.bilibili.com/x/v2/reply/wbi/main`,
       //短链
       biliShortVideoUrl: `https://b23.tv/`,
       //短链412解控接口

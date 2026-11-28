@@ -166,8 +166,8 @@ export function supportGuoba() {
         },
         {
           field: 'bilibili.pushMsgMode',
-          label: 'B站推送消息模式',
-          bottomHelpMessage: '设置B站动态推送消息模式，0文字模式 1图片模式',
+          label: 'B站消息模式',
+          bottomHelpMessage: '设置B站动态推送及视频解析消息模式，0文字模式 1图片模式',
           component: 'Select',
           required: true,
           componentProps: {
